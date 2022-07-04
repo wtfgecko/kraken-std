@@ -13,7 +13,13 @@ __Features__
   [Kaniko]: https://github.com/GoogleContainerTools/kaniko
   [Buildx]: https://docs.docker.com/buildx/working-with-buildx/
 
-Build and publish Docker images, using native Docker, [Buildx][] or Google's [Kaniko][].
+Build and publish Docker images.
+
+__Supported backends__
+
+* [ ] Native Docker
+* [ ] [Buildx][]
+* [x] [Kaniko][]
 
 __Quickstart__
 

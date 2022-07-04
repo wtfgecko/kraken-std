@@ -34,7 +34,7 @@ def docker_run(
     if workdir:
         command += ["--workdir", workdir]
     command += [image]
-    command += args
+    command += args or []
     logger.info("%s", command)
     return sp.call(command, cwd=cwd, env={**os.environ, **(environ or {})})
 
