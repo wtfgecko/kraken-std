@@ -33,7 +33,7 @@ def docker_build(
     default: bool = True,
     dependencies: list[str | AnyTask] | None = None,
     build_context: Path | str | None = None,
-    dockerfile: Path | None = None,
+    dockerfile: Path | str | None = None,
     auth: dict[str, tuple[str, str]] | None = None,
     build_args: dict[str, str] | None = None,
     secrets: dict[str, str] | None = None,
@@ -81,7 +81,7 @@ def docker_build(
     action = _DockerBuildAction(
         config=DockerBuildConfig(
             build_context=build_context,
-            dockerfile=dockerfile,
+            dockerfile=project.to_path(dockerfile),
             auth=auth or {},
             build_args=build_args or {},
             secrets=secrets or {},
@@ -91,7 +91,7 @@ def docker_build(
             push=push,
             squash=squash,
             target=target,
-            image_output_file=project.directory / image_output_file if image_output_file else None,
+            image_output_file=project.to_path(image_output_file),
             load=load,
         ),
         backend=backends[backend](),
