@@ -35,15 +35,15 @@ typed = true
 
 [tool.slap.test]
 check = "slap check"
-mypy = "dmypy run src/"
+mypy = "dmypy run src/ examples/"
 pytest = "pytest tests/ -vv"
 pytest-ete = "pytest tests-ete/ -vv --log-cli-level INFO"
-black = "black --check src/ tests/"
-isort = "isort --check-only src/ tests/"
-flake8 = "flake8 src/ tests/"
+black = "black --check src/ examples/ tests/"
+isort = "isort --check-only src/ examples/ tests/"
+flake8 = "flake8 src/ examples/ tests/"
 
 [tool.slap.run]
-fmt = "black src/ tests/ && isort src/ tests/"
+fmt = "black src/ examples/ tests/ && isort src/ examples/ tests/"
 
 [tool.mypy]
 python_version = "3.7"

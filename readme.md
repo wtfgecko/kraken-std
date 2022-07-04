@@ -24,17 +24,13 @@ __Supported backends__
 __Quickstart__
 
 ```py
-import os
 from kraken.std import docker
 
 docker.build(
-    dockerfile="docker/release.Dockerfile",
-    secrets={
-        "USERNAME": os.environ["USERNAME"],
-        "PASSWORD": os.environ["PASSWORD"],
-    },
-    tags=["my-project:latest"],
-    push_to_registry=["example.jfrog.io/docker-release"],
-    backend="kaniko",
+    name="buildDocker",
+    dockerfile=dockerfile.action.file,
+    dependencies=[dockerfile],
+    tags=["kraken-example"],
+    load=True,
 )
 ```

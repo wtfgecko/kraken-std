@@ -7,6 +7,7 @@ import base64
 import contextlib
 import dataclasses
 import json
+import logging
 import shlex
 import tempfile
 from pathlib import Path
@@ -15,6 +16,8 @@ from typing import Any
 from kraken.core.utils import flatten
 
 from .cliwrapper import docker_load, docker_run
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -132,6 +135,11 @@ class KanikoBackend(DockerBackend):
         tar_path: str | None,
         context: str,
     ) -> list[str]:
+        if cache and not push and not cache_repo:
+            logger.warning("Disabling cache in Kaniko build because it must be combined with push or cache_repo")
+            cache = False
+        if not destination and tar_path:
+            raise ValueError("Need at least one destination (tag) when exporting to an image tarball")
         executor_command = ["/kaniko/executor"]
         executor_command += flatten(("--build-arg", f"{key}={value}") for key, value in build_args.items())
         if cache_repo:
@@ -148,7 +156,7 @@ class KanikoBackend(DockerBackend):
         if single_snapshot:
             executor_command += ["--single-snapshot"]
         if target:
-            executor_command += ["--target"]
+            executor_command += ["--target", target]
         if tar_path:
             executor_command += ["--tarPath", tar_path]
         executor_command += ["--context", context]

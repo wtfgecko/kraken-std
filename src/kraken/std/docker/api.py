@@ -1,21 +1,37 @@
 from __future__ import annotations
 
+import dataclasses
 from pathlib import Path
+from typing import Any
 
 from kraken.core.action import Action, ActionResult
-from kraken.core.task import AnyTask
+from kraken.core.task import AnyTask, TaskCaptureMode
 
-# from .backend import DockerBackend, KanikoBackend
+from kraken.std.docker.backend import DockerBackend, DockerBuildConfig, KanikoBackend
+
+DEFAULT_BACKEND = "kaniko"
+
+backends: dict[str, type[DockerBackend]] = {
+    "kaniko": KanikoBackend,
+}
 
 
-class DockerBuildAction(Action):
+@dataclasses.dataclass
+class _DockerBuildAction(Action):
+    config: DockerBuildConfig
+    backend: DockerBackend
+    backend_options: dict[str, Any]
+
     def execute(self) -> ActionResult:
+        self.backend.build(self.config, self.backend_options)
         return ActionResult.SUCCEEDED
 
 
 def docker_build(
+    *,
     name: str,
     default: bool = True,
+    dependencies: list[str | AnyTask] | None = None,
     build_context: Path | str | None = None,
     dockerfile: Path | None = None,
     auth: dict[str, tuple[str, str]] | None = None,
@@ -27,8 +43,34 @@ def docker_build(
     push: bool = False,
     squash: bool = False,
     target: str | None = None,
-    image_output_file: Path | None = None,
+    image_output_file: Path | str | None = None,
+    load: bool = False,
+    backend: str = DEFAULT_BACKEND,
+    backend_options: dict[str, Any] | None = None,
 ) -> AnyTask:
+    """Create a new task in the current project that builds a Docker image and eventually pushes it.
+
+    Args:
+        name: The task name.
+        default: Whether the task is built by default.
+        build_context: The Docker build context. Defaults to the project root directory.
+        dockerfile: The Dockerfile to use as input.
+        auth: Credentials for reading/writing Docker images.
+        build_args: Build arguments for the docker build.
+        secrets: Secrets that are accessible under `/run/secrets`.
+        cache_repo: A repository to write build caches to.
+        cache: Read/write caches.
+        tags: A list of image tags for the final image.
+        push: Set to True to push images based on *tags*.
+        squash: Squash the final image layer.
+        target: Target stage to build in a multi-stage Dockerfile.
+        image_output_file: Write the image to the given path as a tarball.
+        load: Whether the produced image should be loaded into the Docker runtime.
+        backend: The Docker build backend.
+        backend_options: Additional options for the build backend.
+    Returns:
+        The created task.
+    """
 
     from kraken.api import project
 
@@ -36,4 +78,24 @@ def docker_build(
         build_context = project.directory
     build_context = project.directory / build_context
 
-    return project.do(name, DockerBuildAction(), default=default)
+    action = _DockerBuildAction(
+        config=DockerBuildConfig(
+            build_context=build_context,
+            dockerfile=dockerfile,
+            auth=auth or {},
+            build_args=build_args or {},
+            secrets=secrets or {},
+            cache_repo=cache_repo,
+            cache=cache,
+            tags=tags or [],
+            push=push,
+            squash=squash,
+            target=target,
+            image_output_file=project.directory / image_output_file if image_output_file else None,
+            load=load,
+        ),
+        backend=backends[backend](),
+        backend_options=backend_options or {},
+    )
+
+    return project.do(name, action, default=default, capture=TaskCaptureMode.NONE, dependencies=dependencies or [])
