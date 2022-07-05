@@ -1,6 +1,6 @@
 from kraken.api import ctx
 
-from kraken.std import docker
+from kraken.std.docker import build_docker_image
 from kraken.std.generic.render_file import render_file
 
 dockerfile = render_file(
@@ -9,10 +9,9 @@ dockerfile = render_file(
     file=ctx.build_directory / "Dockerfile",
 )
 
-docker.build(
+build_docker_image(
     name="buildDocker",
-    dockerfile=dockerfile.action.get().file,
-    dependencies=[dockerfile],
+    dockerfile=dockerfile.file,
     tags=["kraken-example"],
     load=True,
 )

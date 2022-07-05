@@ -44,9 +44,27 @@ def helm_package(
             if output_file.exists():
                 output_file.unlink()
             chart_file = next(Path(tempdir).iterdir())
-            shutil.move(chart_file, output_file)
+            shutil.move(str(chart_file), output_file)
         else:
             assert output_directory is not None
             chart_file = next(output_directory.iterdir())
 
         return 0, chart_file
+
+    assert False
+
+
+def helm_registry_login(registry: str, username: str, password: str, insecure: bool = False) -> int:
+    """Log into a Helm registry."""
+
+    command = ["helm", "registry", "login", registry, "-u", username, "-p", password]
+    if insecure:
+        command += ["--insecure"]
+    return sp.call(command)
+
+
+def helm_push(chart_tarball: Path, remote: str) -> int:
+    """Push a Helm chart to a remote."""
+
+    command = ["helm", "push", str(chart_tarball), remote, "--debug"]
+    return sp.call(command)

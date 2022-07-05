@@ -1,5 +1,5 @@
 """ Build and publish Helm charts with Kraken. """
 
-from .tasks import HelmPackageAction, helm_package
+from .tasks import HelmPackageTask, HelmPushTask, helm_package, helm_push
 
-__all__ = ["helm_package", "HelmPackageAction"]
+__all__ = ["HelmPackageTask", "helm_package", "HelmPushTask", "helm_push"]
