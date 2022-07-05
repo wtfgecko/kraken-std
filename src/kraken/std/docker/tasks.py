@@ -7,6 +7,7 @@ import logging
 import shlex
 import tempfile
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 from kraken.core.project import Project
 from kraken.core.property import Property
@@ -24,16 +25,16 @@ class DockerBuildTask(Task):
 
     build_context: Property[Path]
     dockerfile: Property[Path]
-    auth: Property[dict[str, tuple[str, str]]]
-    build_args: Property[dict[str, str]]
-    secrets: Property[dict[str, str]]
-    cache_repo: Property[str | None]
+    auth: Property[Dict[str, Tuple[str, str]]]
+    build_args: Property[Dict[str, str]]
+    secrets: Property[Dict[str, str]]
+    cache_repo: Property[Optional[str]]
     cache: Property[bool]
-    tags: Property[list[str]]
+    tags: Property[List[str]]
     push: Property[bool]
     squash: Property[bool]
-    target: Property[str | None]
-    image_output_file: Property[Path | None]
+    target: Property[Optional[str]]
+    image_output_file: Property[Optional[Path]]
     load: Property[bool]
 
     def __init__(self, name: str, project: Project) -> None:
