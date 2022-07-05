@@ -13,7 +13,6 @@ from . import helmapi
 # from kraken.core.utils import not_none
 
 
-
 class HelmPackageTask(Task):
 
     # Path to the Helm chart directory to package.

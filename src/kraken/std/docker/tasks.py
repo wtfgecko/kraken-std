@@ -10,7 +10,6 @@ from pathlib import Path
 
 from kraken.core.project import Project
 from kraken.core.property import Property
-from kraken.core.supplier import Supplier
 from kraken.core.task import Task, TaskResult
 from kraken.core.utils import flatten
 
@@ -67,7 +66,7 @@ class KanikoBuildTask(DockerBuildTask):
         self.context.set("/workspace")
         self.cache_copy_layers.set(True)
         self.snapshot_mode.set("redo")
-        self.secrets_mount_dir.set("/run_secrets")
+        self.secrets_mount_dir.set("/run/secrets")
 
     def finalize(self) -> None:
         if self.cache.get() and not self.push.get() and not self.cache_repo.get():
@@ -104,6 +103,8 @@ class KanikoBuildTask(DockerBuildTask):
             script += [f"mkdir -p {shlex.quote(self.secrets_mount_dir.get())}"]
             for secret, value in self.secrets.get().items():
                 script += [f"echo {shlex.quote(value)} > {shlex.quote(self.secrets_mount_dir.get() + '/' + secret)}"]
+
+            script += ['echo "Contents of /run/secrets:"', "ls /run", "ls /run/secrets", "echo"]
 
         script += [" ".join(map(shlex.quote, executor_command))]
         return "\n".join(script)

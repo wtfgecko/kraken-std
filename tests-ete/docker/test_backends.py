@@ -1,17 +1,23 @@
+from __future__ import annotations
 import contextlib
 import subprocess as sp
 import tempfile
 import textwrap
 from pathlib import Path
 
-from kraken.std.docker.backend import KanikoBackend, DockerBackend, DockerBuildConfig
+from kraken.std.docker.tasks import KanikoBuildTask, DockerBuildTask
+from kraken.core.project import Project
+from kraken.testing import context, project  # noqa: F401
 
 
 import pytest
 
 
-@pytest.mark.parametrize("backend", [KanikoBackend()], ids=["kaniko"])
-def test_secrets_mounted_and_not_in_final_image(backend: DockerBackend) -> None:
+@pytest.mark.parametrize("task_type", [KanikoBuildTask], ids=["kaniko"])
+def test_secrets_mounted_and_not_in_final_image(
+    project: Project,  # noqa: F811
+    task_type: type[DockerBuildTask],
+) -> None:
     """Tests that secret file mounts work as expected, i.e. they can be read from `/run/secrets` and they
     do not make it into the final image."""
 
@@ -32,16 +38,16 @@ def test_secrets_mounted_and_not_in_final_image(backend: DockerBackend) -> None:
         dockerfile.write_text(dockerfile_content)
 
         tag = "kraken-std/tests-ete/test_secrets_mounted_and_not_in_final_image:latest"
-        config = DockerBuildConfig(
-            build_context=Path(tempdir),
-            dockerfile=dockerfile,
-            secrets={secret_name: "Hello, World!"},
-            cache=False,
-            tags=[tag],
-            load=True,
-        )
 
-        backend.build(config, {})
+        task = task_type("buildDocker", project)
+        task.build_context.set(Path(tempdir))
+        task.dockerfile.set(dockerfile)
+        task.secrets.set({secret_name: "Hello, World!"})
+        task.cache.set(False)
+        task.tags.set([tag])
+        task.load.set(True)
+        task.execute()
+
         exit_stack.callback(lambda: sp.check_call(["docker", "rmi", tag]))
 
         command = ["sh", "-c", f"find {secret_path} 2>/dev/null || true"]
