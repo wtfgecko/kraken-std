@@ -6,7 +6,7 @@ from pathlib import Path
 import httpx
 from kraken.core.property import Property, output
 from kraken.core.supplier import Supplier
-from kraken.core.task import Task, TaskResult, task_factory
+from kraken.core.task import Task, TaskResult, task_factoryw
 
 from . import helmapi
 
@@ -14,31 +14,52 @@ from . import helmapi
 
 
 class HelmPackageTask(Task):
+    """Packages a Helm chart."""
 
-    # Path to the Helm chart directory to package.
-    chart_path: Property[Path]
+    # The path to the directory that contains the Helm chart. A relative path is treated relative to
+    # the project directory. This property must be set.
+    chart_directory: Property[Path]
 
-    # Path to the packaged Helm chart. Only available after the action was executed.
-    output_file: Property[Path] = output()
+    # This property specifies the path to the output Helm chart tarball. It can be specified, when the
+    # task is created if an explicit output location is desired, otherwise the property will be set
+    # when the task was executed and the default output location is in the build directory.
+    chart_tarball: Property[Path] = output()
 
     def execute(self) -> TaskResult:
-        output_directory = self.project.build_directory / "helm"
-        status, output_file = helmapi.helm_package(self.chart_path.get(), output_directory=output_directory)
+        chart_directory = self.project.directory / self.chart_directory.get()
+        if self.chart_tarball.is_filled():
+            status, output_file = helmapi.helm_package(chart_directory, output_file=self.chart_tarball.get())
+        else:
+            output_directory = self.project.build_directory / "helm" / self.name
+            status, output_file = helmapi.helm_package(chart_directory, output_directory=output_directory)
+            if output_file:
+                self.chart_tarball.set(output_file)
         if status != 0 or not output_file:
             return TaskResult.FAILED
-        self.output_file.set(output_file)
         return TaskResult.SUCCEEDED
 
 
 class HelmPushTask(Task):
+    """Pushes a Helm chart to a Helm registry.
 
-    # Path to the packaged chart file to publish.
+    !!! warning
+
+        The current implementation uses a manual authenticated HTTP `POST` call to the :attr:`chart_url`. The
+        chart URL is derived as a concatenation of the :attr:`registry_url` and the :attr:`chart_name` or
+        the :attr:`chart_tarball` base name.
+
+        In a future version, we may also support invoking the `helm push` command.
+    """
+
+    # The path to the Helm chart package file.
     chart_tarball: Property[Path]
 
-    # The Helm registry URL to push to.
+    # The base URL to push the Helm chart file to. This can currently be omitted if :attr:`chart_url` is specified.
     registry_url: Property[str]
 
-    # The filename of the chart in the registry. If omitted, the name of the :attr:`chart_tarball` is used.
+    # The filename of the Helm chart under the :attr:`registry_url`. This can be omitted if the :attr:`chart_url`
+    # is specified explicitly, otherwise it will be used to construct the URL. If it is not set, it will fall back
+    # to the base name of the :attr:`chart_tarball`.
     chart_name: Property[str]
 
     # The username and password to use.
@@ -49,11 +70,11 @@ class HelmPushTask(Task):
     chart_url: Property[str] = output()
 
     def finalize(self) -> None:
-        self.chart_url.set(
+        self.chart_name.setdefault(Supplier.of_callable((lambda: self.chart_tarball.get().name), [self.chart_tarball]))
+        self.chart_url.setdefault(
             Supplier.of_callable(
-                lambda: urllib.parse.urljoin(
-                    self.registry_url.get() + "/", self.chart_name.get_or(self.chart_tarball.get().name)
-                )
+                (lambda: urllib.parse.urljoin(self.registry_url.get() + "/", self.chart_name.get)),
+                [self.registry_url, self.chart_name],
             )
         )
         return super().finalize()
