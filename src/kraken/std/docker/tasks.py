@@ -39,6 +39,7 @@ class DockerBuildTask(Task):
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
+        self.build_context.set(project.directory)
         self.auth.setdefault({})
         self.build_args.setdefault({})
         self.secrets.setdefault({})
@@ -62,7 +63,6 @@ class KanikoBuildTask(DockerBuildTask):
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
-        self.build_context.set(project.build_directory)
         self.image.set("gcr.io/kaniko-project/executor:debug")
         self.context.set("/workspace")
         self.cache_copy_layers.set(True)
@@ -71,7 +71,10 @@ class KanikoBuildTask(DockerBuildTask):
 
     def finalize(self) -> None:
         if self.cache.get() and not self.push.get() and not self.cache_repo.get():
-            logger.warning("Disabling cache in Kaniko build because it must be combined with push or cache_repo")
+            logger.warning(
+                "Disabling cache in Kaniko build %s because it must be combined with push or cache_repo",
+                self,
+            )
             self.cache.set(False)
         return super().finalize()
 
@@ -104,8 +107,6 @@ class KanikoBuildTask(DockerBuildTask):
             script += [f"mkdir -p {shlex.quote(self.secrets_mount_dir.get())}"]
             for secret, value in self.secrets.get().items():
                 script += [f"echo {shlex.quote(value)} > {shlex.quote(self.secrets_mount_dir.get() + '/' + secret)}"]
-
-            script += ['echo "Contents of /run/secrets:"', "ls /run", "ls /run/secrets", "echo"]
 
         script += [" ".join(map(shlex.quote, executor_command))]
         return "\n".join(script)

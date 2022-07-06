@@ -18,7 +18,7 @@ BUILD_BACKENDS = {"kaniko": KanikoBuildTask}
 def build_docker_image(
     *,
     name: str = "buildDocker",
-    default: bool = True,
+    default: bool = False,
     backend: str = DEFAULT_BUILD_BACKEND,
     project: Project | None = None,
     **kwds: Any,
