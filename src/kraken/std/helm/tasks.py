@@ -6,7 +6,7 @@ from pathlib import Path
 import httpx
 from kraken.core.property import Property, output
 from kraken.core.supplier import Supplier
-from kraken.core.task import Task, TaskResult, task_factoryw
+from kraken.core.task import Task, TaskResult, task_factory
 
 from . import helmapi
 
@@ -73,7 +73,7 @@ class HelmPushTask(Task):
         self.chart_name.setdefault(Supplier.of_callable((lambda: self.chart_tarball.get().name), [self.chart_tarball]))
         self.chart_url.setdefault(
             Supplier.of_callable(
-                (lambda: urllib.parse.urljoin(self.registry_url.get() + "/", self.chart_name.get)),
+                (lambda: urllib.parse.urljoin(self.registry_url.get() + "/", self.chart_name.get())),
                 [self.registry_url, self.chart_name],
             )
         )
