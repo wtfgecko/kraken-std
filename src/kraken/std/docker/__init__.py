@@ -12,7 +12,10 @@ __version__ = "0.1.0"
 __all__ = ["build", "DockerBuildTask"]
 
 DEFAULT_BUILD_BACKEND = "kaniko"
-BUILD_BACKENDS = {"kaniko": f"{__name__}.kaniko.KanikoBuildTask"}
+BUILD_BACKENDS = {
+    "kaniko": f"{__name__}.kaniko.KanikoBuildTask",
+    "buildx": f"{__name__}.buildx.BuildxBuildTask",
+}
 
 
 class DockerBuildTask(Task):
@@ -47,6 +50,7 @@ class DockerBuildTask(Task):
         self.squash.set(False)
         self.target.setdefault(None)
         self.image_output_file.setdefault(None)
+        self.load.setdefault(False)
 
 
 def build_docker_image(

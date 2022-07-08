@@ -49,7 +49,7 @@ Build and publish Docker images.
 __Supported backends__
 
 * [ ] Native Docker
-* [ ] [Buildx][]
+* [x] [Buildx][] (missing auth)
 * [x] [Kaniko][]
 
 __Quickstart__

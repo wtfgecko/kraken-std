@@ -40,8 +40,8 @@ typed = true
 [tool.slap.test]
 check = "slap check"
 mypy = "dmypy run src/"
-pytest = "PYTHONPATH=src pytest src/tests/ --ignore src/tests/integration --log-cli-level INFO -vv"
-pytest-ete = "PYTHONPATH=src pytest src/tests/integration --log-cli-level INFO -vv"
+pytest = "PYTHONPATH=src pytest src/tests/ --ignore src/tests/integration --log-cli-level INFO -vv $PYTEST_FLAGS"
+pytest-ete = "PYTHONPATH=src pytest src/tests/integration --log-cli-level INFO -vv $PYTEST_FLAGS"
 black = "black --check src/"
 isort = "isort --check-only src/"
 flake8 = "flake8 src/"
