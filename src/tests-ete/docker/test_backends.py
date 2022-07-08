@@ -1,16 +1,16 @@
 from __future__ import annotations
+
 import contextlib
 import subprocess as sp
 import tempfile
 import textwrap
 from pathlib import Path
 
-from kraken.std.docker.tasks import KanikoBuildTask, DockerBuildTask
+import pytest
 from kraken.core.project import Project
 from kraken.testing import context, project  # noqa: F401
 
-
-import pytest
+from kraken.std.docker.tasks import DockerBuildTask, KanikoBuildTask
 
 
 @pytest.mark.parametrize("task_type", [KanikoBuildTask], ids=["kaniko"])
