@@ -3,7 +3,6 @@ from __future__ import annotations
 import base64
 import contextlib
 import json
-import logging
 import shlex
 import tempfile
 from pathlib import Path
@@ -15,8 +14,6 @@ from kraken.core.task import Task, TaskResult
 from kraken.core.utils import flatten
 
 from .dockerapi import docker_load, docker_run
-
-logger = logging.getLogger(__name__)
 
 
 class DockerBuildTask(Task):
@@ -72,7 +69,7 @@ class KanikoBuildTask(DockerBuildTask):
 
     def finalize(self) -> None:
         if self.cache.get() and not self.push.get() and not self.cache_repo.get():
-            logger.warning(
+            self.logger.warning(
                 "Disabling cache in Kaniko build %s because it must be combined with push or cache_repo",
                 self,
             )
