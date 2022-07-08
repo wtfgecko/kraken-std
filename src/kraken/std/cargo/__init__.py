@@ -122,4 +122,4 @@ class CargoBuildTask(Task):
         assert False
 
 
-cargo_build = task_factory(CargoBuildTask, capture=False)
+cargo_build = task_factory(CargoBuildTask, name="cargoBuild", capture=False)

@@ -57,14 +57,14 @@ def helm_package(
 def helm_registry_login(registry: str, username: str, password: str, insecure: bool = False) -> int:
     """Log into a Helm registry."""
 
-    command = ["helm", "registry", "login", registry, "-u", username, "-p", password]
+    command = ["helm", "registry", "login", registry, "-u", username, "--password-stdin"]
     if insecure:
         command += ["--insecure"]
-    return sp.call(command)
+    return sp.run(command, input=f"{password}\n".encode()).returncode
 
 
 def helm_push(chart_tarball: Path, remote: str) -> int:
     """Push a Helm chart to a remote."""
 
-    command = ["helm", "push", str(chart_tarball), remote, "--debug"]
+    command = ["helm", "push", str(chart_tarball), remote]
     return sp.call(command)

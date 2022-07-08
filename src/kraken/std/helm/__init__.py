@@ -20,6 +20,13 @@ class HelmSettings:
     """Project-specific settings for Helm."""
 
     auth: dict[str, tuple[str, str]] = dataclasses.field(default_factory=dict)
+    insecure_registries: set[str] = dataclasses.field(default_factory=set)
+
+    def add_auth(self, host: str, username: str, password: str, insecure: bool = False) -> HelmSettings:
+        self.auth[host] = (username, password)
+        if insecure:
+            self.insecure_registries.add(host)
+        return self
 
 
 def helm_settings(project: Project | None = None) -> HelmSettings:
@@ -101,20 +108,33 @@ class HelmPushTask(Task):
             raise ValueError(f"{self.registry} missing host name: {self.registry.get()!r}")
 
         settings = helm_settings(self.project)
-        credentials: tuple[str, str] | None = None
-        if url.hostname in settings.auth:
-            credentials = settings.auth[url.hostname]
+        credentials: tuple[str, str] | None
+        oci_login_host: str | None
+        for oci_login_host in (url.hostname, f"{url.hostname}:{url.port}"):
+            if oci_login_host in settings.auth:
+                credentials = settings.auth[oci_login_host]
+                break
+        else:
+            oci_login_host = None
 
         if url.scheme == "oci" and credentials:
             self.logger.info("logging into OCI registry %r", url.hostname)
-            result = helmapi.helm_registry_login(url.hostname, credentials[0], credentials[1])
+            assert oci_login_host is not None
+            result = helmapi.helm_registry_login(
+                oci_login_host,
+                credentials[0],
+                credentials[1],
+                insecure=oci_login_host in settings.insecure_registries,
+            )
             if result != 0:
                 return TaskResult.FAILED
 
         if url.scheme == "oci":
-            self.logger.info('pushing chart "%s" to OCI registry %r', self.chart_tarball.get(), self.registry.get())
-            helmapi.helm_push(self.chart_tarball.get(), self.registry.get())
             self.chart_url.seterror(f"{self.chart_url} for OCI registries is not currently supported")
+            self.logger.info('pushing chart "%s" to OCI registry %r', self.chart_tarball.get(), self.registry.get())
+            result = helmapi.helm_push(self.chart_tarball.get(), self.registry.get())
+            if result != 0:
+                return TaskResult.FAILED
         elif url.scheme in ("http", "https"):
             self.logger.info(
                 'pushing chart "%s" to %s registry %r',
@@ -132,5 +152,5 @@ class HelmPushTask(Task):
         return TaskResult.SUCCEEDED
 
 
-helm_package = task_factory(HelmPackageTask)
-helm_push = task_factory(HelmPushTask, default=False, capture=False)
+helm_package = task_factory(HelmPackageTask, name="helmPackage")
+helm_push = task_factory(HelmPushTask, name="helmPush", default=False, capture=False)
