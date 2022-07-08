@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Union
 
 from kraken.core.project import Project
 from kraken.core.property import Property
@@ -11,7 +11,7 @@ DEFAULT_ENCODING = "utf-8"
 
 
 class RenderFileTask(Task):
-    content: Property[str | Callable[[], str]]
+    content: Property[Union[str, Callable[[], str]]]
     file: Property[Path]
     encoding: Property[str]
 
