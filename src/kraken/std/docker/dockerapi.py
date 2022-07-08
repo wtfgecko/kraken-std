@@ -14,6 +14,7 @@ def docker_run(
     image: str,
     args: list[str] | None = None,
     env: dict[str, str] | None = None,
+    platform: str | None = None,
     entrypoint: str | None = None,
     interactive: bool = False,
     remove: bool = True,
@@ -24,6 +25,8 @@ def docker_run(
 ) -> int:
     command = ["docker", "run"]
     command += flatten(("--env", f"{key}={value}") for key, value in (env or {}).items())
+    if platform is not None:
+        command += ["--platform", platform]
     if entrypoint is not None:
         command += ["--entrypoint", entrypoint]
     if interactive:

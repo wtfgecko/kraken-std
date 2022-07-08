@@ -26,6 +26,7 @@ class DockerBuildTask(Task):
     build_context: Property[Path]
     dockerfile: Property[Path]
     auth: Property[Dict[str, Tuple[str, str]]]
+    platform: Property[str]
     build_args: Property[Dict[str, str]]
     secrets: Property[Dict[str, str]]
     cache_repo: Property[Optional[str]]
@@ -178,6 +179,7 @@ class KanikoBuildTask(DockerBuildTask):
             remove=True,
             volumes=volumes,
             workdir=self.context.get(),
+            platform=self.platform.get_or(None),
         )
 
         if result != 0:

@@ -1,0 +1,5 @@
+[[entries]]
+id = "d5ca660f-9cd8-47d2-84e7-daf4fd38c9c3"
+type = "feature"
+description = "Add `DockerBuildTask.platform` property"
+author = "@NiklasRosenstein"
