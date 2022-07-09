@@ -50,6 +50,11 @@ cargo_publish(registry="private-repo")
 >   `.cargo/config.toml` configuration file. In a future version, we may permanently write it into the file to keep
 >   it synchronized or instead pick up the configured registries by reading the configuration file instead.
 
+__Testing__
+
+The `cargo_publish()` and `cargo_build()` tasks are continuously integration tests against JFrog Artifactory
+and Cloudsmith.
+
 ---
 
 ## Docker
