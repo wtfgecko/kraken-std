@@ -18,12 +18,22 @@ jobs:
       with: { python-version: "${{ matrix.python-version }}" }
     - run: slap install -vv --no-venv-check
     - run: slap test -x pytest-ete
+
     # Make sure we have Docker available for the ete-tests.
     - uses: docker/setup-buildx-action@v2
+
+    # Import credentials for integration tests.
+    - name: Import Secrets
+      uses: hashicorp/vault-action@v2.4.0
+      with:
+        url: ${{ secrets.VAULT_ADDR }}
+        token: ${{ secrets.VAULT_TOKEN }}
+        secrets: |
+          kv/data/projects/github.com/kraken-build/kraken-std cloudsmith.io | CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS ;
+          kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein.jfrog.io | ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS
+
     - run: slap test pytest-ete
-      env:
-        ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS: ${{ secrets.ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS }}
-        CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS: ${{ secrets.CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS }}
+
 
   update-changelog:
     runs-on: ubuntu-latest
