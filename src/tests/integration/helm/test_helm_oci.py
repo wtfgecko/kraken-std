@@ -11,7 +11,7 @@ from kraken.core.utils import not_none
 from kraken.testing import kraken_execute
 
 from kraken.std.helm import helm_package, helm_push, helm_settings
-from tests.utils.docker import DockerServiceManager, docker_service_manager  # noqa: F401
+from tests.utils.docker import DockerServiceManager
 
 logger = logging.getLogger(__name__)
 

@@ -1,0 +1,12 @@
+import contextlib
+from typing import Iterator
+
+import pytest
+
+from tests.utils.docker import DockerServiceManager
+
+
+@pytest.fixture
+def docker_service_manager() -> Iterator[DockerServiceManager]:
+    with contextlib.ExitStack() as stack:
+        yield DockerServiceManager(stack)

@@ -30,12 +30,25 @@ __Quickstart__
 
 ```py
 # kraken.build.py
-from kraken.std.cargo import cargo_build, cargo_settings
+from kraken.std.cargo import cargo_build, cargo_publish, cargo_settings
 
-cargo_settings().add_auth("example.jfrog.io", "me@example.org", "api_token")
+settings = cargo_settings()
+settings.add_auth("example.jfrog.io", "me@example.org", "<API_TOKEN>")
+settings.add_registry(
+    "private-repo",
+    "https://example.jfrog.io/artifactory/git/default-cargo-local.git",
+    publish_token="Bearer ${PASSWORD}",
+)
 
 cargo_build()
+cargo_publish(registry="private-repo")
 ```
+
+> __Note__
+>
+> * The registry URL configured in the Kraken build script is currently written only temporarily into the
+>   `.cargo/config.toml` configuration file. In a future version, we may permanently write it into the file to keep
+>   it synchronized or instead pick up the configured registries by reading the configuration file instead.
 
 ---
 

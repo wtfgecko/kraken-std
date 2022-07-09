@@ -3,9 +3,7 @@ from __future__ import annotations
 import contextlib
 import logging
 import subprocess as sp
-from typing import Iterator
 
-import pytest
 from kraken.core.utils import flatten
 
 logger = logging.getLogger(__name__)
@@ -61,9 +59,3 @@ class DockerServiceManager:
             sp.check_call(command)
 
         return None
-
-
-@pytest.fixture
-def docker_service_manager() -> Iterator[DockerServiceManager]:
-    with contextlib.ExitStack() as stack:
-        yield DockerServiceManager(stack)
