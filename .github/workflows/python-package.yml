@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.x" ]
+        python-version: [ "3.7" ] #, "3.8", "3.9", "3.10", "3.x" ]
     steps:
     - uses: actions/checkout@v2
     - uses: python-slap/slap-cli@gha/install/v1
@@ -29,8 +29,8 @@ jobs:
         url: ${{ secrets.VAULT_ADDR }}
         token: ${{ secrets.VAULT_TOKEN }}
         secrets: |
-          kv/data/projects/github.com/kraken-build/kraken-std cloudsmith.io | CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS ;
-          kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein.jfrog.io | ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS
+          kv/data/projects/github.com/kraken-build/kraken-std cloudsmith_io | CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS ;
+          kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io | ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS
 
     - run: slap test pytest-ete
 
