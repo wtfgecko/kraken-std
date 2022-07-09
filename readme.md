@@ -84,6 +84,11 @@ build_docker_image(
 )
 ```
 
+__Integration tests__
+
+The `build_docker_image()` function for Buildx and Kaniko are continuously integration tested to ensure that build
+time secrets under `/run/secrets` don't appear in the final image.
+
 ---
 
 ## Helm
