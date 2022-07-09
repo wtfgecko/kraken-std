@@ -26,6 +26,7 @@ import dataclasses
 import json
 import logging
 import os
+import subprocess as sp
 import tempfile
 import time
 import unittest.mock
@@ -158,6 +159,10 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
             settings.add_registry(registry_id, repository.index_url)
             cargo_build(project=project2)
             kraken_execute(project2.context, ":cargoBuild")
+
+        # Running the application should give "Hello from hello-world-lib!".
+        output = sp.check_output([data_dir / "hello-world-app" / "target" / "debug" / "hello-world-app"]).decode()
+        assert output.strip() == "Hello from hello-world-lib!"
 
 
 ARTIFACTORY_VAR = "ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS"

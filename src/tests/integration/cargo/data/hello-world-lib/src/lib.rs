@@ -1,4 +1,4 @@
 
 pub fn say_hello() {
-    println!("Hello, World!");
+    println!("Hello from hello-world-lib!");
 }
