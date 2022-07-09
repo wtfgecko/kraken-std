@@ -11,7 +11,7 @@ import subprocess as sp
 import time
 import urllib.parse
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, List
 
 import tomli
 import tomli_w
