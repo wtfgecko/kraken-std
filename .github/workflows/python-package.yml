@@ -21,6 +21,9 @@ jobs:
     # Make sure we have Docker available for the ete-tests.
     - uses: docker/setup-buildx-action@v2
     - run: slap test pytest-ete
+      env:
+        ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS: ${{ secrets.ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS }}
+        CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS: ${{ secrets.CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS }}
 
   update-changelog:
     runs-on: ubuntu-latest
