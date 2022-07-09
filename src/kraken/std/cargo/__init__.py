@@ -204,7 +204,7 @@ class CargoBuildTask(Task):
     """This task runs `cargo build` using the specified parameters. It will respect the authentication
     credentials configured in :attr:`CargoProjectSettings.auth`."""
 
-    args: Property[list[str]]
+    args: Property[List[str]]
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
