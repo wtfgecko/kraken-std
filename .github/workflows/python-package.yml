@@ -32,6 +32,11 @@ jobs:
           kv/data/projects/github.com/kraken-build/kraken-std cloudsmith_io | CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS ;
           kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io | ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS
 
+    - name: Mask secrets
+      run: |
+        echo "::add-mask::${{ env.CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS }}"
+        echo "::add-mask::${{ env.ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS }}"
+
     - run: slap test pytest-ete
 
 
