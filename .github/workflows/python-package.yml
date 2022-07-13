@@ -30,12 +30,14 @@ jobs:
         token: ${{ secrets.VAULT_TOKEN }}
         secrets: |
           kv/data/projects/github.com/kraken-build/kraken-std cloudsmith_io | CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS ;
-          kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io | ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS
+          kv/data/projects/github.com/kraken-build/kraken-std cloudsmith_io.api_key | CLOUDSMITH_API_KEY ;
+          kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io | ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS ;
+          kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io.password | ARTIFACTORY_PASSWORD
 
     - name: Mask secrets
       run: |
-        echo "::add-mask::${{ env.CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS }}"
-        echo "::add-mask::${{ env.ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS }}"
+        echo "::add-mask::${{ env.CLOUDSMITH_API_KEY }}"
+        echo "::add-mask::${{ env.ARTIFACTORY_PASSWORD }}"
 
     - run: slap test pytest-ete
 
