@@ -95,6 +95,8 @@ class KanikoBuildTask(DockerBuildTask):
         executor_command += ["--snapshotMode", self.kaniko_snapshot_mode.get()]
         if self.squash.get():
             executor_command += ["--single-snapshot"]
+        if self.kaniko_cache_copy_layers.get():
+            executor_command += ["--cache-copy-layers"]
         target = self.target.get()
         if target:
             executor_command += ["--target", target]
