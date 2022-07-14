@@ -11,10 +11,11 @@ from kraken.core.utils import import_class
 __version__ = "0.1.0"
 __all__ = ["build", "DockerBuildTask"]
 
-DEFAULT_BUILD_BACKEND = "kaniko"
+DEFAULT_BUILD_BACKEND = "native"
 BUILD_BACKENDS = {
-    "kaniko": f"{__name__}.kaniko.KanikoBuildTask",
     "buildx": f"{__name__}.buildx.BuildxBuildTask",
+    "kaniko": f"{__name__}.kaniko.KanikoBuildTask",
+    "native": f"{__name__}.native.NativeBuildTask",
 }
 
 

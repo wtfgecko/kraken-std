@@ -66,8 +66,8 @@ Build and publish Docker images.
 
 __Supported backends__
 
-* [ ] Native Docker
-* [x] [Buildx][] (missing auth)
+* [x] Native Docker (currently does not perform auth for you)
+* [x] [Buildx][] (currently does not perform auth for you)
 * [x] [Kaniko][]
 
 __Quickstart__

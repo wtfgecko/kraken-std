@@ -1,0 +1,5 @@
+[[entries]]
+id = "e6c3641a-5fe5-42ca-9a8f-3df4b85a175d"
+type = "feature"
+description = "add \"native\" docker build backend"
+author = "@NiklasRosenstein"

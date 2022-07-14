@@ -57,7 +57,7 @@ class BuildxBuildTask(DockerBuildTask):
 
         # TODO (@nrosenstein): docker login for auth
 
-        self.logger.info("running Builx: %s", command)
+        self.logger.info("%s", command)
         result = sp.call(command, env=env, cwd=self.project.directory)
         if result != 0:
             return TaskResult.FAILED

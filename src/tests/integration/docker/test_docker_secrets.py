@@ -14,7 +14,7 @@ from kraken.std.docker import build_docker_image
 from kraken.std.generic.render_file import render_file
 
 
-@pytest.mark.parametrize("backend", ["kaniko", "buildx"])
+@pytest.mark.parametrize("backend", ["buildx", "kaniko", "native"])
 def test__secrets_can_be_accessed_at_build_time_and_are_not_present_in_the_final_image(
     kraken_project: Project,
     backend: str,
@@ -25,7 +25,7 @@ def test__secrets_can_be_accessed_at_build_time_and_are_not_present_in_the_final
     secret_name = "MY_SECRET"
     secret_path = f"/run/secrets/{secret_name}"
 
-    if backend == "buildx":
+    if backend == "buildx" or backend == "native":
         mount = f"--mount=type=secret,id={secret_name}"
     else:
         mount = ""
