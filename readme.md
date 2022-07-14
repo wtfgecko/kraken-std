@@ -29,7 +29,7 @@ __Features__
 __Quickstart__
 
 ```py
-# kraken.build.py
+# .kraken.py
 from kraken.std.cargo import cargo_build, cargo_publish, cargo_settings
 
 settings = cargo_settings()
@@ -73,7 +73,7 @@ __Supported backends__
 __Quickstart__
 
 ```py
-# kraken.build.py
+# .kraken.py
 from kraken.std.docker import build_docker_image
 
 build_docker_image(
@@ -100,7 +100,7 @@ Package and publish [Helm][] charts to OCI or HTTP(S) registries.
 __Quickstart__
 
 ```py
-# kraken.build.py
+# .kraken.py
 from kraken.std.helm import helm_push, helm_package, helm_settings
 
 helm_settings().add_auth("example.jfrog.io", "me@example.org", "api_token")
