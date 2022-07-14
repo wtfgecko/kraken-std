@@ -5,6 +5,8 @@ import subprocess as sp
 import tempfile
 from pathlib import Path
 
+from kraken.core.project import Project
+from kraken.core.property import Property
 from kraken.core.task import TaskResult
 from kraken.core.utils import flatten, not_none
 
@@ -13,6 +15,13 @@ from . import DockerBuildTask
 
 class NativeBuildTask(DockerBuildTask):
     """Implements building a Docker image using the native `docker build` command."""
+
+    #: Whether to use Docker Buildkit. Enabled by default.
+    native_use_buildkit: Property[bool]
+
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        self.native_use_buildkit.set(True)
 
     def finalize(self) -> None:
         if self.cache_repo.get() is not None:
@@ -45,6 +54,7 @@ class NativeBuildTask(DockerBuildTask):
 
         # Buildx will take the secret from the environment variasbles.
         env = os.environ.copy()
+        env["DOCKER_BUILDKIT"] = "1" if self.native_use_buildkit.get() else "0"
 
         # TODO (@nrosenstein): docker login for auth
 
