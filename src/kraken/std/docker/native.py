@@ -64,9 +64,7 @@ class NativeBuildTask(DockerBuildTask):
                 secret_file.write_text(value)
                 command += ["--secret", f"id={key},src={secret_file}"]
 
-            import shlex
-
-            self.logger.info("%s", " ".join(map(shlex.quote, command)))
+            self.logger.info("%s", command)
             result = sp.call(command, env=env, cwd=self.project.directory)
             if result != 0:
                 return TaskResult.FAILED
