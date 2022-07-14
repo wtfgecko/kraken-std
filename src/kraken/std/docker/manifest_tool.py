@@ -1,4 +1,5 @@
 import platform
+import shutil
 import subprocess as sp
 import sys
 import tarfile
@@ -37,15 +38,25 @@ class ManifestToolPushTask(Task):
     #: The image ID to push the Docker image to.
     target: Property[str]
 
+    #: Prefer the local version of the tool if available. Default is `true`.
+    manifest_tool_local: Property[bool]
+
     #: The tool version to use. The appropriate release will be downloaded from Github.
     manifest_tool_version: Property[str]
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
+        self.manifest_tool_local.set(True)
         self.manifest_tool_version.set("2.0.4")
 
     def fetch_manifest_tool(self) -> Path:
         """Fetches the manifest tool binary that is appropriate for the current platform."""
+
+        if self.manifest_tool_local.get():
+            path = shutil.which("manifest-tool")
+            if path is not None:
+                self.logger.info("using %s", path)
+                return Path(path)
 
         version = self.manifest_tool_version.get()
         manifest_tool_dir = self.project.context.build_directory / ".downloads" / f"manifest-tool-{version}"
@@ -58,9 +69,7 @@ class ManifestToolPushTask(Task):
                 fp.raise_for_status()
                 archive = Path(tempdir) / download_url.rpartition("/")[-1]
                 with archive.open("wb") as dst:
-                    import tqdm
-
-                    for chunk in tqdm.tqdm(fp.iter_bytes()):
+                    for chunk in fp.iter_bytes():
                         dst.write(chunk)
                 with tarfile.open(archive, mode="r:gz") as tf:
                     tf.extractall(manifest_tool_dir)
@@ -70,6 +79,7 @@ class ManifestToolPushTask(Task):
         if not binary.is_file():
             raise RuntimeError("unable to construct valid path to binary for downloaded manifest-tool release")
 
+        self.logger.info("using %s", binary)
         return binary
 
     def execute(self) -> TaskResult:
