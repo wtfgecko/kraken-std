@@ -213,7 +213,7 @@ class CargoBuildTask(Task):
     def execute(self) -> TaskResult:
         with _cargo_inject_project_settings(self.project):
             command = ["cargo", "build"] + self.args.get()
-            logger.info("running cargo build command: %s", command)
+            self.logger.info("%s", command)
             result = sp.call(command, cwd=self.project.directory)
             return TaskResult.SUCCEEDED if result == 0 else TaskResult.FAILED
 
@@ -243,7 +243,7 @@ class CargoPublishTask(Task):
             command = ["cargo", "publish", "--registry", registry.name, "--token", publish_token]
             if self.allow_dirty.get():
                 command += ["--allow-dirty"]
-            logger.info("running cargo publish command: %s", command)
+            self.logger.info("%s", command)
             result = sp.call(command, cwd=self.project.directory)
             return TaskResult.SUCCEEDED if result == 0 else TaskResult.FAILED
 
