@@ -158,7 +158,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
             settings.add_auth(repository_host, repository.user, repository.password)
             settings.add_registry(registry_id, repository.index_url)
             project2.do("cargoBuild", CargoBuildTask)
-            project1.context.execute([":cargoBuild"], verbose=True)
+            project2.context.execute([":cargoBuild"], verbose=True)
 
         # Running the application should give "Hello from hello-world-lib!".
         output = sp.check_output([data_dir / "hello-world-app" / "target" / "debug" / "hello-world-app"]).decode()
