@@ -3,9 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from kraken.core.project import Project
-from kraken.core.property import Property
-from kraken.core.task import Task, task_factory
+from kraken.core import Project, Property, Task
 from kraken.core.utils import import_class
 
 __version__ = "0.1.0"
@@ -57,7 +55,6 @@ class DockerBuildTask(Task):
 def build_docker_image(
     *,
     name: str = "buildDocker",
-    default: bool = False,
     backend: str = DEFAULT_BUILD_BACKEND,
     project: Project | None = None,
     **kwds: Any,
@@ -65,5 +62,4 @@ def build_docker_image(
     """Create a new task in the current project that builds a Docker image and eventually pushes it."""
 
     task_class = import_class(BUILD_BACKENDS[backend], DockerBuildTask)  # type: ignore[misc]
-    factory = task_factory(task_class, capture=False)
-    return factory(name=name, default=default, project=project, **kwds)
+    return (project or Project.current()).do(name, task_class, **kwds)

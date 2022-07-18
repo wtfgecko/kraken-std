@@ -8,10 +8,9 @@ from pathlib import Path
 
 import pytest
 from kraken.core.project import Project
-from kraken.testing import kraken_execute
 
 from kraken.std.docker import build_docker_image
-from kraken.std.generic.render_file import render_file
+from kraken.std.generic.render_file import RenderFileTask
 
 
 @pytest.mark.parametrize("backend", ["buildx", "kaniko", "native"])
@@ -42,8 +41,9 @@ def test__secrets_can_be_accessed_at_build_time_and_are_not_present_in_the_final
     with tempfile.TemporaryDirectory() as tempdir, contextlib.ExitStack() as exit_stack:
         kraken_project.directory = Path(tempdir)
 
-        dockerfile = render_file(
-            project=kraken_project,
+        dockerfile = kraken_project.do(
+            name="writeDockerfile",
+            task_type=RenderFileTask,
             file=kraken_project.build_directory / "Dockerfile",
             content=dockerfile_content,
         )
@@ -58,7 +58,7 @@ def test__secrets_can_be_accessed_at_build_time_and_are_not_present_in_the_final
             backend=backend,
         )
 
-        kraken_execute(kraken_project.context, ":buildDocker")
+        kraken_project.context.execute([":buildDocker"], verbose=True)
 
         exit_stack.callback(lambda: sp.check_call(["docker", "rmi", image_tag]))
 

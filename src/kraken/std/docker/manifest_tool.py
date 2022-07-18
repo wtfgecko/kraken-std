@@ -8,9 +8,7 @@ from pathlib import Path
 from typing import List
 
 import httpx
-from kraken.core.project import Project
-from kraken.core.property import Property
-from kraken.core.task import Task, TaskResult, task_factory
+from kraken.core import Project, Property, Task, TaskResult
 
 RELEASE_URL = (
     "https://github.com/estesp/manifest-tool/releases/download/v{VERSION}/binaries-manifest-tool-{VERSION}.tar.gz"
@@ -100,6 +98,3 @@ class ManifestToolPushTask(Task):
         if result != 0:
             return TaskResult.FAILED
         return TaskResult.SUCCEEDED
-
-
-manifest_tool_push = task_factory(ManifestToolPushTask)

@@ -8,9 +8,8 @@ import httpx
 import pytest
 from kraken.core.project import Project
 from kraken.core.utils import not_none
-from kraken.testing import kraken_execute
 
-from kraken.std.helm import helm_package, helm_push, helm_settings
+from kraken.std.helm import HelmPackageTask, HelmPushTask, helm_settings
 from tests.utils.docker import DockerServiceManager
 
 logger = logging.getLogger(__name__)
@@ -60,9 +59,14 @@ def test__helm_push_to_oci_registry(kraken_project: Project, oci_registry: str) 
     chart can be accessed via the registry."""
 
     helm_settings(kraken_project).add_auth(oci_registry, USER_NAME, USER_PASS, insecure=True)
-    package = helm_package(chart_directory="data/example-chart")
-    helm_push(chart_tarball=package.chart_tarball, registry=f"oci://{oci_registry}/example")
-    kraken_execute(kraken_project.context, ":helmPush")
+    package = kraken_project.do("helmPackage", HelmPackageTask, chart_directory="data/example-chart")
+    kraken_project.do(
+        "helmPush",
+        HelmPushTask,
+        chart_tarball=package.chart_tarball,
+        registry=f"oci://{oci_registry}/example",
+    )
+    kraken_project.context.execute([":helmPush"], verbose=True)
     response = httpx.get(f"http://{oci_registry}/v2/example/example-chart/tags/list", auth=(USER_NAME, USER_PASS))
     response.raise_for_status()
     tags = response.json()

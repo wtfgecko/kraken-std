@@ -1,12 +1,13 @@
-from kraken.api import ctx
+from kraken.api import project
 
 from kraken.std.docker import build_docker_image
-from kraken.std.generic.render_file import render_file
+from kraken.std.generic.render_file import RenderFileTask
 
-dockerfile = render_file(
+dockerfile = project.do(
     name="dockerfile",
+    task_type=RenderFileTask,
     content="FROM ubuntu:focal\nRUN echo Hello world\n",
-    file=ctx.build_directory / "Dockerfile",
+    file=project.build_directory / "Dockerfile",
 )
 
 build_docker_image(

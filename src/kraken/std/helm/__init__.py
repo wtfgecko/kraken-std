@@ -7,10 +7,7 @@ import urllib.parse
 from pathlib import Path
 
 import httpx
-from kraken.core.project import Project
-from kraken.core.property import Property, output
-from kraken.core.supplier import Supplier
-from kraken.core.task import Task, TaskResult, task_factory
+from kraken.core import Project, Property, Supplier, Task, TaskResult
 
 from . import helmapi
 
@@ -55,7 +52,7 @@ class HelmPackageTask(Task):
     # This property specifies the path to the output Helm chart tarball. It can be specified, when the
     # task is created if an explicit output location is desired, otherwise the property will be set
     # when the task was executed and the default output location is in the build directory.
-    chart_tarball: Property[Path] = output()
+    chart_tarball: Property[Path] = Property.output()
 
     def execute(self) -> TaskResult:
         chart_directory = self.project.directory / self.chart_directory.get()
@@ -92,7 +89,7 @@ class HelmPushTask(Task):
 
     #: The final constructed chart URL that the chart will be published under. Note: This URL is not currently
     #: constructed when pushing to an `oci://` registry and reading the property will cause an error.
-    chart_url: Property[str] = output()
+    chart_url: Property[str] = Property.output()
 
     def finalize(self) -> None:
         self.chart_name.setdefault(Supplier.of_callable((lambda: self.chart_tarball.get().name), [self.chart_tarball]))
@@ -150,7 +147,3 @@ class HelmPushTask(Task):
             assert False, url
 
         return TaskResult.SUCCEEDED
-
-
-helm_package = task_factory(HelmPackageTask, name="helmPackage")
-helm_push = task_factory(HelmPushTask, name="helmPush", default=False, capture=False)

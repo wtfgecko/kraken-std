@@ -21,7 +21,7 @@ keywords = []
 
 [tool.poetry.dependencies]
 python = "^3.7"
-kraken-core = "^0.2.9"
+kraken-core = "^0.3.0"
 httpx = "^0.23.0"
 "proxy.py" = "^2.4.3"
 tomli = "^2.0.1"
@@ -37,10 +37,8 @@ pyartifactory = "^1.10.0"
 cloudsmith-api = "^1.61.3"
 types-requests = "^2.28.0"
 
-[tool.kraken.include]
-repository = "https://github.com/NiklasRosenstein/kraken-defaults.git"
-branch = "v1"
-
+[tool.poetry.extras]
+docs = ["mkdocs", "mkdocs-material", "novella==0.2.3"]
 
 [tool.slap]
 typed = true
@@ -56,6 +54,8 @@ flake8 = "flake8 src/"
 
 [tool.slap.run]
 fmt = "black src/ && isort src/"
+"docs:build" = "cd docs && novella --base-url kraken-cli/"
+"docs:dev" = "cd docs && novella --serve"
 
 [tool.mypy]
 python_version = "3.7"

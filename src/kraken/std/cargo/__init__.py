@@ -1,3 +1,5 @@
+""" Provides tasks for Rust projects that build using Cargo. """
+
 from __future__ import annotations
 
 import base64
@@ -15,9 +17,7 @@ from typing import Iterator, List
 
 import tomli
 import tomli_w
-from kraken.core.project import Project
-from kraken.core.property import Property
-from kraken.core.task import Task, TaskResult, task_factory
+from kraken.core import Project, Property, Task, TaskResult
 from kraken.core.utils import atomic_file_swap, not_none
 
 logger = logging.getLogger(__name__)
@@ -196,10 +196,6 @@ def _cargo_inject_project_settings(project: Project) -> Iterator[None]:
         yield
 
 
-class CargoTask(Task):
-    """Base class for Cargo tasks."""
-
-
 class CargoBuildTask(Task):
     """This task runs `cargo build` using the specified parameters. It will respect the authentication
     credentials configured in :attr:`CargoProjectSettings.auth`."""
@@ -246,7 +242,3 @@ class CargoPublishTask(Task):
             self.logger.info("%s", command)
             result = sp.call(command, cwd=self.project.directory)
             return TaskResult.SUCCEEDED if result == 0 else TaskResult.FAILED
-
-
-cargo_build = task_factory(CargoBuildTask, name="cargoBuild", capture=False)
-cargo_publish = task_factory(CargoPublishTask, name="cargoPublish", default=False, capture=False)

@@ -3,9 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Callable, Union
 
-from kraken.core.project import Project
-from kraken.core.property import Property
-from kraken.core.task import Task, TaskResult, task_factory
+from kraken.core import Project, Property, Task, TaskResult
 
 DEFAULT_ENCODING = "utf-8"
 
@@ -42,6 +40,3 @@ class RenderFileTask(Task):
         print(f"write {self.file} ({len(encoded)} bytes)")
         self.file.get().write_bytes(encoded)
         return TaskResult.SUCCEEDED
-
-
-render_file = task_factory(RenderFileTask)

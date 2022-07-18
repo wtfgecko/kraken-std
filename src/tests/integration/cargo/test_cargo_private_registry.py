@@ -36,10 +36,10 @@ from pathlib import Path
 from typing import Iterator
 
 import pytest
+from kraken.core.testing import kraken_ctx, kraken_project
 from kraken.core.utils import not_none
-from kraken.testing import kraken_ctx, kraken_execute, kraken_project
 
-from kraken.std.cargo import cargo_build, cargo_publish, cargo_settings
+from kraken.std.cargo import CargoBuildTask, CargoPublishTask, cargo_settings
 
 logger = logging.getLogger(__name__)
 
@@ -140,8 +140,8 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
             settings = cargo_settings(project1)
             settings.add_auth(repository_host, repository.user, repository.password)
             settings.add_registry(registry_id, repository.index_url)
-            cargo_publish(project=project1, registry=registry_id, allow_dirty=True)
-            kraken_execute(project1.context, ":cargoPublish")
+            project1.do("cargoPublish", CargoPublishTask, registry=registry_id, allow_dirty=True)
+            project1.context.execute([":cargoPublish"], verbose=True)
 
         logger.info("Giving repository time to index (20s) ...")
         time.sleep(20)
@@ -157,8 +157,8 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
             settings = cargo_settings(project2)
             settings.add_auth(repository_host, repository.user, repository.password)
             settings.add_registry(registry_id, repository.index_url)
-            cargo_build(project=project2)
-            kraken_execute(project2.context, ":cargoBuild")
+            project2.do("cargoBuild", CargoBuildTask)
+            project1.context.execute([":cargoBuild"], verbose=True)
 
         # Running the application should give "Hello from hello-world-lib!".
         output = sp.check_output([data_dir / "hello-world-app" / "target" / "debug" / "hello-world-app"]).decode()
