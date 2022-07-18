@@ -38,7 +38,7 @@ cloudsmith-api = "^1.61.3"
 types-requests = "^2.28.0"
 
 [tool.poetry.extras]
-docs = ["mkdocs", "mkdocs-material", "novella==0.2.3"]
+docs = ["mkdocs", "mkdocs-material", "novella==0.2.3", "pydoc-markdown==4.6.0"]
 
 [tool.slap]
 typed = true
