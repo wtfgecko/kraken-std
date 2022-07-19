@@ -1,3 +1,4 @@
+from .install import InstallTask, install
 from .settings import PythonSettings, python_settings
 from .tools.black import BlackTask, black
 from .tools.flake8 import Flake8Task, flake8
@@ -18,4 +19,6 @@ __all__ = [
     "mypy",
     "PytestTask",
     "pytest",
+    "InstallTask",
+    "install",
 ]

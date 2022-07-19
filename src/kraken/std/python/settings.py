@@ -6,56 +6,13 @@ import logging
 import os
 import subprocess as sp
 from pathlib import Path
-from typing import MutableMapping
+from typing import Iterable
 
-from kraken.core import Project, Task, TaskResult
+from kraken.core import Project, Task, TaskRelationship, TaskResult
+
+from .environments import ENVIRONMENT_HANDLERS, EnvironmentHandler
 
 logger = logging.getLogger(__name__)
-
-
-class EnvironmentHandler(abc.ABC):
-    """Interface for dealing with a Python virtual environment."""
-
-    @abc.abstractmethod
-    def activate(self, environ: MutableMapping[str, str]) -> None:
-        """Activate the environment by updating environment variables in *environ*."""
-
-
-class PoetryEnvironmentHandler(EnvironmentHandler):
-    """This handler activates the current Poetry environment, if available."""
-
-    def __init__(self, project_directory: Path) -> None:
-        self.project_directory = project_directory
-        self.environment_dir: Path | None = None
-
-    @staticmethod
-    def discover_environment(project_directory: Path) -> Path | None:
-        """Discover the Poetry environment in use for the given project directory. Ignores any virtual environment
-        that may currently be activated, which Poetry will otherwise default to in place for its otherwise managed
-        environment."""
-
-        command = ["poetry", "env", "info", "-p"]
-        environ = os.environ.copy()
-        environ.pop("VIRTUAL_ENV", None)
-        environ.pop("VIRTUAL_ENV_PROMPT", None)
-        try:
-            return Path(sp.check_output(command, cwd=project_directory).decode().strip())
-        except sp.CalledProcessError as exc:
-            if exc.returncode == 1:
-                return None
-            raise
-
-    def activate(self, environ: MutableMapping[str, str]) -> None:
-        if self.environment_dir is None:
-            self.environment_dir = self.discover_environment(self.project_directory)
-            if not self.environment_dir:
-                logger.warning("Missing Poetry environment for project directory (%s)", self.project_directory)
-                return
-
-        logger.info("Activating Poetry environment (%s)", self.environment_dir)
-        bin_dir = self.environment_dir / ("Scripts" if os.name == "nt" else "bin")
-        environ["VIRTUAL_ENV"] = str(self.environment_dir)
-        environ["PATH"] = os.pathsep.join([str(bin_dir), environ["PATH"]])
 
 
 @dataclasses.dataclass
@@ -108,12 +65,17 @@ def python_settings(
         settings = PythonSettings(project)
         project.metadata.append(settings)
 
+    if environment_handler is None and settings.environment_handler is None:
+        # Autodetect the environment handler.
+        for handler_name, handler in ENVIRONMENT_HANDLERS.items():
+            environment_handler = handler.detect(project.directory)
+            if environment_handler is not None:
+                logger.info("Detected environment handler for %s = %r", project, handler_name)
+                break
+
     if environment_handler is not None:
         if isinstance(environment_handler, str):
-            if environment_handler == "poetry":
-                environment_handler = PoetryEnvironmentHandler(project.directory)
-            else:
-                raise ValueError(f"unsupported environment handler name: {environment_handler!r}")
+            environment_handler = ENVIRONMENT_HANDLERS[environment_handler](project.directory)
         assert isinstance(environment_handler, EnvironmentHandler), repr(environment_handler)
         if settings.environment_handler:
             logger.warning(
@@ -139,6 +101,13 @@ class EnvironmentAwareDispatchTask(Task):
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
         self.settings = python_settings(project)
+
+    def get_relationships(self) -> Iterable[TaskRelationship]:
+        # If a pythonInstall task exists, we may need it.
+        install_task = self.project.tasks().get("pythonInstall")
+        if install_task:
+            yield TaskRelationship(install_task, True, False)
+        yield from super().get_relationships()
 
     @abc.abstractmethod
     def get_execute_command(self) -> list[str] | TaskResult:
