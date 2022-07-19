@@ -5,7 +5,7 @@ from typing import Any
 
 from kraken.core import Project, Property, TaskResult
 
-from ..settings import EnvironmentAwareDispatchTask, PythonSettings
+from ..settings import EnvironmentAwareDispatchTask
 
 # TODO (@NiklasRosenstein): Pytest coverage support
 
