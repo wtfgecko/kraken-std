@@ -15,3 +15,9 @@ id = "e7dc557e-1699-48be-89f9-1ab0f8e4dde6"
 type = "fix"
 description = "Python `MypyTask` no longer adds the test directory if it is a subdirectory of the source directory, which used to cause an error in Mypy"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "e89c2e20-8d8d-4b92-a8ff-9e63d1a73f96"
+type = "improvement"
+description = "add `MypyTask.python_version` property"
+author = "@NiklasRosenstein"

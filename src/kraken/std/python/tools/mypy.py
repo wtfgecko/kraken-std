@@ -13,6 +13,7 @@ class MypyTask(EnvironmentAwareDispatchTask):
     additional_args: Property[list[str]] = Property.config(default_factory=list)
     check_tests: Property[bool] = Property.config(default=True)
     use_daemon: Property[bool] = Property.config(default=True)
+    python_version: Property[str]
 
     def get_execute_command(self) -> list[str] | TaskResult:
         # TODO (@NiklasRosenstein): Should we somewhere add a task that ensures `.dmypy.json` is in `.gitignore`?
@@ -24,6 +25,8 @@ class MypyTask(EnvironmentAwareDispatchTask):
             command += ["--config-file", str(self.config_file.get())]
         else:
             command += ["--show-error-codes", "--namespace-packages"]  # Sane defaults. 🙏
+        if self.python_version.is_filled():
+            command += ["--python-version", self.python_version.get()]
         source_dir = self.settings.source_directory
         command += [str(source_dir)]
         if self.check_tests.get():
