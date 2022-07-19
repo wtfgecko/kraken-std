@@ -1,0 +1,5 @@
+[[entries]]
+id = "c53e0963-e23a-4723-8617-6ef690116c26"
+type = "improvement"
+description = "`KanikoBuildTask` now errors in `finalize()` if the `cache_repo` contains a `:` (colon)"
+author = "@NiklasRosenstein"

@@ -40,6 +40,9 @@ class KanikoBuildTask(DockerBuildTask):
                 self,
             )
             self.cache.set(False)
+        cache_repo = self.cache_repo.get_or(None)
+        if cache_repo and ":" in cache_repo:
+            raise ValueError(f"Kaniko --cache-repo argument cannot contain `:` (got: {cache_repo!r})")
         return super().finalize()
 
     def _render_auth_file(self) -> str:
