@@ -16,18 +16,15 @@ class RenderFileTask(Task):
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
         self.encoding.setdefault(DEFAULT_ENCODING)
+        self._content_cache: str | None = None
 
     def _get_content(self) -> str:
-        content = self.content.get()
-        if callable(content):
-            content = content()
-        return content
-
-    def finalize(self) -> None:
-        # Materialize content that is to be rendered.
-        content = self._get_content()
-        self.content.setfinal(content)
-        return super().finalize()
+        if self._content_cache is None:
+            content = self.content.get()
+            if callable(content):
+                content = content()
+            self._content_cache = content
+        return self._content_cache
 
     def is_up_to_date(self) -> bool:
         content = self._get_content()
@@ -37,6 +34,6 @@ class RenderFileTask(Task):
         content = self._get_content()
         self.file.get().parent.mkdir(exist_ok=True)
         encoded = content.encode(self.encoding.get())
-        print(f"write {self.file} ({len(encoded)} bytes)")
+        print(f"write {self.file.get()} ({len(encoded)} bytes)")
         self.file.get().write_bytes(encoded)
         return TaskResult.SUCCEEDED
