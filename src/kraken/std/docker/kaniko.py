@@ -128,7 +128,7 @@ class KanikoBuildTask(DockerBuildTask):
         # If the image needs to be loaded into the Docker daemon after building, we need to always
         # export it to a file.
         image_output_file = self.image_output_file.get_or(None)
-        if self.load and not image_output_file:
+        if self.load.get() and not image_output_file:
             tempdir = exit_stack.enter_context(tempfile.TemporaryDirectory())
             image_output_file = Path(tempdir) / "image.tgz"
 
@@ -155,7 +155,7 @@ class KanikoBuildTask(DockerBuildTask):
         if result != 0:
             raise Exception(f"Kaniko build failed with exit code {result}")
 
-        if self.load:
+        if self.load.get():
             assert image_output_file is not None, "image_output_file is expected to be set when config.load == True"
             result = docker_load(image_output_file)
             if result != 0:
