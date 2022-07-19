@@ -9,3 +9,9 @@ id = "c3af61ab-bf19-4232-8e81-91a5926fc31a"
 type = "improvement"
 description = "add INFO log for subcommand executed by python `EnvironmentAwareDispatchTask`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "e7dc557e-1699-48be-89f9-1ab0f8e4dde6"
+type = "fix"
+description = "Python `MypyTask` no longer adds the test directory if it is a subdirectory of the source directory, which used to cause an error in Mypy"
+author = "@NiklasRosenstein"

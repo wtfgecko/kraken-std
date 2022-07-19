@@ -24,9 +24,17 @@ class MypyTask(EnvironmentAwareDispatchTask):
             command += ["--config-file", str(self.config_file.get())]
         else:
             command += ["--show-error-codes", "--namespace-packages"]  # Sane defaults. 🙏
-        command += ["src/"]
+        source_dir = self.settings.source_directory
+        command += [str(source_dir)]
         if self.check_tests.get():
-            command += self.settings.get_tests_directory_as_args()
+            # We only want to add the tests directory if it is not already in the source directory. Otherwise
+            # Mypy will find the test files twice and error.
+            tests_dir = self.settings.get_tests_directory()
+            if tests_dir:
+                try:
+                    tests_dir.relative_to(source_dir)
+                except ValueError:
+                    command += [str(tests_dir)]
         command += self.additional_args.get()
         return command
 
