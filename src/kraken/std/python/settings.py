@@ -155,5 +155,6 @@ class EnvironmentAwareDispatchTask(Task):
         env = os.environ.copy()
         if settings.environment_handler:
             settings.environment_handler.activate(env)
+        logger.info("%s", command)
         result = sp.call(command, cwd=self.project.directory, env=env)
         return self.handle_exit_code(result)

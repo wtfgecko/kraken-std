@@ -3,3 +3,9 @@ id = "d63edec0-7c4a-4516-9d57-a1f260564fda"
 type = "improvement"
 description = "RenderFileTask no longer tries to call the content supplier in `finalize()`, fix info line on the file being written"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "c3af61ab-bf19-4232-8e81-91a5926fc31a"
+type = "improvement"
+description = "add INFO log for subcommand executed by python `EnvironmentAwareDispatchTask`"
+author = "@NiklasRosenstein"
