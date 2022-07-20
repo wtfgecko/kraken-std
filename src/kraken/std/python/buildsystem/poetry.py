@@ -44,7 +44,7 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
         src_files = list(dist_dir.iterdir())
         dst_files = [output_directory / path.name for path in src_files]
         for src, dst in zip(src_files, dst_files):
-            src.rename(dst)
+            shutil.move(str(src), dst)
 
         # Unless the output directory is a subdirectory of the dist_dir, we remove the dist dir again.
         if not is_relative_to(output_directory, dist_dir):

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import shutil
 import subprocess as sp
 import tempfile
 from pathlib import Path
@@ -39,7 +40,7 @@ class SlapPythonBuildSystem(PythonBuildSystem):
             src_files = list(Path(tempdir).iterdir())
             dst_files = [output_directory / path.name for path in src_files]
             for src, dst in zip(src_files, dst_files):
-                src.rename(dst)
+                shutil.move(str(src), dst)
         return dst_files
 
 
