@@ -19,8 +19,9 @@ class BlackTask(EnvironmentAwareDispatchTask):
     additional_files: Property[List[Path]] = Property.config(default_factory=list)
 
     def get_execute_command(self) -> list[str] | TaskResult:
-        command = ["black"] + list(map(str, self.source_directories.get())) + self.additional_files.get()
+        command = ["black"] + list(map(str, self.source_directories.get()))
         command += self.settings.get_tests_directory_as_args()
+        command += [str(p) for p in self.additional_files.get()]
         if self.check_only.get():
             command += ["--check"]
         if self.config_file.is_filled():
