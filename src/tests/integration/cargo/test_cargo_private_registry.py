@@ -36,6 +36,7 @@ from pathlib import Path
 from typing import Iterator
 
 import pytest
+from flaky import flaky
 from kraken.core.testing import kraken_ctx, kraken_project
 from kraken.core.utils import not_none
 
@@ -178,6 +179,7 @@ def test__artifactory_cargo_publish_and_consume() -> None:
 
 
 @pytest.mark.skipif(CLOUDSMITH_VAR not in os.environ, reason=f"{CLOUDSMITH_VAR} is not set")
+@flaky  # type: ignore[misc]
 def test__cloudsmith_cargo_publish_and_consume() -> None:
     credentials = json.loads(os.environ[CLOUDSMITH_VAR])
     with create_cargo_repository_in_cloudsmith(credentials) as repository:
