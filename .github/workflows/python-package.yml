@@ -46,6 +46,7 @@ jobs:
     needs: [ "test" ]
     steps:
     - uses: actions/checkout@v2
+      with: { fetch-depth: 0 }
     - uses: actions/setup-python@v2
       with: { python-version: "${{ matrix.python-version }}" }
     - run: pip install pipx && pipx install kraken-cli
