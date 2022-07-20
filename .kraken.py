@@ -44,10 +44,10 @@ publish_repo: str | None = None
 if "CI" in os.environ:
     if os.environ["GITHUB_REF_TYPE"] == "tag":
         publish_repo = "pypi"
-        as_version = git_version_to_python(git_describe(project.directory), True)
+        as_version = os.environ["GITHUB_REF_NAME"]
     elif os.environ["GITHUB_REF_TYPE"] == "branch" and os.environ["GITHUB_REF_NAME"] == "develop":
         publish_repo = "testpypi"
-        as_version = os.environ["GITHUB_REF_NAME"]
+        as_version = git_version_to_python(git_describe(project.directory), True)
     else:
         raise EnvironmentError(
             f"GITHUB_REF_TYPE={os.environ['GITHUB_REF_TYPE']}, GITHUB_REF_NAME={os.environ['GITHUB_REF_NAME']}"
