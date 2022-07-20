@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from kraken.core import Project, Property, TaskResult
+from kraken.core.utils import flatten
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -12,6 +13,7 @@ from .base_task import EnvironmentAwareDispatchTask
 
 class PytestTask(EnvironmentAwareDispatchTask):
     tests_dir: Property[Path]
+    ignore_dirs: Property[list[Path]] = Property.config(default_factory=list)
     allow_no_tests: Property[bool] = Property.config(default=False)
 
     def is_skippable(self) -> bool:
@@ -23,7 +25,8 @@ class PytestTask(EnvironmentAwareDispatchTask):
         if not tests_dir:
             print("error: no test directory configured and none could be detected")
             return TaskResult.FAILED
-        command = ["pytest", "-vv", str(tests_dir)]
+        command = ["pytest", "-vv", str(self.project.directory / tests_dir)]
+        command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
         return command
 
     def handle_exit_code(self, code: int) -> TaskResult:
@@ -33,6 +36,6 @@ class PytestTask(EnvironmentAwareDispatchTask):
         return TaskResult.from_exit_code(code)
 
 
-def pytest(project: Project | None = None, **kwargs: Any) -> PytestTask:
+def pytest(*, name: str = "pytest", project: Project | None = None, **kwargs: Any) -> PytestTask:
     project = project or Project.current()
-    return project.do("pytest", PytestTask, group="test", **kwargs)
+    return project.do(name, PytestTask, group="test", **kwargs)
