@@ -45,6 +45,8 @@ if "CI" in os.environ:
     if os.environ["GITHUB_REF_TYPE"] == "tag":
         publish_repo = "pypi"
         as_version = os.environ["GITHUB_REF_NAME"]
+        # TODO (@NiklasRosenstein): It would be nice to add a test that checks if the version in the package
+        #       is consistent (ie. run `slap release --validate <tag>`).
     elif os.environ["GITHUB_REF_TYPE"] == "branch" and os.environ["GITHUB_REF_NAME"] == "develop":
         publish_repo = "testpypi"
         as_version = git_version_to_python(git_describe(project.directory), True)
