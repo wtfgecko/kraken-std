@@ -16,7 +16,7 @@ class PublishTask(Task):
     index_upload_url: Property[str]
     index_credentials: Property[Optional[Tuple[str, str]]] = Property.config(default=None)
     distributions: Property[List[Path]]
-    dependencies: list[Task]
+    dependencies: List[Task]
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
