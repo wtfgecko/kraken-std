@@ -32,7 +32,7 @@ jobs:
           kv/data/projects/github.com/kraken-build/kraken-std cloudsmith_io | CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS ;
           kv/data/projects/github.com/kraken-build/kraken-std cloudsmith_io.api_key | CLOUDSMITH_API_KEY ;
           kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io | ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS ;
-          kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io.password | ARTIFACTORY_PASSWORD
+          kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io.password | ARTIFACTORY_PASSWORD ;
 
     - name: Mask secrets
       run: |
@@ -49,7 +49,23 @@ jobs:
     - uses: actions/setup-python@v2
       with: { python-version: "${{ matrix.python-version }}" }
     - run: pip install pipx && pipx install kraken-cli
-    - run: kraken publish -v
+
+    # Import credentials for integration tests.
+    - name: Import Secrets
+      uses: hashicorp/vault-action@v2.4.0
+      with:
+        url: ${{ secrets.VAULT_ADDR }}
+        token: ${{ secrets.VAULT_TOKEN }}
+        secrets: |
+          kv/data/projects/github.com/kraken-build/kraken-std pypi_org.user | PYPI_USER ;
+          kv/data/projects/github.com/kraken-build/kraken-std pypi_org.password | PYPI_PASSWORD ;
+          kv/data/projects/github.com/kraken-build/kraken-std test_pypi_org.user | TESTPYPI_USER ;
+          kv/data/projects/github.com/kraken-build/kraken-std test_pypi_org.password | TESTPYPI_PASSWORD ;
+    - name: Mask secrets
+      run: |
+        echo "::add-mask::${{ env.PYPI_PASSWORD }}"
+        echo "::add-mask::${{ env.TESTPYPI_PASSWORD }}"
+    - run: kraken run publish -v
 
   update-changelog:
     runs-on: ubuntu-latest
