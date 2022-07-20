@@ -1,0 +1,5 @@
+[[entries]]
+id = "74a06257-41dd-4809-a259-5b493d2cfcc0"
+type = "feature"
+description = "add `BlackTask.additional_files` and `IsortTask.additional_files`"
+author = "@NiklasRosenstein"

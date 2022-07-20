@@ -57,7 +57,7 @@ class PythonSettings:
         upload_url: str | None = None,
         credentials: tuple[str, str] | None = None,
         is_package_source: bool = True,
-    ) -> None:
+    ) -> PythonSettings:
         """Adds an index to consume Python packages from or publish packages to.
 
         :param alias: An alias for the package index.
@@ -88,6 +88,7 @@ class PythonSettings:
                 raise ValueError(f"cannot derive upload URL for alias {alias!r} and index URL {index_url!r}")
 
         self.package_indexes[alias] = PythonIndex(alias, index_url, upload_url, credentials, is_package_source)
+        return self
 
 
 def python_settings(
