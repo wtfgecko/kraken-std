@@ -13,7 +13,7 @@ from .base_task import EnvironmentAwareDispatchTask
 
 class PytestTask(EnvironmentAwareDispatchTask):
     tests_dir: Property[Path]
-    ignore_dirs: Property[list[Path]] = Property.config(default_factory=list)
+    ignore_dirs: Property[List[Path]] = Property.config(default_factory=list)
     allow_no_tests: Property[bool] = Property.config(default=False)
 
     def is_skippable(self) -> bool:

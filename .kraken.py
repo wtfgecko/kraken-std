@@ -51,3 +51,7 @@ if "CI" in os.environ:
         publish_repo = "testpypi"
         as_version = git_version_to_python(git_describe(project.directory), True)
         publish(package_index=publish_repo, distributions=build_task.output_files)
+    else:
+        raise EnvironmentError(
+            f"GITHUB_REF_TYPE={os.environ['GITHUB_REF_TYPE']}, GITHUB_REF_NAME={os.environ['GITHUB_REF_NAME']}"
+        )

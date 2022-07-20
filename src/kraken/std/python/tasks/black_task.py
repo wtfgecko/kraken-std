@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, List, Union
 
 from kraken.core import Project, Property, TaskResult
 
@@ -14,8 +14,8 @@ class BlackTask(EnvironmentAwareDispatchTask):
 
     check_only: Property[bool] = Property.config(default=False)
     config_file: Property[Path]
-    source_directories: Property[list[Union[str, Path]]] = Property.config(default_factory=lambda: ["src"])
-    additional_args: Property[list[str]] = Property.config(default_factory=list)
+    source_directories: Property[List[Union[str, Path]]] = Property.config(default_factory=lambda: ["src"])
+    additional_args: Property[List[str]] = Property.config(default_factory=list)
 
     def get_execute_command(self) -> list[str] | TaskResult:
         command = ["black"] + list(map(str, self.source_directories.get()))

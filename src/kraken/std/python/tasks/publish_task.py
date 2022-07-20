@@ -15,7 +15,7 @@ class PublishTask(Task):
 
     index_url: Property[str]
     index_credentials: Property[Optional[tuple[str, str]]] = Property.config(default=None)
-    distributions: Property[list[Path]]
+    distributions: Property[List[Path]]
 
     def execute(self) -> TaskResult:
         credentials = self.index_credentials.get()
@@ -31,7 +31,7 @@ class PublishTask(Task):
 def publish(
     *,
     package_index: str,
-    distributions: list[Path] | Property[list[Path]],
+    distributions: list[Path] | Property[List[Path]],
     name: str = "publishPython",
     group: str | None = "publish",
     default: bool = False,

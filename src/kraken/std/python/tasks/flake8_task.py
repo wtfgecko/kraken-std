@@ -10,7 +10,7 @@ from .base_task import EnvironmentAwareDispatchTask
 
 class Flake8Task(EnvironmentAwareDispatchTask):
     config_file: Property[Path]
-    additional_args: Property[list[str]] = Property.config(default_factory=list)
+    additional_args: Property[List[str]] = Property.config(default_factory=list)
 
     def get_execute_command(self) -> list[str] | TaskResult:
         command = ["flake8", "src/"] + self.settings.get_tests_directory_as_args()

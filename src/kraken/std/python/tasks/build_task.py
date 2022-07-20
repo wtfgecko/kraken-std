@@ -16,7 +16,7 @@ class BuildTask(Task):
     build_system: Property[Optional[PythonBuildSystem]]
     output_directory: Property[Path]
     as_version: Property[Optional[str]] = Property.config(default=None)
-    output_files: Property[list[Path]] = Property.output()
+    output_files: Property[List[Path]] = Property.output()
 
     def execute(self) -> TaskResult:
         build_system = self.build_system.get()

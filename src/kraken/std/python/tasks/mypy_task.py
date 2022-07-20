@@ -10,7 +10,7 @@ from .base_task import EnvironmentAwareDispatchTask
 
 class MypyTask(EnvironmentAwareDispatchTask):
     config_file: Property[Path]
-    additional_args: Property[list[str]] = Property.config(default_factory=list)
+    additional_args: Property[List[str]] = Property.config(default_factory=list)
     check_tests: Property[bool] = Property.config(default=True)
     use_daemon: Property[bool] = Property.config(default=True)
     python_version: Property[str]
