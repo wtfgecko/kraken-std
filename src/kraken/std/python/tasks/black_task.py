@@ -41,6 +41,6 @@ def black(project: Project | None = None, **kwargs: Any) -> BlackTasks:
     whereas the format task will be grouped under `"fmt"`."""
 
     project = project or Project.current()
-    check_task = project.do("blackCheck", BlackTask, group="lint", **kwargs)
-    format_task = project.do("blackFormat", BlackTask, group="fmt", default=False, **kwargs, check_only=True)
+    check_task = project.do("blackCheck", BlackTask, group="lint", **kwargs, check_only=True)
+    format_task = project.do("blackFormat", BlackTask, group="fmt", default=False, **kwargs)
     return BlackTasks(check_task, format_task)
