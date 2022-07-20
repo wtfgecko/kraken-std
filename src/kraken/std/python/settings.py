@@ -1,18 +1,21 @@
 from __future__ import annotations
 
-import abc
 import dataclasses
 import logging
-import os
-import subprocess as sp
 from pathlib import Path
-from typing import Iterable
 
-from kraken.core import Project, Task, TaskRelationship, TaskResult
+from kraken.core import Project
 
-from .environments import ENVIRONMENT_HANDLERS, EnvironmentHandler
+from .buildsystem import PythonBuildSystem, detect_build_system
 
 logger = logging.getLogger(__name__)
+
+
+@dataclasses.dataclass
+class PythonIndex:
+    url: str
+    credentials: tuple[str, str] | None
+    is_package_source: bool
 
 
 @dataclasses.dataclass
@@ -20,9 +23,10 @@ class PythonSettings:
     """Project-global settings for Python tasks."""
 
     project: Project
-    environment_handler: EnvironmentHandler | None = None
+    build_system: PythonBuildSystem | None = None
     source_directory: Path = Path("src")
     tests_directory: Path | None = None
+    package_indexes: dict[str, PythonIndex] = dataclasses.field(default_factory=dict)
 
     def get_tests_directory(self) -> Path | None:
         """Returns :attr:`tests_directory` if it is set. If not, it will look for the following directories and
@@ -43,10 +47,28 @@ class PythonSettings:
         test_dir = self.get_tests_directory()
         return [] if test_dir is None else [str(test_dir)]
 
+    def add_package_index(
+        self,
+        alias: str,
+        url: str,
+        credentials: tuple[str, str] | None,
+        is_package_source: bool = True,
+    ) -> None:
+        """Adds an index to consume Python packages from or publish packages to.
+
+        :param alias: An alias for the package index.
+        :param url: The URL of the package index (without the trailing `/simple` bit).
+        :param credentials: Optional credentials to read from the index.
+        :param is_package_source: If set to `False`, the index will not be used to source packages from, but
+            can be used to publish to.
+        """
+
+        self.package_indexes[alias] = PythonIndex(url, credentials, is_package_source)
+
 
 def python_settings(
     project: Project | None = None,
-    environment_handler: str | EnvironmentHandler | None = None,
+    build_system: PythonBuildSystem | None = None,
     source_directory: str | Path | None = None,
     tests_directory: str | Path | None = None,
 ) -> PythonSettings:
@@ -65,25 +87,20 @@ def python_settings(
         settings = PythonSettings(project)
         project.metadata.append(settings)
 
-    if environment_handler is None and settings.environment_handler is None:
+    if build_system is None and settings.build_system is None:
         # Autodetect the environment handler.
-        for handler_name, handler in ENVIRONMENT_HANDLERS.items():
-            environment_handler = handler.detect(project.directory)
-            if environment_handler is not None:
-                logger.info("Detected environment handler for %s = %r", project, handler_name)
-                break
+        build_system = detect_build_system(project.directory)
+        if build_system:
+            logger.info("Detected Python build system %r for %s", type(build_system).__name__, project)
 
-    if environment_handler is not None:
-        if isinstance(environment_handler, str):
-            environment_handler = ENVIRONMENT_HANDLERS[environment_handler](project.directory)
-        assert isinstance(environment_handler, EnvironmentHandler), repr(environment_handler)
-        if settings.environment_handler:
+    if build_system is not None:
+        if settings.build_system:
             logger.warning(
                 "overwriting existing PythonSettings.environment_handler=%r with %r",
-                settings.environment_handler,
-                environment_handler,
+                settings.build_system,
+                build_system,
             )
-        settings.environment_handler = environment_handler
+        settings.build_system = build_system
 
     if source_directory is not None:
         settings.source_directory = Path(source_directory)
@@ -92,38 +109,3 @@ def python_settings(
         settings.tests_directory = Path(tests_directory)
 
     return settings
-
-
-class EnvironmentAwareDispatchTask(Task):
-    """Base class for tasks that run a subcommand. The command ensures that the command is aware of the
-    environment configured in the project settings."""
-
-    def __init__(self, name: str, project: Project) -> None:
-        super().__init__(name, project)
-        self.settings = python_settings(project)
-
-    def get_relationships(self) -> Iterable[TaskRelationship]:
-        # If a pythonInstall task exists, we may need it.
-        install_task = self.project.tasks().get("pythonInstall")
-        if install_task:
-            yield TaskRelationship(install_task, True, False)
-        yield from super().get_relationships()
-
-    @abc.abstractmethod
-    def get_execute_command(self) -> list[str] | TaskResult:
-        pass
-
-    def handle_exit_code(self, code: int) -> TaskResult:
-        return TaskResult.from_exit_code(code)
-
-    def execute(self) -> TaskResult:
-        settings = python_settings(self.project)
-        command = self.get_execute_command()
-        if isinstance(command, TaskResult):
-            return command
-        env = os.environ.copy()
-        if settings.environment_handler:
-            settings.environment_handler.activate(env)
-        logger.info("%s", command)
-        result = sp.call(command, cwd=self.project.directory, env=env)
-        return self.handle_exit_code(result)

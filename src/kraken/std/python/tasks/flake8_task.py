@@ -5,7 +5,7 @@ from typing import Any
 
 from kraken.core import Project, Property, TaskResult
 
-from ..settings import EnvironmentAwareDispatchTask
+from .base_task import EnvironmentAwareDispatchTask
 
 
 class Flake8Task(EnvironmentAwareDispatchTask):

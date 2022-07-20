@@ -6,7 +6,7 @@ from typing import Any, Union
 
 from kraken.core import Project, Property, TaskResult
 
-from ..settings import EnvironmentAwareDispatchTask
+from .base_task import EnvironmentAwareDispatchTask
 
 
 class BlackTask(EnvironmentAwareDispatchTask):

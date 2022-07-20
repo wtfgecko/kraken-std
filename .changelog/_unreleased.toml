@@ -1,0 +1,5 @@
+[[entries]]
+id = "403d8b1b-c6ec-4c84-8aed-11e3cf5b2f92"
+type = "improvement"
+description = "Refactor Python task, add tasks for build and publish and the ability to register package indices that will be used for publishing (and should also be used for installing but we dont do that yet)"
+author = "@NiklasRosenstein"
