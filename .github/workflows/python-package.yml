@@ -37,7 +37,7 @@ jobs:
         echo "::add-mask::${{ env.CLOUDSMITH_API_KEY }}"
         echo "::add-mask::${{ env.ARTIFACTORY_PASSWORD }}"
 
-    - run: slap test pytest-ete
+    - run: kraken run test publish
 
   update-changelog:
     runs-on: ubuntu-latest
