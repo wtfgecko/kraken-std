@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Iterator
 
 import pytest
-from flaky import flaky
+from flaky import flaky  # type: ignore[import]
 from kraken.core.testing import kraken_ctx, kraken_project
 from kraken.core.utils import not_none
 
