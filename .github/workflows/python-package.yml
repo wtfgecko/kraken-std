@@ -16,7 +16,7 @@ jobs:
       with: { fetch-depth: 0 }
     - uses: actions/setup-python@v2
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: pip install pipx && pipx install kraken-cli
+    - run: pip install pipx && pipx install kraken-cli && pipx install slap-cli
 
     # Make sure we have Docker available for the ete-tests.
     - uses: docker/setup-buildx-action@v2
@@ -38,7 +38,7 @@ jobs:
         echo "::add-mask::${{ env.CLOUDSMITH_API_KEY }}"
         echo "::add-mask::${{ env.ARTIFACTORY_PASSWORD }}"
 
-    - run: kraken run test
+    - run: kraken run test -v
 
   publish:
     runs-on: ubuntu-latest
@@ -48,7 +48,7 @@ jobs:
     - uses: actions/setup-python@v2
       with: { python-version: "${{ matrix.python-version }}" }
     - run: pip install pipx && pipx install kraken-cli
-    - run: kraken publish
+    - run: kraken publish -v
 
   update-changelog:
     runs-on: ubuntu-latest
@@ -65,6 +65,13 @@ jobs:
     - run: slap venv -ac && slap install --extras docs
     - run: slap run docs:build
     - uses: actions/upload-artifact@v2
+      with: { name: docs, path: docs/_site }
+
+  docs-publish:
+    needs: [ test, docs ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/download-artifact@v2
       with: { name: docs, path: docs/_site }
     - uses: Cecilapp/GitHub-Pages-deploy@v3
       env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
