@@ -43,10 +43,11 @@ class GitVersion:
     minor: int
     patch: int
     distance: CommitDistance | None
+    dirty: bool
 
     @staticmethod
     def parse(value: str) -> GitVersion:
-        GIT_VERSION_REGEX = r"^(\d+)\.(\d+)\.(\d+)(?:-(\d+)-g(\w+))?$"
+        GIT_VERSION_REGEX = r"^(\d+)\.(\d+)\.(\d+)(?:-(\d+)-g(\w+))?(-dirty)?$"
         match = re.match(GIT_VERSION_REGEX, value)
         if not match:
             raise ValueError(f"not a valid GitVersion: {value!r}")
@@ -59,4 +60,5 @@ class GitVersion:
             minor=int(match.group(2)),
             patch=int(match.group(3)),
             distance=distance,
+            dirty=match.group(6) is not None,
         )

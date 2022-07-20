@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import final
+
 from ..git import GitVersion
 
 
@@ -14,6 +16,10 @@ def git_version_to_python(value: str | GitVersion, include_sha: bool) -> str:
     final_version = f"{version.major}.{version.minor}.{version.patch}"
     if version.distance:
         final_version += f".dev{version.distance.value}"
-    if version.distance and include_sha:
-        final_version += f"+g{version.distance.sha}"
+        if include_sha:
+            final_version += f"+g{version.distance.sha}"
+            if version.dirty:
+                final_version += "-dirty"
+        elif version.dirty:
+            final_version += "+dirty"
     return final_version
