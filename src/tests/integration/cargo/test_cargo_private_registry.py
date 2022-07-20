@@ -33,7 +33,7 @@ import unittest.mock
 import urllib.parse
 import uuid
 from pathlib import Path
-from typing import Iterator
+from typing import Any, Iterator
 
 import pytest
 from flaky import flaky  # type: ignore[import]
@@ -43,6 +43,12 @@ from kraken.core.utils import not_none
 from kraken.std.cargo import CargoBuildTask, CargoPublishTask, cargo_settings
 
 logger = logging.getLogger(__name__)
+
+
+def _pause_between_retries(*args: Any) -> bool:
+    """Used as a rerun filter for :func:`flaky`."""
+    time.sleep(20)
+    return True
 
 
 @dataclasses.dataclass
@@ -179,7 +185,7 @@ def test__artifactory_cargo_publish_and_consume() -> None:
 
 
 @pytest.mark.skipif(CLOUDSMITH_VAR not in os.environ, reason=f"{CLOUDSMITH_VAR} is not set")
-@flaky  # type: ignore[misc]
+@flaky(max_runs=3, rerun_filter=_pause_between_retries)  # type: ignore[misc]
 def test__cloudsmith_cargo_publish_and_consume() -> None:
     credentials = json.loads(os.environ[CLOUDSMITH_VAR])
     with create_cargo_repository_in_cloudsmith(credentials) as repository:
