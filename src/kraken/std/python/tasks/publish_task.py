@@ -13,14 +13,14 @@ from ..settings import python_settings
 class PublishTask(Task):
     """Publishes Python distributions to one or more indexes using :mod:`twine`."""
 
-    index_url: Property[str]
+    index_upload_url: Property[str]
     index_credentials: Property[Optional[Tuple[str, str]]] = Property.config(default=None)
     distributions: Property[List[Path]]
 
     def execute(self) -> TaskResult:
         credentials = self.index_credentials.get()
         settings = TwineSettings(
-            repository_url=self.index_url.get(),
+            repository_url=self.index_upload_url.get(),
             username=credentials[0] if credentials else None,
             password=credentials[1] if credentials else None,
         )
@@ -50,7 +50,7 @@ def publish(
         PublishTask,
         default=default,
         group=group,
-        index_url=index.url,
+        index_upload_url=index.upload_url,
         index_credentials=index.credentials,
         distributions=distributions,
     )

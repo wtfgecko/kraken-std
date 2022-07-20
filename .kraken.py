@@ -32,13 +32,13 @@ build_task = build()
 settings = python_settings()
 settings.add_package_index(
     "pypi",
-    "https://pypi.org",
-    (os.environ["PYPI_USER"], os.environ["PYPI_PASSWORD"]) if "PYPI_USER" in os.environ else None,
+    credentials=(os.environ["PYPI_USER"], os.environ["PYPI_PASSWORD"]) if "PYPI_USER" in os.environ else None,
 )
 settings.add_package_index(
     "testpypi",
-    "https://test.pypi.org",
-    (os.environ["TESTPYPI_USER"], os.environ["TESTPYPI_PASSWORD"]) if "TESTPYPI_USER" in os.environ else None,
+    credentials=(os.environ["TESTPYPI_USER"], os.environ["TESTPYPI_PASSWORD"])
+    if "TESTPYPI_USER" in os.environ
+    else None,
 )
 
 publish_repo: str | None = None

@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class PythonIndex:
-    url: str
+    alias: str
+    index_url: str
+    upload_url: str | None
     credentials: tuple[str, str] | None
     is_package_source: bool
 
@@ -50,20 +52,42 @@ class PythonSettings:
     def add_package_index(
         self,
         alias: str,
-        url: str,
-        credentials: tuple[str, str] | None,
+        *,
+        index_url: str | None = None,
+        upload_url: str | None = None,
+        credentials: tuple[str, str] | None = None,
         is_package_source: bool = True,
     ) -> None:
         """Adds an index to consume Python packages from or publish packages to.
 
         :param alias: An alias for the package index.
-        :param url: The URL of the package index (without the trailing `/simple` bit).
+        :param index_url: The URL of the package index (with the trailing `/simple` bit if applicable).
+            If not specified, *alias* must be a known package index (`pypi` or `testpypi`).
+        :param upload_url: If the upload url deviates from the registry URL. Otherwise, the upload URL will
+            be the same as the *url*,
         :param credentials: Optional credentials to read from the index.
         :param is_package_source: If set to `False`, the index will not be used to source packages from, but
             can be used to publish to.
         """
 
-        self.package_indexes[alias] = PythonIndex(url, credentials, is_package_source)
+        if index_url is None:
+            if alias == "pypi":
+                index_url = "https://pypi.org/simple"
+            elif alias == "testpypi":
+                index_url = "https://test.pypi.org/simple"
+            else:
+                raise ValueError(f"cannot derive index URL for alias {alias!r}")
+        if upload_url is None:
+            if alias == "pypi":
+                upload_url = "https://upload.pypi.org/legacy"
+            elif alias == "testpypi":
+                upload_url = "https://test.pypi.org/legacy"
+            elif index_url.endswith("/simple"):
+                upload_url = index_url[: -len("/simple")]
+            else:
+                raise ValueError(f"cannot derive upload URL for alias {alias!r} and index URL {index_url!r}")
+
+        self.package_indexes[alias] = PythonIndex(alias, index_url, upload_url, credentials, is_package_source)
 
 
 def python_settings(
