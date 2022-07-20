@@ -50,6 +50,16 @@ else:
     as_version = None
 
 build_task = python.build(as_version=as_version)
-testpypi = python.publish(name="publishToTestPypi", package_index="testpypi", distributions=build_task.output_files)
+testpypi = python.publish(
+    name="publishToTestPypi",
+    package_index="testpypi",
+    distributions=build_task.output_files,
+    skip_existing=True,
+)
 if is_release:
-    python.publish(name="publishToPypi", package_index="pypi", distributions=build_task.output_files, after=[testpypi])
+    python.publish(
+        name="publishToPypi",
+        package_index="pypi",
+        distributions=build_task.output_files,
+        after=[testpypi],
+    )

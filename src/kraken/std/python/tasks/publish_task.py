@@ -16,6 +16,7 @@ class PublishTask(Task):
     index_upload_url: Property[str]
     index_credentials: Property[Optional[Tuple[str, str]]] = Property.config(default=None)
     distributions: Property[List[Path]]
+    skip_existing: Property[bool] = Property.config(default=False)
     dependencies: List[Task]
 
     def __init__(self, name: str, project: Project) -> None:
@@ -32,6 +33,7 @@ class PublishTask(Task):
             repository_url=self.index_upload_url.get().rstrip("/") + "/",
             username=credentials[0] if credentials else None,
             password=credentials[1] if credentials else None,
+            skip_existing=self.skip_existing.get(),
         )
         twine_upload(settings, list(map(str, self.distributions.get())))
         return TaskResult.SUCCEEDED
@@ -41,6 +43,7 @@ def publish(
     *,
     package_index: str,
     distributions: list[Path] | Property[List[Path]],
+    skip_existing: bool = False,
     name: str = "publishPython",
     group: str | None = "publish",
     default: bool = False,
@@ -63,6 +66,7 @@ def publish(
         index_upload_url=index.upload_url,
         index_credentials=index.credentials,
         distributions=distributions,
+        skip_existing=skip_existing,
     )
     task.dependencies += after or []
     return task
