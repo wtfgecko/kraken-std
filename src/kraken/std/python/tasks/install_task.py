@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Union, cast
+from typing import Optional, Union, cast
 
 from kraken.core import Project, Property, Supplier, Task, TaskResult
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class InstallTask(Task):
-    build_system: Property[PythonBuildSystem | None]
+    build_system: Property[Optional[PythonBuildSystem]]
 
     def is_skippable(self) -> bool:
         build_system = self.build_system.get()

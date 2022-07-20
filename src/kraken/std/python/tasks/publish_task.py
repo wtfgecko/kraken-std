@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Optional
 
 from kraken.core import Project, Property, Task, TaskResult
 from twine.commands.upload import upload as twine_upload
@@ -13,7 +14,7 @@ class PublishTask(Task):
     """Publishes Python distributions to one or more indexes using :mod:`twine`."""
 
     index_url: Property[str]
-    index_credentials: Property[tuple[str, str] | None] = Property.config(default=None)
+    index_credentials: Property[Optional[tuple[str, str]]] = Property.config(default=None)
     distributions: Property[list[Path]]
 
     def execute(self) -> TaskResult:
