@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from kraken.core import Project, Property, Task, TaskResult
 from twine.commands.upload import upload as twine_upload

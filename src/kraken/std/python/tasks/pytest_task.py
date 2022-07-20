@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, List
 
 from kraken.core import Project, Property, TaskResult
 from kraken.core.utils import flatten
