@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Iterable, List, Optional, Tuple
 
-from kraken.core import Project, Property, Task, TaskResult
+from kraken.core import Project, Property, Task, TaskRelationship, TaskResult
 from twine.commands.upload import upload as twine_upload
 from twine.settings import Settings as TwineSettings
 
@@ -16,6 +16,15 @@ class PublishTask(Task):
     index_upload_url: Property[str]
     index_credentials: Property[Optional[Tuple[str, str]]] = Property.config(default=None)
     distributions: Property[List[Path]]
+    dependencies: list[Task]
+
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        self.dependencies = []
+
+    def get_relationships(self) -> Iterable[TaskRelationship]:
+        yield from (TaskRelationship(task, True, False) for task in self.dependencies)
+        yield from super().get_relationships()
 
     def execute(self) -> TaskResult:
         credentials = self.index_credentials.get()
@@ -36,6 +45,7 @@ def publish(
     group: str | None = "publish",
     default: bool = False,
     project: Project | None = None,
+    after: list[Task] | None = None,
 ) -> PublishTask:
     """Create a publish task for the specified registry."""
 
@@ -45,7 +55,7 @@ def publish(
         raise ValueError(f"package index {package_index!r} is not defined")
 
     index = settings.package_indexes[package_index]
-    return project.do(
+    task = project.do(
         name,
         PublishTask,
         default=default,
@@ -54,3 +64,5 @@ def publish(
         index_credentials=index.credentials,
         distributions=distributions,
     )
+    task.dependencies += after or []
+    return task
