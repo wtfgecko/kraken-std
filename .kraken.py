@@ -20,6 +20,8 @@ from kraken.std.python import (
     python_settings,
 )
 
+python_project(template="kraken", build_system="slap")
+
 black()
 flake8()
 isort()
@@ -49,7 +51,7 @@ if "CI" in os.environ:
         #       is consistent (ie. run `slap release --validate <tag>`).
     elif os.environ["GITHUB_REF_TYPE"] == "branch" and os.environ["GITHUB_REF_NAME"] == "develop":
         publish_repo = "testpypi"
-        as_version = git_version_to_python(git_describe(project.directory), True)
+        as_version = git_version_to_python(git_describe(project.directory), False)
     else:
         raise EnvironmentError(
             f"GITHUB_REF_TYPE={os.environ['GITHUB_REF_TYPE']}, GITHUB_REF_NAME={os.environ['GITHUB_REF_NAME']}"
