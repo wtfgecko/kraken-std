@@ -565,7 +565,7 @@
         <span class="n">source_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">tests_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PythonSettings</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L69">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L93">[view_source]</a></p>
 <p>Read the Python settings for the given or current project and optionally update attributes.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
@@ -579,14 +579,14 @@
 <div class="highlight"><pre><span></span><code><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span> <span class="nc">PythonSettings</span><span class="p">()</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L22">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L24">[view_source]</a></p>
 <p>Project-global settings for Python tasks.</p>
 <p><a id="kraken.std.python.settings.PythonSettings.get_tests_directory"></a></p>
 <p><a id="pydoc:kraken.std.python.settings.PythonSettings.get_tests_directory"></a></p>
 <h4 id="get_tests_directory">get_tests_directory</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_tests_directory</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L31">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L33">[view_source]</a></p>
 <p>Returns :attr:<code>tests_directory</code> if it is set. If not, it will look for the following directories and
 return the first that exists: <code>test/</code>, <code>tests/</code>, <code>src/test/</code>, <code>src/tests/</code>. The determined path will be
 relative to the project directory.</p>
@@ -595,23 +595,28 @@ relative to the project directory.</p>
 <h4 id="get_tests_directory_as_args">get_tests_directory_as_args</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_tests_directory_as_args</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L43">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L45">[view_source]</a></p>
 <p>Returns a list with a single item that is the test directory, or an empty list. This is convenient
 when constructing command-line arguments where you want to pass the test directory if it exists.</p>
 <p><a id="kraken.std.python.settings.PythonSettings.add_package_index"></a></p>
 <p><a id="pydoc:kraken.std.python.settings.PythonSettings.add_package_index"></a></p>
 <h4 id="add_package_index">add_package_index</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">add_package_index</span><span class="p">(</span><span class="n">alias</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                      <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                      <span class="n">credentials</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="o">*</span><span class="p">,</span>
+                      <span class="n">index_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">upload_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">credentials</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">is_package_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L50">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L52">[view_source]</a></p>
 <p>Adds an index to consume Python packages from or publish packages to.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
 <li><code>alias</code>: An alias for the package index.</li>
-<li><code>url</code>: The URL of the package index (without the trailing <code>/simple</code> bit).</li>
+<li><code>index_url</code>: The URL of the package index (with the trailing <code>/simple</code> bit if applicable).
+If not specified, <em>alias</em> must be a known package index (<code>pypi</code> or <code>testpypi</code>).</li>
+<li><code>upload_url</code>: If the upload url deviates from the registry URL. Otherwise, the upload URL will
+be the same as the <em>url</em>,</li>
 <li><code>credentials</code>: Optional credentials to read from the index.</li>
 <li><code>is_package_source</code>: If set to <code>False</code>, the index will not be used to source packages from, but
 can be used to publish to.</li>
