@@ -47,7 +47,7 @@ if "CI" in os.environ:
         publish_repo = "pypi"
         as_version = os.environ["GITHUB_REF_NAME"]
         publish(package_index=publish_repo, distributions=build_task.output_files)
-    elif os.environ["GITHUB_REF_TYPE"] == "develop" and os.environ["GITHUB_REF_NAME"] == "develop":
+    elif os.environ["GITHUB_REF_TYPE"] == "branch" and os.environ["GITHUB_REF_NAME"] == "develop":
         publish_repo = "testpypi"
         as_version = git_version_to_python(git_describe(project.directory), True)
         publish(package_index=publish_repo, distributions=build_task.output_files)

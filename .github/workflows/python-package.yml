@@ -37,7 +37,17 @@ jobs:
         echo "::add-mask::${{ env.CLOUDSMITH_API_KEY }}"
         echo "::add-mask::${{ env.ARTIFACTORY_PASSWORD }}"
 
-    - run: kraken run test publish
+    - run: kraken run test
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [ "test" ]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with: { python-version: "${{ matrix.python-version }}" }
+    - run: pip install pipx && pipx install kraken-cli
+    - run: kraken publish
 
   update-changelog:
     runs-on: ubuntu-latest
