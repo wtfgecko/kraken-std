@@ -20,7 +20,7 @@ class PublishTask(Task):
     def execute(self) -> TaskResult:
         credentials = self.index_credentials.get()
         settings = TwineSettings(
-            repository_url=self.index_upload_url.get(),
+            repository_url=self.index_upload_url.get().rstrip("/") + "/",
             username=credentials[0] if credentials else None,
             password=credentials[1] if credentials else None,
         )
