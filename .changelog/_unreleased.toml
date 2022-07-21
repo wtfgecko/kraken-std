@@ -15,3 +15,9 @@ id = "f9ae793e-ffc2-40aa-a7d4-12e2c2b772c1"
 type = "feature"
 description = "add `--log-cli-level` by default when running Pytest and take `PYTEST_FLAGS` into account"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "9182784b-8f03-43dd-bd6c-cd2fbab3cd66"
+type = "tests"
+description = "add integration tests for linting and publishing Poetry and Slap Python projects"
+author = "@NiklasRosenstein"

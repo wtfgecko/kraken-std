@@ -14,7 +14,11 @@ python.flake8()
 python.isort(additional_files=[__file__])
 python.mypy()
 python.pytest(ignore_dirs=["src/tests/integration"])
-python.pytest(name="pytestIntegration", tests_dir="src/tests/integration")
+python.pytest(
+    name="pytestIntegration",
+    tests_dir="src/tests/integration",
+    ignore_dirs=["src/tests/integration/python/data"],
+)
 python.install()
 
 (
