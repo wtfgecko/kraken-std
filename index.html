@@ -216,9 +216,53 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Welcome to the `kraken-std` documentation!
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="." class="md-nav__link md-nav__link--active">
         Welcome to the `kraken-std` documentation!
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    Development
+  </a>
+  
+    <nav class="md-nav" aria-label="Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integration-testing" class="md-nav__link">
+    Integration testing
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -319,6 +363,34 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    Development
+  </a>
+  
+    <nav class="md-nav" aria-label="Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integration-testing" class="md-nav__link">
+    Integration testing
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -339,6 +411,24 @@
 <p><a href="https://github.com/kraken-build/kraken-std/actions/workflows/python-package.yml"><img alt="Python application" src="https://github.com/kraken-build/kraken-std/actions/workflows/python-package.yml/badge.svg" /></a>
 <a href="https://badge.fury.io/py/kraken-std"><img alt="PyPI version" src="https://badge.fury.io/py/kraken-std.svg" /></a></p>
 <p>The Kraken standard library.</p>
+<hr />
+<h2 id="development">Development</h2>
+<h3 id="integration-testing">Integration testing</h3>
+<p>Integration tests are located in <code>src/tests/integration</code>. The following tools need to be available to run the
+integration tests:</p>
+<ul>
+<li>Cargo (to test Cargo building and publishing) <em>The Cargo integration tests run against Artifactory and Cloudsmith
+and requires credentials to temporarily create a new Cargo repository (available in CI).</em></li>
+<li>Docker (used to setup services that we run integration tests against)</li>
+<li>Helm (to test Helm packaging and publishing)</li>
+<li>Poetry (to test Python publishing and installing)</li>
+<li><a href="https://github.com/python-slap/slap-cli">Slap</a> (to test Python publishing and installing)</li>
+</ul>
+<p><strong>Test a single integration test</strong></p>
+<div class="highlight"><pre><span></span><code>```
+PYTEST_FLAGS=&quot;--log-cli-level DEBUG -s -k &lt;test_filter&gt;&quot; kraken run pytestIntegration -v
+```
+</code></pre></div>
 
               
             </article>

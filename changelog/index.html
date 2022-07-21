@@ -634,6 +634,15 @@ add `--log-cli-level` by default when running Pytest and take `PYTEST_FLAGS` int
   <tr><td>Tests</td><td>
 
 add integration tests for linting and publishing Poetry and Slap Python projects</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Fix</td><td>
+
+update `PoetryPythonBuildSystem` to ignore the current virtual environment to ensure we get the path of the Poetry managed environment</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Fix</td><td>
+
+`PoetryPythonBuildSystem` now injects package indexes and credentials into `pyproject.toml` and `poetry.toml` temporarily</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Fix</td><td>
+
+Pass index URL and credentials to `slap install` command</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
 </table>
 
 <h2 id="0119-2022-07-20">0.1.19 (2022-07-20)</h2>

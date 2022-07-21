@@ -316,6 +316,40 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#build-systems" class="md-nav__link">
+    Build systems
+  </a>
+  
+    <nav class="md-nav" aria-label="Build systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#poetry" class="md-nav__link">
+    Poetry
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slap" class="md-nav__link">
+    Slap
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publishing" class="md-nav__link">
+    Publishing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api-documentation" class="md-nav__link">
     API Documentation
   </a>
@@ -439,6 +473,40 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#build-systems" class="md-nav__link">
+    Build systems
+  </a>
+  
+    <nav class="md-nav" aria-label="Build systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#poetry" class="md-nav__link">
+    Poetry
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slap" class="md-nav__link">
+    Slap
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publishing" class="md-nav__link">
+    Publishing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api-documentation" class="md-nav__link">
     API Documentation
   </a>
@@ -555,6 +623,32 @@
 <li>Mypy</li>
 <li>Pytest</li>
 </ul>
+<p><strong>Supported build systems (for installing/building)</strong></p>
+<ul>
+<li>Poetry</li>
+<li>Slap</li>
+</ul>
+<h2 id="build-systems">Build systems</h2>
+<p>A build system that is supported by Kraken is needed to use the {@link pydoc:kraken.std.python.tasks.build_task.BuildTask}.
+Most build systems will support managed Python environments for the current Python project (e.g. <code>poetry install</code> will
+create a virtual environment and install the project into it).</p>
+<p>Build systems implemented for Kraken will take care of the installation, ensuring that the Python package indexes
+registered in the build script are made available to the installation process.</p>
+<h3 id="poetry">Poetry</h3>
+<ul>
+<li><strong>Package index credentials</strong>: The installation process injects package index configurations into <code>poetry.toml</code> and
+<code>pyproject.toml</code></li>
+<li>[TODO] Should we permanently inject the config into <code>pyproject.toml</code> and keep it in sync with a task?</li>
+</ul>
+<h3 id="slap">Slap</h3>
+<ul>
+<li><strong>Package index credentials</strong>: [TODO] The installation processs passes the extra index URLs to <code>slap install</code> using the
+<code>--package-index</code> option.</li>
+<li>[TODO] Should we add an option to permanently add a package index to the Slap configuration and then keep it in
+    sync with a task?</li>
+</ul>
+<h2 id="publishing">Publishing</h2>
+<p>Independent of the Python build system used, Kraken will use <a href="https://twine.readthedocs.io/en/stable/">Twine</a> to publish to a Package index.</p>
 <h2 id="api-documentation">API Documentation</h2>
 <p><a id="kraken.std.python.settings.python_settings"></a></p>
 <p><a id="pydoc:kraken.std.python.settings.python_settings"></a></p>
