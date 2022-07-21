@@ -5,6 +5,10 @@ from __future__ import annotations
 
 import abc
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..settings import PythonSettings
 
 
 class PythonBuildSystem(abc.ABC):
@@ -46,7 +50,7 @@ class ManagedEnvironment(abc.ABC):
         """
 
     @abc.abstractmethod
-    def install(self) -> None:
+    def install(self, settings: PythonSettings) -> None:
         """Install the managed environment. This should be a no-op if the environment already exists."""
 
 

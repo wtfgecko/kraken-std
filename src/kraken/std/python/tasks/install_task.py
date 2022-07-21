@@ -33,7 +33,7 @@ class InstallTask(Task):
             logger.error("no build system configured")
             return TaskResult.FAILED
         managed_environment = build_system.get_managed_environment()
-        managed_environment.install()
+        managed_environment.install(python_settings(self.project))
         return TaskResult.SUCCEEDED
 
 

@@ -27,3 +27,9 @@ id = "5976bef8-278a-4d00-b27c-5d5a9937ba64"
 type = "fix"
 description = "update `PoetryPythonBuildSystem` to ignore the current virtual environment to ensure we get the path of the Poetry managed environment"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "e0108498-391f-4083-ad81-749691abc2f1"
+type = "fix"
+description = "`PoetryPythonBuildSystem` now injects package indexes and credentials into `pyproject.toml` and `poetry.toml` temporarily"
+author = "@NiklasRosenstein"

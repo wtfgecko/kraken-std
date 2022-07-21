@@ -21,3 +21,8 @@ and requires credentials to temporarily create a new Cargo repository (available
 * Poetry (to test Python publishing and installing)
 * [Slap](https://github.com/python-slap/slap-cli) (to test Python publishing and installing)
 
+__Test a single integration test__
+
+    ```
+    PYTEST_FLAGS="--log-cli-level DEBUG -s -k <test_filter>" kraken run pytestIntegration -v
+    ```

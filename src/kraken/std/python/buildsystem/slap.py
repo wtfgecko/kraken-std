@@ -7,10 +7,14 @@ import shutil
 import subprocess as sp
 import tempfile
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from kraken.core.utils import NotSet
 
 from . import ManagedEnvironment, PythonBuildSystem
+
+if TYPE_CHECKING:
+    from ..settings import PythonSettings
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +74,7 @@ class SlapManagedEnvironment(ManagedEnvironment):
             raise RuntimeError("managed environment does not exist")
         return self._env_path
 
-    def install(self) -> None:
+    def install(self, settings: PythonSettings) -> None:
         # Ensure that an environment exists.
         command = ["slap", "venv", "-ac"]
         logger.info("%s", command)

@@ -2,14 +2,19 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import os
 import shutil
 import subprocess as sp
 from pathlib import Path
 
-from kraken.core.utils import NotSet, is_relative_to
+import tomli
+import tomli_w
+from kraken.core.utils import NotSet, atomic_file_swap, is_relative_to
 from nr.python.environment.virtualenv import get_current_venv
+
+from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
 
@@ -93,7 +98,41 @@ class PoetryManagedEnvironment(ManagedEnvironment):
             raise RuntimeError("managed environment does not exist")
         return self._env_path
 
-    def install(self) -> None:
-        command = ["poetry", "install"]
-        logger.info("%s", command)
-        sp.check_call(command, cwd=self.project_directory)
+    def install(self, settings: PythonSettings) -> None:
+
+        # Ensure that `poetry.toml` is up to date with the credentials.
+        poetry_toml = self.project_directory / "poetry.toml"
+        poetry_conf = tomli.loads(poetry_toml.read_text()) if poetry_toml.exists() else {}
+
+        # Ensure that the source is configured in `pyproject.toml`.
+        # TODO (@NiklasRosenstein): Maybe we should permanently sync the source configuration into the
+        #       pyproject.toml instead of just temporarily?
+        pyproject_toml = self.project_directory / "pyproject.toml"
+        pyproject_conf = tomli.loads(pyproject_toml.read_text())
+
+        for index in settings.package_indexes.values():
+            if index.is_package_source and index.credentials:
+                poetry_conf.setdefault("http-basic", {})[index.alias] = {
+                    "username": index.credentials[0],
+                    "password": index.credentials[1],
+                }
+                pyproject_conf.setdefault("tool", {}).setdefault("poetry", {}).setdefault("source", []).append(
+                    {
+                        "name": index.alias,
+                        "url": index.index_url,
+                        "secondary": True,
+                    }
+                )
+
+        with contextlib.ExitStack() as exit_stack:
+            fp = exit_stack.enter_context(atomic_file_swap(poetry_toml, "wb", always_revert=True))
+            tomli_w.dump(poetry_conf, fp)
+            fp.close()
+
+            fp = exit_stack.enter_context(atomic_file_swap(pyproject_toml, "wb", always_revert=True))
+            tomli_w.dump(pyproject_conf, fp)
+            fp.close()
+
+            command = ["poetry", "install"]
+            logger.info("%s", command)
+            sp.check_call(command, cwd=self.project_directory)
