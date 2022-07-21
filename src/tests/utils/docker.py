@@ -3,7 +3,9 @@ from __future__ import annotations
 import contextlib
 import logging
 import subprocess as sp
+import time
 
+import httpx
 from kraken.core.utils import flatten
 
 logger = logging.getLogger(__name__)
@@ -18,6 +20,22 @@ class DockerServiceManager:
     def _stop_container(self, container_id: str) -> None:
         sp.call(["docker", "stop", container_id])
 
+    def _run_probe(self, probe_method: str, probe_url: str, timeout: int) -> None:
+        logger.info("Probing %s %s (timeout: %d)", probe_method, probe_url, timeout)
+        tstart = time.perf_counter()
+        while (time.perf_counter() - tstart) < timeout:
+            try:
+                request = httpx.request(probe_method, probe_url)
+            except httpx.RequestError as exc:
+                logger.debug("Ignoring error while probing (%s)", exc)
+            else:
+                if request.status_code // 100 in (2, 3):
+                    logger.info("Probe returned status code %d", request.status_code)
+                    return
+                logger.debug("Probe returned status code %d (continue probing)", request.status_code)
+            time.sleep(0.5)
+        raise TimeoutError("Probe timed out")
+
     def run(
         self,
         image: str,
@@ -29,6 +47,8 @@ class DockerServiceManager:
         env: dict[str, str] | None = None,
         entrypoint: str | None = None,
         capture_output: bool = False,
+        probe: tuple[str, str] | None = None,
+        probe_timeout: int = 60,
     ) -> bytes | None:
         command = ["docker", "run", "--rm"]
         if detach:
@@ -53,6 +73,10 @@ class DockerServiceManager:
                 logs_proc.wait()
 
             self._exit_stack.callback(_stop_logs_proc)
+
+            if probe:
+                self._run_probe(probe[0], probe[1], probe_timeout)
+
         elif capture_output:
             return sp.check_output(command)
         else:
