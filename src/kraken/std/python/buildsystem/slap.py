@@ -77,6 +77,6 @@ class SlapManagedEnvironment(ManagedEnvironment):
         sp.check_call(command, cwd=self.project_directory)
 
         # Install into the environment.
-        command = ["slap", "install", "--link"]
+        command = ["slap", "install", "--ignore-active-venv", "--link"]
         logger.info("%s", command)
         sp.check_call(command, cwd=self.project_directory)
