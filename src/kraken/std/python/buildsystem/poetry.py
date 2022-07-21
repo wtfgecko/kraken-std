@@ -8,6 +8,7 @@ import shutil
 import subprocess as sp
 from pathlib import Path
 
+from nr.python.environment.virtualenv import get_current_venv
 from kraken.core.utils import NotSet, is_relative_to
 
 from . import ManagedEnvironment, PythonBuildSystem
@@ -69,10 +70,21 @@ class PoetryManagedEnvironment(ManagedEnvironment):
     def get_path(self) -> Path:
         if self._env_path is NotSet.Value:
             command = ["poetry", "env", "info", "-p"]
-            env = os.environ.copy()
-            env.pop("VIRTUAL_ENV", None)  # Poetry would otherwise assume the active virtual env.
+            environ = os.environ.copy()
+            # Poetry would otherwise assume the active virtual env.
+            venv = get_current_venv(environ)
+            if venv:
+                venv.deactivate(environ)
             try:
-                self._env_path = Path(sp.check_output(command, cwd=self.project_directory).decode().strip())
+                self._env_path = Path(
+                    sp.check_output(
+                        command,
+                        cwd=self.project_directory,
+                        env=environ,
+                    )
+                    .decode()
+                    .strip()
+                )
             except sp.CalledProcessError as exc:
                 if exc.returncode != 1:
                     raise
