@@ -33,3 +33,9 @@ id = "e0108498-391f-4083-ad81-749691abc2f1"
 type = "fix"
 description = "`PoetryPythonBuildSystem` now injects package indexes and credentials into `pyproject.toml` and `poetry.toml` temporarily"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "5d4564de-dbce-4143-922d-a433c6940297"
+type = "fix"
+description = "Pass index URL and credentials to `slap install` command"
+author = "@NiklasRosenstein"
