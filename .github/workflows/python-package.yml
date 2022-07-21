@@ -3,6 +3,7 @@ name: Python application
 on:
   push: { branches: [ develop ], tags: [ "*" ] }
   pull_request: { branches: [ develop ] }
+  workflow_dispatch: {}
 
 jobs:
   test:
