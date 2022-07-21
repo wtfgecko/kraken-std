@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import shlex
 from pathlib import Path
 from typing import Any, List
 
@@ -27,6 +29,8 @@ class PytestTask(EnvironmentAwareDispatchTask):
             return TaskResult.FAILED
         command = ["pytest", "-vv", str(self.project.directory / tests_dir)]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
+        command += ["--log-cli-level", "INFO"]
+        command += shlex.split(os.getenv("PYTEST_FLAGS", ""))
         return command
 
     def handle_exit_code(self, code: int) -> TaskResult:

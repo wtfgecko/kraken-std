@@ -9,3 +9,9 @@ id = "b8065b60-4e51-43b8-8751-c690c92f42b7"
 type = "fix"
 description = "add `--non-interactive` to Twine upload"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "f9ae793e-ffc2-40aa-a7d4-12e2c2b772c1"
+type = "feature"
+description = "add `--log-cli-level` by default when running Pytest and take `PYTEST_FLAGS` into account"
+author = "@NiklasRosenstein"
