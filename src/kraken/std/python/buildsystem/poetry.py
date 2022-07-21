@@ -8,8 +8,8 @@ import shutil
 import subprocess as sp
 from pathlib import Path
 
-from nr.python.environment.virtualenv import get_current_venv
 from kraken.core.utils import NotSet, is_relative_to
+from nr.python.environment.virtualenv import get_current_venv
 
 from . import ManagedEnvironment, PythonBuildSystem
 

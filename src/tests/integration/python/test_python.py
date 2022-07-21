@@ -63,7 +63,7 @@ def test__python_project_install_lint_and_publish(
     tempdir: Path,
     pypiserver: str,
 ) -> None:
-    consumer_dir = project_dir + '-consumer'
+    consumer_dir = project_dir + "-consumer"
 
     # Copy the projects to the temporary directory.
     shutil.copytree(Path(__file__).parent / "data" / project_dir, tempdir / project_dir)
