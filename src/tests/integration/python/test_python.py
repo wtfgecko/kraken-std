@@ -1,8 +1,6 @@
 import logging
 import os
 import shutil
-import subprocess as sp
-import sys
 import tempfile
 import unittest.mock
 from pathlib import Path
