@@ -29,6 +29,7 @@ class PythonSettings:
     source_directory: Path = Path("src")
     tests_directory: Path | None = None
     package_indexes: dict[str, PythonIndex] = dataclasses.field(default_factory=dict)
+    always_use_managed_env: bool = False
 
     def get_tests_directory(self) -> Path | None:
         """Returns :attr:`tests_directory` if it is set. If not, it will look for the following directories and
@@ -96,6 +97,7 @@ def python_settings(
     build_system: PythonBuildSystem | None = None,
     source_directory: str | Path | None = None,
     tests_directory: str | Path | None = None,
+    always_use_managed_env: bool | None = None,
 ) -> PythonSettings:
     """Read the Python settings for the given or current project and optionally update attributes.
 
@@ -132,5 +134,8 @@ def python_settings(
 
     if tests_directory is not None:
         settings.tests_directory = Path(tests_directory)
+
+    if always_use_managed_env is not None:
+        settings.always_use_managed_env = True
 
     return settings

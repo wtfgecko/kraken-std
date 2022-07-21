@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import shutil
 import subprocess as sp
 import tempfile
@@ -58,10 +57,6 @@ class SlapManagedEnvironment(ManagedEnvironment):
 
     def get_path(self) -> Path:
         if self._env_path is NotSet.Value:
-            # Slap assumes the currently active environment, so do we.
-            path = os.getenv("VIRTUAL_ENV")
-            if path is not None:
-                return Path(path)
             command = ["slap", "venv", "-p"]
             try:
                 self._env_path = Path(

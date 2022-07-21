@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import shutil
 import subprocess as sp
 from pathlib import Path
@@ -68,6 +69,8 @@ class PoetryManagedEnvironment(ManagedEnvironment):
     def get_path(self) -> Path:
         if self._env_path is NotSet.Value:
             command = ["poetry", "env", "info", "-p"]
+            env = os.environ.copy()
+            env.pop("VIRTUAL_ENV", None)  # Poetry would otherwise assume the active virtual env.
             try:
                 self._env_path = Path(sp.check_output(command, cwd=self.project_directory).decode().strip())
             except sp.CalledProcessError as exc:
