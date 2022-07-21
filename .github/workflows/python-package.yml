@@ -19,6 +19,9 @@ jobs:
       with: { python-version: "${{ matrix.python-version }}" }
     - run: pip install pipx && pipx install kraken-cli
 
+    # Need Poetry for integration tests.
+    - run: pipx install poetry
+
     # Make sure we have Docker available for the ete-tests.
     - uses: docker/setup-buildx-action@v2
 
