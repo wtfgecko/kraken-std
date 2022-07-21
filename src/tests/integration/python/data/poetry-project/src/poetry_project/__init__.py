@@ -1,2 +1,2 @@
 def foo() -> None:
-    pass
+    print("Hello, world from poetry-project!")

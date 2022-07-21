@@ -63,8 +63,11 @@ def test__python_project_install_lint_and_publish(
     tempdir: Path,
     pypiserver: str,
 ) -> None:
-    # Copy the project to the temporary directory.
+    consumer_dir = project_dir + '-consumer'
+
+    # Copy the projects to the temporary directory.
     shutil.copytree(Path(__file__).parent / "data" / project_dir, tempdir / project_dir)
+    shutil.copytree(Path(__file__).parent / "data" / consumer_dir, tempdir / consumer_dir)
 
     # TODO (@NiklasRosenstein): Make sure Poetry installs the environment locally so it gets cleaned up
     #       with the temporary directory.
@@ -76,12 +79,9 @@ def test__python_project_install_lint_and_publish(
     kraken_ctx.load_project(directory=tempdir / project_dir)
     kraken_ctx.execute([":lint", ":publish"])
 
-    # Make sure we can install the package with Pip now. (Package name is the same as the project dir)
-    venv_dir = tempdir / "venv"
-    logger.info("Creating virtual environment (%s)", venv_dir)
-    command = [sys.executable, "-m", "venv", str(venv_dir)]
-    sp.check_call(command)
-    logger.info("Installing package %r from local Pypiserver into virtual environment", project_dir)
-    # TODO (@NiklasRosenstein): Different path on Windows
-    command = [str(venv_dir / "bin" / "pip"), "install", "--index-url", pypiserver, project_dir]
-    sp.check_call(command)
+    # Try to run the "consumer" project.
+    logger.info("Loading and executing Kraken project (%s)", tempdir / consumer_dir)
+    Context.__init__(kraken_ctx, kraken_ctx.build_directory)
+    kraken_ctx.load_project(directory=tempdir / consumer_dir)
+    kraken_ctx.execute([":pythonInstall"])
+    # TODO (@NiklasRosenstein): Test importing the consumer project.
