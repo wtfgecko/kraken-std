@@ -3,3 +3,9 @@ id = "f8dc4c76-b79f-45c1-958e-bb2f819a2a41"
 type = "feature"
 description = "add `PythonSettings.always_use_managed_env` to ensure that Python tasks use the managed environment from the Python build system (instead of falling back to a currently active virtual environment)"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "b8065b60-4e51-43b8-8751-c690c92f42b7"
+type = "fix"
+description = "add `--non-interactive` to Twine upload"
+author = "@NiklasRosenstein"

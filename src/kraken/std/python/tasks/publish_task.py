@@ -34,6 +34,7 @@ class PublishTask(Task):
             username=credentials[0] if credentials else None,
             password=credentials[1] if credentials else None,
             skip_existing=self.skip_existing.get(),
+            non_interactive=True,
         )
         twine_upload(settings, list(map(str, self.distributions.get())))
         return TaskResult.SUCCEEDED
