@@ -133,6 +133,6 @@ class PoetryManagedEnvironment(ManagedEnvironment):
             tomli_w.dump(pyproject_conf, fp)
             fp.close()
 
-            command = ["poetry", "install"]
+            command = ["poetry", "install", "--no-interaction"]
             logger.info("%s", command)
             sp.check_call(command, cwd=self.project_directory)

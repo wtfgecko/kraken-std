@@ -1,0 +1,5 @@
+[[entries]]
+id = "e3db4ba1-6bae-4a51-830d-3ec9933e0980"
+type = "improvement"
+description = "Pass `--no-interacton` to `poetry install`"
+author = "@NiklasRosenstein"
