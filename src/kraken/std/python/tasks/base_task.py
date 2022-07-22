@@ -7,6 +7,7 @@ import subprocess as sp
 from typing import Iterable, MutableMapping
 
 from kraken.core import Project, Task, TaskRelationship, TaskResult
+from nr.python.environment.virtualenv import VirtualEnvInfo, get_current_venv
 
 from kraken.std.python.buildsystem import ManagedEnvironment
 
@@ -38,16 +39,14 @@ class EnvironmentAwareDispatchTask(Task):
         return TaskResult.from_exit_code(code)
 
     def activate_managed_environment(self, pyenv: ManagedEnvironment, envvar: MutableMapping[str, str]) -> None:
-        active_venv = envvar.get("VIRTUAL_ENV", "") or None
+        active_venv = get_current_venv(envvar)
         if active_venv is None or self.settings.always_use_managed_env:
             if not pyenv.exists():
                 logger.warning("Managed environment (%s) does not exist", pyenv)
                 return
-            env_path = pyenv.get_path()
-            logger.info("Activating managed environment (%s)", env_path)
-            bin_dir = env_path / ("Scripts" if os.name == "nt" else "bin")
-            envvar["VIRTUAL_ENV"] = str(env_path)
-            envvar["PATH"] = os.pathsep.join([str(bin_dir), envvar["PATH"]])
+            managed_env = VirtualEnvInfo(pyenv.get_path())
+            logger.info("Activating managed environment (%s)", managed_env.path)
+            managed_env.activate()
         elif active_venv:
             logger.info("An active virtual environment was found, not activating managed environment")
 
