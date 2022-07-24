@@ -7,7 +7,7 @@ from kraken.core import Project, Property, Task
 from kraken.core.utils import import_class
 
 __version__ = "0.1.0"
-__all__ = ["build", "DockerBuildTask"]
+__all__ = ["build", "DockerBuildTask", "manifest_tool"]
 
 DEFAULT_BUILD_BACKEND = "native"
 BUILD_BACKENDS = {
@@ -63,3 +63,6 @@ def build_docker_image(
 
     task_class = import_class(BUILD_BACKENDS[backend], DockerBuildTask)  # type: ignore[misc]
     return (project or Project.current()).do(name, task_class, **kwds)
+
+
+from .manifest_tool import manifest_tool  # noqa: E402
