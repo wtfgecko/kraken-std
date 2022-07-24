@@ -6,7 +6,7 @@ import os
 import subprocess as sp
 from typing import Iterable, MutableMapping
 
-from kraken.core import Project, Task, TaskRelationship, TaskResult
+from kraken.core import Project, Task, TaskRelationship, TaskStatus
 from nr.python.environment.virtualenv import VirtualEnvInfo, get_current_venv
 
 from kraken.std.python.buildsystem import ManagedEnvironment
@@ -32,27 +32,27 @@ class EnvironmentAwareDispatchTask(Task):
         yield from super().get_relationships()
 
     @abc.abstractmethod
-    def get_execute_command(self) -> list[str] | TaskResult:
+    def get_execute_command(self) -> list[str] | TaskStatus:
         pass
 
-    def handle_exit_code(self, code: int) -> TaskResult:
-        return TaskResult.from_exit_code(code)
+    def handle_exit_code(self, code: int) -> TaskStatus:
+        return TaskStatus.from_exit_code(None, code)
 
-    def activate_managed_environment(self, pyenv: ManagedEnvironment, envvar: MutableMapping[str, str]) -> None:
-        active_venv = get_current_venv(envvar)
+    def activate_managed_environment(self, venv: ManagedEnvironment, environ: MutableMapping[str, str]) -> None:
+        active_venv = get_current_venv(environ)
         if active_venv is None or self.settings.always_use_managed_env:
-            if not pyenv.exists():
-                logger.warning("Managed environment (%s) does not exist", pyenv)
+            if not venv.exists():
+                logger.warning("Managed environment (%s) does not exist", venv)
                 return
-            managed_env = VirtualEnvInfo(pyenv.get_path())
+            managed_env = VirtualEnvInfo(venv.get_path())
             logger.info("Activating managed environment (%s)", managed_env.path)
-            managed_env.activate()
+            managed_env.activate(environ)
         elif active_venv:
             logger.info("An active virtual environment was found, not activating managed environment")
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> TaskStatus:
         command = self.get_execute_command()
-        if isinstance(command, TaskResult):
+        if isinstance(command, TaskStatus):
             return command
         env = os.environ.copy()
         if self.settings.build_system and self.settings.build_system.supports_managed_environments():

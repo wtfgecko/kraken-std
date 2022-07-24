@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Callable, Union
 
-from kraken.core import Project, Property, Task, TaskResult
+from kraken.core import Project, Property, Task, TaskStatus
 
 DEFAULT_ENCODING = "utf-8"
 
@@ -26,14 +26,15 @@ class RenderFileTask(Task):
             self._content_cache = content
         return self._content_cache
 
-    def is_up_to_date(self) -> bool:
+    def prepare(self) -> TaskStatus | None:
         content = self._get_content()
-        return self.file.get().is_file() and self.file.get().read_text(self.encoding.get()) == content
+        if self.file.get().is_file() and self.file.get().read_text(self.encoding.get()) == content:
+            return TaskStatus.up_to_date("content has not changed")
+        return TaskStatus.pending()
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> None:
         content = self._get_content()
         self.file.get().parent.mkdir(exist_ok=True)
         encoded = content.encode(self.encoding.get())
         print(f"write {self.file.get()} ({len(encoded)} bytes)")
         self.file.get().write_bytes(encoded)
-        return TaskResult.SUCCEEDED

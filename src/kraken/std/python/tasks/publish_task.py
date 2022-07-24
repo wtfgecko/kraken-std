@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, List, Optional, Tuple
 
-from kraken.core import Project, Property, Task, TaskRelationship, TaskResult
+from kraken.core import Project, Property, Task, TaskRelationship
 from twine.commands.upload import upload as twine_upload
 from twine.settings import Settings as TwineSettings
 
@@ -27,7 +27,7 @@ class PublishTask(Task):
         yield from (TaskRelationship(task, True, False) for task in self.dependencies)
         yield from super().get_relationships()
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> None:
         credentials = self.index_credentials.get()
         settings = TwineSettings(
             repository_url=self.index_upload_url.get().rstrip("/") + "/",
@@ -37,7 +37,6 @@ class PublishTask(Task):
             non_interactive=True,
         )
         twine_upload(settings, list(map(str, self.distributions.get())))
-        return TaskResult.SUCCEEDED
 
 
 def publish(

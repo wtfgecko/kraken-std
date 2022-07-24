@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from kraken.core import Project, Property, Supplier, Task, TaskResult
+from kraken.core import Project, Property, Supplier, Task, TaskStatus
 
 from ..buildsystem import PythonBuildSystem
 from ..settings import python_settings
@@ -18,15 +18,14 @@ class BuildTask(Task):
     as_version: Property[Optional[str]] = Property.config(default=None)
     output_files: Property[List[Path]] = Property.output()
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> TaskStatus:
         build_system = self.build_system.get()
         if not build_system:
-            logger.error("no build system configured")
-            return TaskResult.FAILED
+            return TaskStatus.failed("no build system configured")
         output_directory = self.output_directory.get_or(self.project.build_directory / "python-dist")
         output_directory.mkdir(exist_ok=True, parents=True)
         self.output_files.set(build_system.build(output_directory, self.as_version.get()))
-        return TaskResult.SUCCEEDED
+        return TaskStatus.succeeded()
 
 
 def build(

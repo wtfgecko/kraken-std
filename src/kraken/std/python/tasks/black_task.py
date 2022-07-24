@@ -4,7 +4,7 @@ import dataclasses
 from pathlib import Path
 from typing import Any, List, Union
 
-from kraken.core import Project, Property, TaskResult
+from kraken.core import Project, Property
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -18,7 +18,7 @@ class BlackTask(EnvironmentAwareDispatchTask):
     additional_args: Property[List[str]] = Property.config(default_factory=list)
     additional_files: Property[List[Path]] = Property.config(default_factory=list)
 
-    def get_execute_command(self) -> list[str] | TaskResult:
+    def get_execute_command(self) -> list[str]:
         command = ["black"] + list(map(str, self.source_directories.get()))
         command += self.settings.get_tests_directory_as_args()
         command += [str(p) for p in self.additional_files.get()]

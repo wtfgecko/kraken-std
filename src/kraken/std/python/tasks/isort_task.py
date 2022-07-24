@@ -4,7 +4,7 @@ import dataclasses
 from pathlib import Path
 from typing import Any, List
 
-from kraken.core import Project, Property, TaskResult
+from kraken.core import Project, Property
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -14,7 +14,7 @@ class IsortTask(EnvironmentAwareDispatchTask):
     config_file: Property[Path]
     additional_files: Property[List[Path]] = Property.config(default_factory=list)
 
-    def get_execute_command(self) -> list[str] | TaskResult:
+    def get_execute_command(self) -> list[str]:
         command = ["isort", "src/"] + self.settings.get_tests_directory_as_args()
         command += [str(p) for p in self.additional_files.get()]
         if self.check_only.get():

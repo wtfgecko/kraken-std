@@ -7,7 +7,7 @@ import urllib.parse
 from pathlib import Path
 
 import httpx
-from kraken.core import Project, Property, Supplier, Task, TaskResult
+from kraken.core import Project, Property, Supplier, Task, TaskStatus
 
 from . import helmapi
 
@@ -54,7 +54,7 @@ class HelmPackageTask(Task):
     # when the task was executed and the default output location is in the build directory.
     chart_tarball: Property[Path] = Property.output()
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> TaskStatus:
         chart_directory = self.project.directory / self.chart_directory.get()
         if self.chart_tarball.is_filled():
             status, output_file = helmapi.helm_package(chart_directory, output_file=self.chart_tarball.get())
@@ -64,8 +64,8 @@ class HelmPackageTask(Task):
             if output_file:
                 self.chart_tarball.set(output_file)
         if status != 0 or not output_file:
-            return TaskResult.FAILED
-        return TaskResult.SUCCEEDED
+            return TaskStatus.failed()
+        return TaskStatus.succeeded()
 
 
 class HelmPushTask(Task):
@@ -95,7 +95,7 @@ class HelmPushTask(Task):
         self.chart_name.setdefault(Supplier.of_callable((lambda: self.chart_tarball.get().name), [self.chart_tarball]))
         return super().finalize()
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> TaskStatus:
         url = urllib.parse.urlparse(self.registry.get())
         if not url.scheme:
             raise ValueError(f"{self.registry} missing url scheme: {self.registry.get()!r}")
@@ -117,21 +117,21 @@ class HelmPushTask(Task):
         if url.scheme == "oci" and credentials:
             self.logger.info("logging into OCI registry %r", url.hostname)
             assert oci_login_host is not None
-            result = helmapi.helm_registry_login(
+            command, result = helmapi.helm_registry_login(
                 oci_login_host,
                 credentials[0],
                 credentials[1],
                 insecure=oci_login_host in settings.insecure_registries,
             )
             if result != 0:
-                return TaskResult.FAILED
+                return TaskStatus.from_exit_code(command, result)
 
         if url.scheme == "oci":
             self.chart_url.seterror(f"{self.chart_url} for OCI registries is not currently supported")
             self.logger.info('pushing chart "%s" to OCI registry %r', self.chart_tarball.get(), self.registry.get())
-            result = helmapi.helm_push(self.chart_tarball.get(), self.registry.get())
+            command, result = helmapi.helm_push(self.chart_tarball.get(), self.registry.get())
             if result != 0:
-                return TaskResult.FAILED
+                return TaskStatus.from_exit_code(command, result)
         elif url.scheme in ("http", "https"):
             self.logger.info(
                 'pushing chart "%s" to %s registry %r',
@@ -146,4 +146,4 @@ class HelmPushTask(Task):
         else:
             assert False, url
 
-        return TaskResult.SUCCEEDED
+        return TaskStatus.succeeded()

@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, List
 
-from kraken.core import Project, Property, TaskResult
+from kraken.core import Project, Property
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -12,7 +12,7 @@ class Flake8Task(EnvironmentAwareDispatchTask):
     config_file: Property[Path]
     additional_args: Property[List[str]] = Property.config(default_factory=list)
 
-    def get_execute_command(self) -> list[str] | TaskResult:
+    def get_execute_command(self) -> list[str]:
         command = ["flake8", "src/"] + self.settings.get_tests_directory_as_args()
         if self.config_file.is_filled():
             command += ["--config", str(self.config_file.get())]

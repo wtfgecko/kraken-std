@@ -7,7 +7,7 @@ from pathlib import Path
 
 from kraken.core.project import Project
 from kraken.core.property import Property
-from kraken.core.task import TaskResult
+from kraken.core.task import TaskStatus
 from kraken.core.utils import flatten, not_none
 
 from . import DockerBuildTask
@@ -34,7 +34,7 @@ class NativeBuildTask(DockerBuildTask):
             raise ValueError(f"{self}.tags cannot be empty if .push is enabled")
         return super().finalize()
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> TaskStatus:
         command = ["docker", "build", str(self.build_context.get().absolute())]
         if self.dockerfile.is_filled():
             command += ["-f", str(self.dockerfile.get().absolute())]
@@ -67,11 +67,11 @@ class NativeBuildTask(DockerBuildTask):
             self.logger.info("%s", command)
             result = sp.call(command, env=env, cwd=self.project.directory)
             if result != 0:
-                return TaskResult.FAILED
+                return TaskStatus.from_exit_code(command, result)
 
         if self.push.get():
             command = ["docker", "push"] + self.tags.get()
             self.logger.info("%s", command)
             result = sp.call(command, env=env, cwd=self.project.directory)
 
-        return TaskResult.SUCCEEDED
+        return TaskStatus.succeeded()

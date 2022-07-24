@@ -17,7 +17,7 @@ from typing import Iterator, List
 
 import tomli
 import tomli_w
-from kraken.core import Project, Property, Task, TaskResult
+from kraken.core import Project, Property, Task, TaskStatus
 from kraken.core.utils import atomic_file_swap, not_none
 
 logger = logging.getLogger(__name__)
@@ -206,12 +206,12 @@ class CargoBuildTask(Task):
         super().__init__(name, project)
         self.args.set([])
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> TaskStatus:
         with _cargo_inject_project_settings(self.project):
             command = ["cargo", "build"] + self.args.get()
             self.logger.info("%s", command)
             result = sp.call(command, cwd=self.project.directory)
-            return TaskResult.SUCCEEDED if result == 0 else TaskResult.FAILED
+            return TaskStatus.from_exit_code(command, result)
 
 
 class CargoPublishTask(Task):
@@ -228,7 +228,7 @@ class CargoPublishTask(Task):
         super().__init__(name, project)
         self.allow_dirty.set(False)
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> TaskStatus:
         settings = cargo_settings(self.project)
         if self.registry.get() not in settings.registries:
             raise ValueError(f"registry {self.registry.get()!r} is not configured in Kraken project settings")
@@ -241,4 +241,4 @@ class CargoPublishTask(Task):
                 command += ["--allow-dirty"]
             self.logger.info("%s", command)
             result = sp.call(command, cwd=self.project.directory)
-            return TaskResult.SUCCEEDED if result == 0 else TaskResult.FAILED
+            return TaskStatus.from_exit_code(command, result)

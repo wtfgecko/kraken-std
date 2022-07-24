@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, List
 
-from kraken.core import Project, Property, TaskResult
+from kraken.core import Project, Property
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -15,7 +15,7 @@ class MypyTask(EnvironmentAwareDispatchTask):
     use_daemon: Property[bool] = Property.config(default=True)
     python_version: Property[str]
 
-    def get_execute_command(self) -> list[str] | TaskResult:
+    def get_execute_command(self) -> list[str]:
         # TODO (@NiklasRosenstein): Should we somewhere add a task that ensures `.dmypy.json` is in `.gitignore`?
         #       Having it in the project directory makes it easier to just stop the daemon if it malfunctions (which
         #       happens regularly but is hard to detect automatically).

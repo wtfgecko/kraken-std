@@ -9,7 +9,6 @@ from pathlib import Path
 
 from kraken.core.project import Project
 from kraken.core.property import Property
-from kraken.core.task import TaskResult
 from kraken.core.utils import flatten
 
 from . import DockerBuildTask
@@ -161,7 +160,6 @@ class KanikoBuildTask(DockerBuildTask):
             if result != 0:
                 raise Exception(f"Docker load failed with exit code {result}")
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> None:
         with contextlib.ExitStack() as exit_stack:
             self._build(exit_stack)
-        return TaskResult.SUCCEEDED

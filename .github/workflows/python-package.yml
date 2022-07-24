@@ -71,14 +71,15 @@ jobs:
       run: |
         echo "::add-mask::${{ env.PYPI_PASSWORD }}"
         echo "::add-mask::${{ env.TESTPYPI_PASSWORD }}"
-    - run: kraken run publish -v
 
-  update-changelog:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - uses: actions/checkout@v2
-      - uses: python-slap/slap-cli@gha/changelog/update/v1
+    - run: kraken run publish? -0 -v
+
+  # update-changelog:
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'pull_request'
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: python-slap/slap-cli@gha/changelog/update/v1
 
   docs:
     runs-on: ubuntu-latest

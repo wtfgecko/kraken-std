@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List
 
 import httpx
-from kraken.core import Project, Property, Task, TaskResult
+from kraken.core import Project, Property, Task, TaskStatus
 
 RELEASE_URL = (
     "https://github.com/estesp/manifest-tool/releases/download/v{VERSION}/binaries-manifest-tool-{VERSION}.tar.gz"
@@ -80,7 +80,7 @@ class ManifestToolPushTask(Task):
         self.logger.info("using %s", binary)
         return binary
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> TaskStatus:
         binary = self.fetch_manifest_tool()
         command = [
             str(binary),
@@ -95,6 +95,4 @@ class ManifestToolPushTask(Task):
         ]
         self.logger.info("%s", command)
         result = sp.call(command)
-        if result != 0:
-            return TaskResult.FAILED
-        return TaskResult.SUCCEEDED
+        return TaskStatus.from_exit_code(command, result)

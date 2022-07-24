@@ -4,7 +4,7 @@ import logging
 import os
 from typing import Optional, Union, cast
 
-from kraken.core import Project, Property, Supplier, Task, TaskResult
+from kraken.core import Project, Property, Supplier, Task, TaskStatus
 from nr.python.environment.virtualenv import get_current_venv
 
 from ..buildsystem import PythonBuildSystem
@@ -17,29 +17,30 @@ class InstallTask(Task):
     build_system: Property[Optional[PythonBuildSystem]]
     always_use_managed_env: Property[bool]
 
-    def is_skippable(self) -> bool:
-        if not self.always_use_managed_env.get() and get_current_venv(os.environ):
-            return True
+    def prepare(self) -> TaskStatus | None:
+        venv = get_current_venv(os.environ)
+        if not self.always_use_managed_env.get() and venv:
+            return TaskStatus.skipped("using current virtual env (%s)" % venv.path)
         build_system = self.build_system.get()
-        if build_system:
-            return not build_system.supports_managed_environments()
-        return True
+        if not build_system:
+            return TaskStatus.skipped("no Python build system configured")
+        if not build_system.supports_managed_environments():
+            return TaskStatus.skipped(
+                "current build system does not supported managed environment (%s)" % type(build_system).__name__
+            )
+        managed_environment = build_system.get_managed_environment()
+        if managed_environment.exists():
+            return TaskStatus.skipped("managed environment exists (%s)" % managed_environment.get_path())
+        return TaskStatus.pending()
 
-    def is_up_to_date(self) -> bool:
-        build_system = self.build_system.get()
-        if build_system:
-            managed_environment = build_system.get_managed_environment()
-            return managed_environment.exists()
-        return True
-
-    def execute(self) -> TaskResult:
+    def execute(self) -> TaskStatus:
         build_system = self.build_system.get()
         if not build_system:
             logger.error("no build system configured")
-            return TaskResult.FAILED
+            return TaskStatus.failed("no build system configured")
         managed_environment = build_system.get_managed_environment()
         managed_environment.install(python_settings(self.project))
-        return TaskResult.SUCCEEDED
+        return TaskStatus.succeeded()
 
 
 def install(project: Project | None = None) -> InstallTask:

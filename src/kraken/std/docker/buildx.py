@@ -4,7 +4,7 @@ import os
 import re
 import subprocess as sp
 
-from kraken.core.task import TaskResult
+from kraken.core.task import TaskStatus
 from kraken.core.utils import flatten, not_none
 
 from . import DockerBuildTask
@@ -19,7 +19,7 @@ class BuildxBuildTask(DockerBuildTask):
             self.load.set(True)
         return super().finalize()
 
-    def execute(self) -> TaskResult:
+    def execute(self) -> TaskStatus:
         inspect_response = sp.check_output(["docker", "buildx", "inspect"]).decode()
         if re.search(r"Driver:\s*docker\n", inspect_response) and self.cache_repo.get():
             self.logger.info(
@@ -59,6 +59,4 @@ class BuildxBuildTask(DockerBuildTask):
 
         self.logger.info("%s", command)
         result = sp.call(command, env=env, cwd=self.project.directory)
-        if result != 0:
-            return TaskResult.FAILED
-        return TaskResult.SUCCEEDED
+        return TaskStatus.from_exit_code(command, result)
