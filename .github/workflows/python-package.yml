@@ -44,6 +44,7 @@ jobs:
         echo "::add-mask::${{ env.ARTIFACTORY_PASSWORD }}"
 
     - run: kraken run lint test -v
+    - run: kraken run integrationTest -v --resume
 
   publish:
     runs-on: ubuntu-latest
