@@ -2,243 +2,134 @@
 
 from __future__ import annotations
 
-import base64
-import contextlib
-import dataclasses
-import enum
-import io
-import logging
-import re
-import subprocess as sp
-import time
-import urllib.parse
-from pathlib import Path
-from typing import Iterator, List
+from kraken.core import Project, Supplier
+from typing_extensions import Literal
 
-import tomli
-import tomli_w
-from kraken.core import Project, Property, Task, TaskStatus
-from kraken.core.utils import atomic_file_swap, not_none
+from .config import CargoProject, CargoRegistry
+from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
+from .tasks.cargo_build_task import CargoBuildTask
+from .tasks.cargo_publish_task import CargoPublishTask
+from .tasks.cargo_sync_config_task import CargoSyncConfigTask
 
-logger = logging.getLogger(__name__)
-CARGO_CONFIG_TOML = Path(".cargo/config.toml")
+__all__ = [
+    "CargoBuildTask",
+    "CargoPublishTask",
+    "CargoSyncConfigTask",
+    "CargoAuthProxyTask",
+    "CargoProject",
+    "CargoRegistry",
+    "cargo_registry",
+    "cargo_auth_proxy",
+    "cargo_sync_config",
+    "cargo_build",
+    "cargo_publish",
+]
 
-
-@dataclasses.dataclass
-class PublishTokenType(enum.Enum):
-    """Desribes what kind of publish token the registry expects."""
-
-    #: Prefix the password or api_key with `"Bearer "`. Example: Artifactory
-    BEARER_TOKEN = enum.auto()
-
-    #: Just take the password or api_key as the publish token as-is. Example: Cloudsmith
-    API_KEY = enum.auto()
+CARGO_SYNC_CONFIG_TASK_NAME = "cargoSyncConfig"
+CARGO_AUTH_PROXY_TASK_NAME = "cargoAuthProxy"
 
 
-@dataclasses.dataclass
-class Registry:
-    """Represents a Cargo registrory."""
+def cargo_registry(
+    alias: str,
+    index: str,
+    read_credentials: tuple[str, str] | None = None,
+    publish_token: str | None = None,
+    project: Project | None = None,
+) -> None:
+    """Adds a Cargo registry to the project. The registry must be synced to disk into the `.cargo/config.toml`
+    configuration file. You need to make sure to add a sync task using :func:`cargo_sync_config` if you manage
+    your Cargo registries with this function. Can be called multiple times.
 
-    #: Registry name.
-    name: str
+    :param alias: The registry alias.
+    :param index: The registry index URL (usually an HTTPS URL that ends in `.git`).
+    :param read_credentials: Username/password to read from the registry (only for private registries).
+    :param publish_token: The token to use with `cargo publish`.
 
-    #: The index URL.
-    index_url: str
+    !!! note Artifactory
 
-    #: The publish token. This may be a templated string that, if applicable, will be constructed from the
-    #: :attr:`CargoProjectSettings.auth` credentials if a matching host was found according to *index_url*.
-    #: The available variables are `${PASSWORD}` and `${BASIC}`.
-    #: Artifactory will expected a `Bearer ${PASSWORD}` while Cloudsmith expects just `${PASSWORD}` (and
-    #: `PASSWORD` should be the Cloudsmith API Key).
-    publish_token: str
-
-    def __post_init__(self) -> None:
-        # Validate the registry name.
-        assert re.match(r"^[a-zA-Z0-9_\-]+$", self.name), f"invalid registry name: {self.name!r}"
-
-    def get_publish_token(self, auth: dict[str, tuple[str, str]]) -> str:
-        """Replaces variables in the :attr:`publish_token` if necessary and returns it."""
-
-        if not ("${PASSWORD}" in self.publish_token or "${BASIC}" in self.publish_token):
-            return self.publish_token
-
-        hostname = not_none(not_none(urllib.parse.urlparse(self.index_url)).hostname)
-        if hostname not in auth:
-            raise ValueError(
-                f"host {hostname!r} has no auth configured in Kraken project settings "
-                f"(required for registry {self.name!r})"
-            )
-
-        curr_auth = auth[hostname]
-        password = curr_auth[1]
-        basic = base64.b64encode(f"{curr_auth[0]}:{curr_auth[1]}".encode()).decode("ascii")
-        return self.publish_token.replace("${PASSWORD}", password).replace("${BASIC}", basic)
-
-
-@dataclasses.dataclass
-class CargoProjectSettings:
-    """Settings for Cargo tasks in a project."""
-
-    #: A dictionary that maps host names to (username, password) tuples.
-    auth: dict[str, tuple[str, str]] = dataclasses.field(default_factory=dict)
-
-    #: A dictionary that maps registry index URLs.
-    registries: dict[str, Registry] = dataclasses.field(default_factory=dict)
-
-    def add_auth(self, host: str, username: str, password: str) -> CargoProjectSettings:
-        self.auth[host] = (username, password)
-        return self
-
-    def add_registry(
-        self, registry_name: str, index_url: str, publish_token: str = "${PASSWORD}"
-    ) -> CargoProjectSettings:
-        self.registries[registry_name] = Registry(registry_name, index_url, publish_token)
-        return self
-
-
-def cargo_settings(project: Project | None = None) -> CargoProjectSettings:
-    """Creates or gets the cargo project settings for the current project or the given one."""
-
-    if project is None:
-        from kraken.api import project as _project
-
-        project = _project
-
-    settings = project.find_metadata(CargoProjectSettings)
-    if settings is None:
-        settings = CargoProjectSettings()
-        project.metadata.append(settings)
-
-    return settings
-
-
-def _load_gitconfig(file: Path) -> dict[str, dict[str, str]]:
-    import configparser
-
-    parser = configparser.RawConfigParser()
-    parser.read(file)
-    result = dict(parser._sections)  # type: ignore[attr-defined]
-    for k in result:
-        result[k] = dict(parser._defaults, **result[k])  # type: ignore[attr-defined]
-        result[k].pop("__name__", None)
-    return result
-
-
-def _dump_gitconfig(data: dict[str, dict[str, str]]) -> str:
-    import configparser
-
-    parser = configparser.RawConfigParser()
-    for section, values in data.items():
-        parser.add_section(section)
-        for key, value in values.items():
-            parser.set(section, key, value)
-    fp = io.StringIO()
-    parser.write(fp)
-    return fp.getvalue()
-
-
-@contextlib.contextmanager
-def _cargo_inject_settings(project_dir: Path, certs_dir: Path, settings: CargoProjectSettings) -> Iterator[None]:
-    """This context manager injects the HTTP basic authentication headers using an MITM proxy and informs Cargo
-    and Git of the HTTP(s) proxy and the self-signed certificates.
-
-    Args:
-        project_dir: The directory that contains the Cargo project.
-        settings: The project settings that contain the credentials.
+        It appears that for Artifactory, the *publish_token* must be of the form `Bearer <TOKEN>` where the token
+        is a token generated manually via the JFrog UI. It cannot be an API key.
     """
 
-    if not settings.auth:
-        return
-
-    from kraken.std.cargo.mitm import mitm_auth_proxy
-
-    cargo_config_toml = project_dir / ".cargo" / "config.toml"
-    cargo_config = tomli.loads(cargo_config_toml.read_text()) if cargo_config_toml.is_file() else {}
-
-    git_config_file = Path("~/.gitconfig").expanduser()
-    git_config = _load_gitconfig(git_config_file) if git_config_file.is_file() else {}
-
-    with contextlib.ExitStack() as exit_stack:
-
-        # Start an HTTP(S) proxy that we can direct Cargo and Git to. We need to give the proxy a little
-        # time to come up.
-        proxy_url, cert_file = exit_stack.enter_context(mitm_auth_proxy(settings.auth, certs_dir))
-        time.sleep(0.5)
-
-        # Temporarily update the Cargo configuration file to inject the HTTP(S) proxy and CA info.
-        cargo_registries = cargo_config.setdefault("registries", {})
-        for registry in settings.registries.values():
-            cargo_registries[registry.name] = {"index": registry.index_url}
-        cargo_http = cargo_config.setdefault("http", {})
-        cargo_http["proxy"] = proxy_url
-        cargo_http["cainfo"] = str(cert_file.absolute())
-        logger.info("updating %s", cargo_config_toml)
-        fp = exit_stack.enter_context(atomic_file_swap(cargo_config_toml, "w", always_revert=True, create_dirs=True))
-        fp.write(tomli_w.dumps(cargo_config))
-        fp.close()
-
-        # Temporarily update the Git configuration file to inject the HTTP(S) proxy and CA info.
-        git_http = git_config.setdefault("http", {})
-        git_http["proxy"] = proxy_url
-        git_http["sslCAInfo"] = str(cert_file.absolute())
-        logger.info("updating %s", git_config_file)
-        fp = exit_stack.enter_context(atomic_file_swap(git_config_file, "w", always_revert=True, create_dirs=True))
-        fp.write(_dump_gitconfig(git_config))
-        fp.close()
-
-        yield
+    cargo = CargoProject.get_or_create(project)
+    cargo.add_registry(alias, index, read_credentials, publish_token)
 
 
-@contextlib.contextmanager
-def _cargo_inject_project_settings(project: Project) -> Iterator[None]:
-    settings = cargo_settings(project)
-    with _cargo_inject_settings(project.directory, project.context.build_directory / ".mitm-certs", settings):
-        yield
+def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
+    """Creates a background task that the :func:`cargo_build` and :func:`cargo_publish` tasks will depend on to
+    inject the read credentials for private registries into HTTPS requests made by Cargo. This is only needed when
+    private registries are used."""
+
+    project = project or Project.current()
+    cargo = CargoProject.get_or_create(project)
+    task = project.do(
+        CARGO_AUTH_PROXY_TASK_NAME,
+        CargoAuthProxyTask,
+        False,
+        registries=Supplier.of_callable(lambda: list(cargo.registries.values())),
+    )
+    task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
+    return task
 
 
-class CargoBuildTask(Task):
-    """This task runs `cargo build` using the specified parameters. It will respect the authentication
-    credentials configured in :attr:`CargoProjectSettings.auth`."""
+def cargo_sync_config(*, name: str = "cargoSyncConfig", project: Project | None = None) -> CargoSyncConfigTask:
+    """Creates a task that the :func:`cargo_build` and :func:`cargo_publish` tasks will depend on to synchronize
+    the `.cargo/config.toml` configuration file, ensuring that the Cargo registries configured with the
+    :func:`cargo_registry` function are present and up to date."""
 
-    args: Property[List[str]]
-
-    def __init__(self, name: str, project: Project) -> None:
-        super().__init__(name, project)
-        self.args.set([])
-
-    def execute(self) -> TaskStatus:
-        with _cargo_inject_project_settings(self.project):
-            command = ["cargo", "build"] + self.args.get()
-            self.logger.info("%s", command)
-            result = sp.call(command, cwd=self.project.directory)
-            return TaskStatus.from_exit_code(command, result)
+    project = project or Project.current()
+    cargo = CargoProject.get_or_create(project)
+    return project.do(
+        CARGO_SYNC_CONFIG_TASK_NAME,
+        CargoSyncConfigTask,
+        True,
+        group="fmt",
+        registries=Supplier.of_callable(lambda: list(cargo.registries.values())),
+    )
 
 
-class CargoPublishTask(Task):
-    """Publish a Cargo crate."""
+def cargo_build(
+    mode: Literal["debug", "release"],
+    *,
+    name: str | None = None,
+    project: Project | None = None,
+) -> CargoBuildTask:
+    """Creates a task that runs `cargo build`.
 
-    #: The name of the Cargo registry configured in `.cargo/config.yoml` under `[registries]` to publish
-    #: the package to.
-    registry: Property[str]
+    :param mode: Whether to create a task that runs the debug or release build.
+    :param name: The name of the task. If not specified, defaults to `:cargoBuild{mode.capitalied()}`."""
 
-    #: Pass the `--allow-dirty` flag to `cargo publish`. This is usually discouraged.
-    allow_dirty: Property[bool]
+    assert mode in ("debug", "release"), repr(mode)
+    project = project or Project.current()
+    task = project.do(
+        f"cargoBuild{mode.capitalize()}" if name is None else name,
+        CargoBuildTask,
+        False,
+        args=["--release"] if mode == "release" else [],
+    )
+    task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")
+    task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
+    return task
 
-    def __init__(self, name: str, project: Project) -> None:
-        super().__init__(name, project)
-        self.allow_dirty.set(False)
 
-    def execute(self) -> TaskStatus:
-        settings = cargo_settings(self.project)
-        if self.registry.get() not in settings.registries:
-            raise ValueError(f"registry {self.registry.get()!r} is not configured in Kraken project settings")
-        registry = settings.registries[self.registry.get()]
-        publish_token = registry.get_publish_token(settings.auth)
+def cargo_publish(
+    registry: str,
+    *,
+    name: str = "cargoPublish",
+    project: Project | None = None,
+) -> CargoPublishTask:
+    """Creates a task that publishes the create to the specified *registry*.
 
-        with _cargo_inject_project_settings(self.project):
-            command = ["cargo", "publish", "--registry", registry.name, "--token", publish_token]
-            if self.allow_dirty.get():
-                command += ["--allow-dirty"]
-            self.logger.info("%s", command)
-            result = sp.call(command, cwd=self.project.directory)
-            return TaskStatus.from_exit_code(command, result)
+    :param registry: The alias of the registry to publish to."""
+
+    project = project or Project.current()
+    cargo = CargoProject.get_or_create(project)
+    task = project.do(
+        name,
+        CargoPublishTask,
+        False,
+        registry=Supplier.of_callable(lambda: cargo.registries[registry]),
+    )
+    task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")
+    task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
+    return task

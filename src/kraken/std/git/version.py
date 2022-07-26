@@ -1,6 +1,3 @@
-""" Tools for Git versioned projects. """
-
-
 from __future__ import annotations
 
 import dataclasses

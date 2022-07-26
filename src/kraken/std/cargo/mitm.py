@@ -59,7 +59,6 @@ class AuthInjector(HttpProxyBasePlugin):
 @contextlib.contextmanager
 def mitm_auth_proxy(
     auth: dict[str, tuple[str, str]],
-    certs_dir: Path,
     port: int = 8899,
 ) -> Iterator[tuple[str, Path]]:
     """Runs a MITM HTTPS proxy that injects credentials according to *auth* into requests."""

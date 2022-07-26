@@ -30,7 +30,6 @@ import subprocess as sp
 import tempfile
 import time
 import unittest.mock
-import urllib.parse
 import uuid
 from pathlib import Path
 from typing import Any, Iterator
@@ -38,9 +37,8 @@ from typing import Any, Iterator
 import pytest
 from flaky import flaky  # type: ignore[import]
 from kraken.core.testing import kraken_ctx, kraken_project
-from kraken.core.utils import not_none
 
-from kraken.std.cargo import CargoBuildTask, CargoPublishTask, cargo_settings
+from kraken.std.cargo import cargo_build, cargo_publish, cargo_registry
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +126,6 @@ def create_cargo_repository_in_cloudsmith(cloudsmith: dict[str, str]) -> Iterato
 def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
 
     data_dir = Path(__file__).parent / "data"
-    repository_host = not_none(not_none(urllib.parse.urlparse(repository.index_url)).hostname)
     registry_id = "private-repo"
 
     with tempfile.TemporaryDirectory() as tempdir, unittest.mock.patch.dict(
@@ -144,10 +141,13 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
         )
         with kraken_project(kraken_ctx()) as project1:
             project1.directory = data_dir / "hello-world-lib"
-            settings = cargo_settings(project1)
-            settings.add_auth(repository_host, repository.user, repository.password)
-            settings.add_registry(registry_id, repository.index_url)
-            project1.do("cargoPublish", CargoPublishTask, registry=registry_id, allow_dirty=True)
+            cargo_registry(
+                registry_id,
+                repository.index_url,
+                read_credentials=(repository.user, repository.password),
+                publish_token=repository.password,
+            )
+            cargo_publish(registry_id)
             project1.context.execute([":cargoPublish"], verbose=True)
 
         logger.info("Giving repository time to index (20s) ...")
@@ -161,11 +161,13 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
         )
         with kraken_project(kraken_ctx()) as project2:
             project2.directory = data_dir / "hello-world-app"
-            settings = cargo_settings(project2)
-            settings.add_auth(repository_host, repository.user, repository.password)
-            settings.add_registry(registry_id, repository.index_url)
-            project2.do("cargoBuild", CargoBuildTask)
-            project2.context.execute([":cargoBuild"], verbose=True)
+            cargo_registry(
+                registry_id,
+                repository.index_url,
+                read_credentials=(repository.user, repository.password),
+            )
+            cargo_build("debug")
+            project2.context.execute([":cargoBuildDebug"], verbose=True)
 
         # Running the application should give "Hello from hello-world-lib!".
         output = sp.check_output([data_dir / "hello-world-app" / "target" / "debug" / "hello-world-app"]).decode()

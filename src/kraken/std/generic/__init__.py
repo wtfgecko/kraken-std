@@ -1,3 +1,1 @@
 """ Generic actions. """
-
-pass

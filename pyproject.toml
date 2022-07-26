@@ -24,7 +24,7 @@ python = "^3.7"
 "nr.python.environment" = "^0.1.4"
 "proxy.py" = "^2.4.3"
 httpx = "^0.23.0"
-kraken-core = "^0.5.2"
+kraken-core = "^0.5.3"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 twine = "^4.0.1"
@@ -62,6 +62,7 @@ fmt = "black src/ && isort src/"
 
 [tool.mypy]
 python_version = "3.7"
+exclude = ["src/tests/integration/.*/data/.*"]
 explicit_package_bases = true
 mypy_path = ["src"]
 namespace_packages = true
