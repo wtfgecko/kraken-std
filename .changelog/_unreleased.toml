@@ -9,3 +9,9 @@ id = "5c93a704-da6f-4323-98d3-f46facae4ba9"
 type = "improvement"
 description = "Add `INFO` log line to `CargoPublishTask.execute()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "d3fedd13-a647-4fcd-bac6-970b3e63e4c6"
+type = "feature"
+description = "add `CargoClippyTask` and `cargo_clippy()` function"
+author = "@NiklasRosenstein"

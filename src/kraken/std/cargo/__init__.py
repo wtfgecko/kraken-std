@@ -11,24 +11,27 @@ from .config import CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
 from .tasks.cargo_build_task import CargoBuildTask
 from .tasks.cargo_bump_version_task import CargoBumpVersionTask
+from .tasks.cargo_clippy_task import CargoClippyTask
 from .tasks.cargo_fmt_task import CargoFmtTask
 from .tasks.cargo_publish_task import CargoPublishTask
 from .tasks.cargo_sync_config_task import CargoSyncConfigTask
 
 __all__ = [
-    "CargoBuildTask",
-    "CargoPublishTask",
-    "CargoSyncConfigTask",
-    "CargoAuthProxyTask",
-    "CargoBumpVersionTask",
-    "CargoProject",
-    "CargoRegistry",
-    "cargo_registry",
     "cargo_auth_proxy",
-    "cargo_sync_config",
-    "cargo_fmt",
     "cargo_build",
+    "cargo_clippy",
+    "cargo_fmt",
     "cargo_publish",
+    "cargo_registry",
+    "cargo_sync_config",
+    "CargoAuthProxyTask",
+    "CargoBuildTask",
+    "CargoBumpVersionTask",
+    "CargoClippyTask",
+    "CargoProject",
+    "CargoPublishTask",
+    "CargoRegistry",
+    "CargoSyncConfigTask",
 ]
 
 CARGO_SYNC_CONFIG_TASK_NAME = "cargoSyncConfig"
@@ -97,6 +100,19 @@ def cargo_sync_config(
         registries=Supplier.of_callable(lambda: list(cargo.registries.values())),
         replace=replace,
     )
+
+
+def cargo_clippy(
+    *,
+    fix: bool = False,
+    name: str | None = None,
+    group: str | None = "_auto_",
+    project: Project | None = None,
+) -> None:
+    project = project or Project.current()
+    name = "cargoClippyFix" if fix else "cargoClippy"
+    group = ("fmt" if fix else "lint") if group == "_auto_" else group
+    project.do(name, CargoClippyTask, not fix, group=group, fix=fix)
 
 
 def cargo_fmt(*, project: Project | None = None) -> None:
