@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from kraken.std.git import GitVersion
 
 
