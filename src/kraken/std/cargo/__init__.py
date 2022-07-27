@@ -108,7 +108,7 @@ def cargo_fmt(*, project: Project | None = None) -> None:
 def cargo_build(
     mode: Literal["debug", "release"],
     *,
-    group: str = "build",
+    group: str | None = "build",
     name: str | None = None,
     project: Project | None = None,
 ) -> CargoBuildTask:
