@@ -18,6 +18,11 @@ class GitignoreEntry(NamedTuple):
     type: GitignoreEntryType
     value: str
 
+    def __str__(self) -> str:
+        if self.is_comment():
+            return f"# {self.value}"
+        return self.value
+
     def is_comment(self) -> bool:
         return self.type == GitignoreEntryType.COMMENT
 
@@ -40,7 +45,7 @@ class GitignoreFile(NamedTuple):
         return (entry.value for entry in islice(self.entries, start, stop) if entry.is_path())
 
     def add_comment(self, comment: str, index: int | None = None) -> None:
-        entry = GitignoreEntry(GitignoreEntryType.COMMENT, "# " + comment)
+        entry = GitignoreEntry(GitignoreEntryType.COMMENT, comment)
         self.entries.insert(len(self.entries) if index is None else index, entry)
 
     def add_blank(self, index: int | None = None) -> None:
@@ -58,7 +63,7 @@ class GitignoreFile(NamedTuple):
         del self.entries[index]
 
     def render(self) -> str:
-        return "\n".join(entry.value for entry in self.entries) + "\n"
+        return "\n".join(map(str, self.entries)) + "\n"
 
 
 def parse_gitignore(file: TextIO | Path | str) -> GitignoreFile:

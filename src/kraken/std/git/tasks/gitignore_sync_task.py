@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Sequence
+from typing import Sequence
 
-from kraken.core import Project, Property
+from kraken.core import Property
 
 from kraken.std.generic.render_file_task import RenderFileTask
 
@@ -22,18 +22,13 @@ class GitignoreSyncTask(RenderFileTask):
     It's common to group this task under the default `fmt` group, as it is similar to formatting a `.gitignore` file.
     """
 
-    paths: Property[List[str]] = Property.config(default_factory=list)
-    header: Property[str]
+    file: Property[Path] = Property.default(".gitignore")
+    _paths: dict[str | None, list[str]] = {}
     sort_paths: Property[bool] = Property.config(default=False)
     sort_groups: Property[bool] = Property.config(default=False)
 
-    def __init__(self, name: str, project: Project) -> None:
-        super().__init__(name, project)
-        self.file.set(self.project.directory / ".gitignore")
-
-    def add_paths(self, paths: Sequence[str]) -> None:
-        previous = self.paths.value
-        self.paths.setcallable(lambda: previous.get() + list(paths), self.paths.derived_from())
+    def add_paths(self, header: str | None, paths: Sequence[str]) -> None:
+        self._paths.setdefault(header, []).extend(paths)
 
     # RenderFileTask
 
@@ -43,33 +38,33 @@ class GitignoreSyncTask(RenderFileTask):
         else:
             gitignore = GitignoreFile([])
 
-        has_paths = set(gitignore.paths())
+        for comment_header, paths in self._paths.items():
+            has_paths = set(gitignore.paths())
 
-        comment_header = self.header.get_or(None)
-        if comment_header is not None:
+            if comment_header is not None:
 
-            # Remove all existing paths, we'll make sure they're located under the header.
-            for path in self.paths.get():
-                if path in has_paths:
-                    gitignore.remove_path(path)
-                    has_paths.discard(path)
+                # Remove all existing paths, we'll make sure they're located under the header.
+                for path in paths:
+                    if path in has_paths:
+                        gitignore.remove_path(path)
+                        has_paths.discard(path)
 
-            # Find the location of the header.
-            insert_index = gitignore.find_comment(comment_header)
-            if insert_index is None:
-                gitignore.add_blank()
-                gitignore.add_comment(comment_header)
-                insert_index = len(gitignore.entries)
+                # Find the location of the header.
+                insert_index = gitignore.find_comment(comment_header)
+                if insert_index is None:
+                    gitignore.add_blank()
+                    gitignore.add_comment(comment_header)
+                    insert_index = len(gitignore.entries)
+                else:
+                    insert_index += 1
+
             else:
-                insert_index += 1
+                insert_index = 0
 
-        else:
-            insert_index = 0
-
-        for path in self.paths.get():
-            if path not in has_paths:
-                gitignore.add_path(path, insert_index)
-                insert_index += 1
+            for path in paths:
+                if path not in has_paths:
+                    gitignore.add_path(path, insert_index)
+                    insert_index += 1
 
         gitignore = sort_gitignore(gitignore, self.sort_paths.get(), self.sort_groups.get())
 
