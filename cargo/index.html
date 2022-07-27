@@ -531,7 +531,8 @@ private registries are used.</p>
 <h4 id="cargo_sync_config">cargo_sync_config</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cargo_sync_config</span><span class="p">(</span><span class="o">*</span><span class="p">,</span>
                       <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cargoSyncConfig&quot;</span><span class="p">,</span>
-                      <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoSyncConfigTask</span>
+                      <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoSyncConfigTask</span>
 </code></pre></div>
 <p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/cargo/__init__.py#L79">[view_source]</a></p>
 <p>Creates a task that the :func:<code>cargo_build</code> and :func:<code>cargo_publish</code> tasks will depend on to synchronize
@@ -546,7 +547,7 @@ the <code>.cargo/config.toml</code> configuration file, ensuring that the Cargo 
                 <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoBuildTask</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/cargo/__init__.py#L101">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/cargo/__init__.py#L107">[view_source]</a></p>
 <p>Creates a task that runs <code>cargo build</code>.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
@@ -562,7 +563,7 @@ the <code>.cargo/config.toml</code> configuration file, ensuring that the Cargo 
                   <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cargoPublish&quot;</span><span class="p">,</span>
                   <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoPublishTask</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/cargo/__init__.py#L126">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/cargo/__init__.py#L132">[view_source]</a></p>
 <p>Creates a task that publishes the create to the specified <em>registry</em>.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
