@@ -10,6 +10,7 @@ from typing_extensions import Literal
 from .config import CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
 from .tasks.cargo_build_task import CargoBuildTask
+from .tasks.cargo_bump_version_task import CargoBumpVersionTask
 from .tasks.cargo_fmt_task import CargoFmtTask
 from .tasks.cargo_publish_task import CargoPublishTask
 from .tasks.cargo_sync_config_task import CargoSyncConfigTask
@@ -19,6 +20,7 @@ __all__ = [
     "CargoPublishTask",
     "CargoSyncConfigTask",
     "CargoAuthProxyTask",
+    "CargoBumpVersionTask",
     "CargoProject",
     "CargoRegistry",
     "cargo_registry",
@@ -132,24 +134,44 @@ def cargo_build(
 def cargo_publish(
     registry: str,
     additional_args: Sequence[str] = (),
+    version: str | None = None,
     *,
     name: str = "cargoPublish",
     project: Project | None = None,
 ) -> CargoPublishTask:
     """Creates a task that publishes the create to the specified *registry*.
 
-    :param registry: The alias of the registry to publish to."""
+    :param registry: The alias of the registry to publish to.
+    :param version: The version number to publish. If specified, a cargo bump task will be added. If a version
+        number to bump to is specified, the `--allow-dirty` option is automatically passed to Cargo.
+    """
 
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
+
+    additional_args = list(additional_args)
+    if version is not None and "--allow-dirty" not in additional_args:
+        additional_args.append("--allow-dirty")
+
     task = project.do(
         name,
         CargoPublishTask,
         False,
         group="publish",
         registry=Supplier.of_callable(lambda: cargo.registries[registry]),
-        additional_args=list(additional_args),
+        additional_args=additional_args,
     )
     task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")
     task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
+
+    if version is not None:
+        bump_task = project.do(
+            f"{name}/bump",
+            CargoBumpVersionTask,
+            False,
+            version=version,
+            revert=True,
+        )
+        task.add_relationship(bump_task)
+
     return task

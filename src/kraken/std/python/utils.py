@@ -18,6 +18,6 @@ def git_version_to_python(value: str | GitVersion, include_sha: bool) -> str:
             final_version += f"+g{version.distance.sha}"
             if version.dirty:
                 final_version += "-dirty"
-        elif version.dirty:
-            final_version += "+dirty"
+    if version.dirty and "-dirty" not in final_version:
+        final_version += "+dirty"
     return final_version
