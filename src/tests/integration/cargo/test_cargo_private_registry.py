@@ -38,7 +38,7 @@ import pytest
 from flaky import flaky  # type: ignore[import]
 from kraken.core.testing import kraken_ctx, kraken_project
 
-from kraken.std.cargo import cargo_build, cargo_publish, cargo_registry, cargo_sync_config
+from kraken.std.cargo import cargo_auth_proxy, cargo_build, cargo_publish, cargo_registry, cargo_sync_config
 
 logger = logging.getLogger(__name__)
 
@@ -147,8 +147,9 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
                 read_credentials=(repository.user, repository.password),
                 publish_token=repository.password,
             )
+            cargo_auth_proxy()
             cargo_sync_config()
-            cargo_publish(registry_id)
+            cargo_publish(registry_id, additional_args=["--allow-dirty"])
             project1.context.execute([":cargoPublish"], verbose=True)
 
         logger.info("Giving repository time to index (20s) ...")
@@ -167,6 +168,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
                 repository.index_url,
                 read_credentials=(repository.user, repository.password),
             )
+            cargo_auth_proxy()
             cargo_sync_config()
             cargo_build("debug")
             project2.context.execute([":cargoBuildDebug"], verbose=True)

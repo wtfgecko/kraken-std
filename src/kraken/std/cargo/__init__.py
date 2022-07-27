@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Sequence
+
 from kraken.core import Project, Supplier
 from typing_extensions import Literal
 
@@ -114,6 +116,7 @@ def cargo_build(
 
 def cargo_publish(
     registry: str,
+    additional_args: Sequence[str] = (),
     *,
     name: str = "cargoPublish",
     project: Project | None = None,
@@ -129,6 +132,7 @@ def cargo_publish(
         CargoPublishTask,
         False,
         registry=Supplier.of_callable(lambda: cargo.registries[registry]),
+        additional_args=additional_args,
     )
     task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")
     task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")

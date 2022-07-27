@@ -47,7 +47,7 @@ class CargoAuthProxyTask(BackgroundTask):
 
         # TODO (@NiklasRosenstein): Can we get away without temporarily modifying the GLOBAL Git config?
 
-        cargo_config_toml = self.cargo_config_file.get()
+        cargo_config_toml = self.project.directory / self.cargo_config_file.get()
         cargo_config = tomli.loads(cargo_config_toml.read_text()) if cargo_config_toml.is_file() else {}
 
         git_config_file = Path("~/.gitconfig").expanduser()
