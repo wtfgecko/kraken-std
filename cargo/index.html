@@ -530,7 +530,6 @@ private registries are used.</p>
 <p><a id="pydoc:kraken.std.cargo.cargo_sync_config"></a></p>
 <h4 id="cargo_sync_config">cargo_sync_config</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cargo_sync_config</span><span class="p">(</span><span class="o">*</span><span class="p">,</span>
-                      <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cargoSyncConfig&quot;</span><span class="p">,</span>
                       <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoSyncConfigTask</span>
 </code></pre></div>
@@ -544,10 +543,11 @@ the <code>.cargo/config.toml</code> configuration file, ensuring that the Cargo 
 <h4 id="cargo_build">cargo_build</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cargo_build</span><span class="p">(</span><span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="s2">&quot;release&quot;</span><span class="p">],</span>
                 <span class="o">*</span><span class="p">,</span>
+                <span class="n">group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;build&quot;</span><span class="p">,</span>
                 <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoBuildTask</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/cargo/__init__.py#L109">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/cargo/__init__.py#L108">[view_source]</a></p>
 <p>Creates a task that runs <code>cargo build</code>.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
@@ -558,9 +558,9 @@ the <code>.cargo/config.toml</code> configuration file, ensuring that the Cargo 
 <p><a id="pydoc:kraken.std.cargo.cargo_publish"></a></p>
 <h4 id="cargo_publish">cargo_publish</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cargo_publish</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                  <span class="n">additional_args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
-                  <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                   <span class="o">*</span><span class="p">,</span>
+                  <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                  <span class="n">additional_args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
                   <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cargoPublish&quot;</span><span class="p">,</span>
                   <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoPublishTask</span>
 </code></pre></div>
