@@ -44,5 +44,6 @@ __Build graph__
 @pydoc kraken.std.cargo.cargo_registry
 @pydoc kraken.std.cargo.cargo_auth_proxy
 @pydoc kraken.std.cargo.cargo_sync_config
+@pydoc kraken.std.cargo.cargo_fmt
 @pydoc kraken.std.cargo.cargo_build
 @pydoc kraken.std.cargo.cargo_publish

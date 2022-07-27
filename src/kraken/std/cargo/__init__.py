@@ -10,6 +10,7 @@ from typing_extensions import Literal
 from .config import CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
 from .tasks.cargo_build_task import CargoBuildTask
+from .tasks.cargo_fmt_task import CargoFmtTask
 from .tasks.cargo_publish_task import CargoPublishTask
 from .tasks.cargo_sync_config_task import CargoSyncConfigTask
 
@@ -23,6 +24,7 @@ __all__ = [
     "cargo_registry",
     "cargo_auth_proxy",
     "cargo_sync_config",
+    "cargo_fmt",
     "cargo_build",
     "cargo_publish",
 ]
@@ -88,6 +90,12 @@ def cargo_sync_config(*, name: str = "cargoSyncConfig", project: Project | None 
         group="fmt",
         registries=Supplier.of_callable(lambda: list(cargo.registries.values())),
     )
+
+
+def cargo_fmt(*, project: Project | None = None) -> None:
+    project = project or Project.current()
+    project.do("cargoFmt", CargoFmtTask, True, group="fmt")
+    project.do("cargoFmtCheck", CargoFmtTask, True, group="lint", check=True)
 
 
 def cargo_build(
