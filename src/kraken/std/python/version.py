@@ -3,7 +3,7 @@ from __future__ import annotations
 from ..git import GitVersion
 
 
-def git_version_to_python(value: str | GitVersion, include_sha: bool) -> str:
+def git_version_to_python_version(value: str | GitVersion, include_sha: bool) -> str:
     """Converts a Git version to a Python version.
 
     :param value: The Git version to convert.

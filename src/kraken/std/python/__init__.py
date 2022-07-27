@@ -7,7 +7,9 @@ from .tasks.isort_task import IsortTask, isort
 from .tasks.mypy_task import MypyTask, mypy
 from .tasks.publish_task import PublishTask, publish
 from .tasks.pytest_task import PytestTask, pytest
-from .utils import git_version_to_python
+
+# Backwards compatibilty
+from .version import git_version_to_python_version, git_version_to_python_version as git_version_to_python
 
 __all__ = [
     "PythonSettings",
@@ -28,5 +30,6 @@ __all__ = [
     "publish",
     "PytestTask",
     "pytest",
+    "git_version_to_python_version",
     "git_version_to_python",
 ]
