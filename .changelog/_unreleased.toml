@@ -3,3 +3,9 @@ id = "f6c8106e-c7fa-45e9-8c9f-d18969a4460b"
 type = "fix"
 description = "fix status message returned by `CargoVersionBumpTask.start_background_task()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "5c93a704-da6f-4323-98d3-f46facae4ba9"
+type = "improvement"
+description = "Add `INFO` log line to `CargoPublishTask.execute()`"
+author = "@NiklasRosenstein"

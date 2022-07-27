@@ -1,3 +1,4 @@
+import logging
 import subprocess as sp
 from pathlib import Path
 from typing import List
@@ -5,6 +6,8 @@ from typing import List
 from kraken.core import Property, Task, TaskStatus
 
 from ..config import CargoRegistry
+
+logger = logging.getLogger(__name__)
 
 
 class CargoPublishTask(Task):
@@ -24,6 +27,8 @@ class CargoPublishTask(Task):
         if registry.publish_token is None:
             print(f'error: registry {registry.alias!r} missing a "publish_token"')
             return TaskStatus.failed()
+
+        logger.info("Publishing Crate to registry %s (%s)", registry.alias, registry.index)
 
         command = ["cargo", "publish", "--registry", registry.alias, "--token", registry.publish_token]
         command += self.additional_args.get()
