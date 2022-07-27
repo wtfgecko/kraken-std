@@ -107,6 +107,7 @@ def cargo_build(
         f"cargoBuild{mode.capitalize()}" if name is None else name,
         CargoBuildTask,
         False,
+        group="build",
         args=["--release"] if mode == "release" else [],
     )
     task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")
@@ -131,8 +132,9 @@ def cargo_publish(
         name,
         CargoPublishTask,
         False,
+        group="publish",
         registry=Supplier.of_callable(lambda: cargo.registries[registry]),
-        additional_args=additional_args,
+        additional_args=list(additional_args),
     )
     task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")
     task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
