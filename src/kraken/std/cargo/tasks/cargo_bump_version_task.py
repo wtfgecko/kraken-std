@@ -32,9 +32,9 @@ class CargoBumpVersionTask(BackgroundTask):
         fp.close()
         version = self.version.get()
         return (
-            TaskStatus.started(f"permanent bump to {version}")
+            TaskStatus.started(f"temporary bump to {version}")
             if revert
-            else TaskStatus.succeeded(f"temporary bump to {version}")
+            else TaskStatus.succeeded(f"permanent bump to {version}")
         )
 
     # Task
