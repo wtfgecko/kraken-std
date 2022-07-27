@@ -80,7 +80,6 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
 
 def cargo_sync_config(
     *,
-    name: str = "cargoSyncConfig",
     project: Project | None = None,
     replace: bool = False,
 ) -> CargoSyncConfigTask:
@@ -109,6 +108,7 @@ def cargo_fmt(*, project: Project | None = None) -> None:
 def cargo_build(
     mode: Literal["debug", "release"],
     *,
+    group: str = "build",
     name: str | None = None,
     project: Project | None = None,
 ) -> CargoBuildTask:
@@ -123,7 +123,7 @@ def cargo_build(
         f"cargoBuild{mode.capitalize()}" if name is None else name,
         CargoBuildTask,
         False,
-        group="build",
+        group=group,
         args=["--release"] if mode == "release" else [],
     )
     task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")
@@ -133,9 +133,9 @@ def cargo_build(
 
 def cargo_publish(
     registry: str,
-    additional_args: Sequence[str] = (),
-    version: str | None = None,
     *,
+    version: str | None = None,
+    additional_args: Sequence[str] = (),
     name: str = "cargoPublish",
     project: Project | None = None,
 ) -> CargoPublishTask:
