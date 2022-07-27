@@ -94,7 +94,7 @@ def cargo_sync_config(*, name: str = "cargoSyncConfig", project: Project | None 
 
 def cargo_fmt(*, project: Project | None = None) -> None:
     project = project or Project.current()
-    project.do("cargoFmt", CargoFmtTask, True, group="fmt")
+    project.do("cargoFmt", CargoFmtTask, False, group="fmt")
     project.do("cargoFmtCheck", CargoFmtTask, True, group="lint", check=True)
 
 
