@@ -30,7 +30,12 @@ class CargoBumpVersionTask(BackgroundTask):
         fp = exit_stack.enter_context(atomic_file_swap(self.cargo_toml_file.get(), "w", always_revert=revert))
         fp.write(content)
         fp.close()
-        return TaskStatus.started() if revert else TaskStatus.succeeded()
+        version = self.version.get()
+        return (
+            TaskStatus.started(f"permanent bump to {version}")
+            if revert
+            else TaskStatus.succeeded(f"temporary bump to {version}")
+        )
 
     # Task
 
