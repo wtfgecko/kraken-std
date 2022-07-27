@@ -76,7 +76,12 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
     return task
 
 
-def cargo_sync_config(*, name: str = "cargoSyncConfig", project: Project | None = None) -> CargoSyncConfigTask:
+def cargo_sync_config(
+    *,
+    name: str = "cargoSyncConfig",
+    project: Project | None = None,
+    replace: bool = False,
+) -> CargoSyncConfigTask:
     """Creates a task that the :func:`cargo_build` and :func:`cargo_publish` tasks will depend on to synchronize
     the `.cargo/config.toml` configuration file, ensuring that the Cargo registries configured with the
     :func:`cargo_registry` function are present and up to date."""
@@ -89,6 +94,7 @@ def cargo_sync_config(*, name: str = "cargoSyncConfig", project: Project | None 
         True,
         group="fmt",
         registries=Supplier.of_callable(lambda: list(cargo.registries.values())),
+        replace=replace,
     )
 
 
