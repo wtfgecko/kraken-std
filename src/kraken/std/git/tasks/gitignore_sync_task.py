@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Sequence
+from typing import Dict, List, Optional, Sequence
 
 from kraken.core import Property
 
@@ -23,7 +23,7 @@ class GitignoreSyncTask(RenderFileTask):
     """
 
     file: Property[Path] = Property.default(".gitignore")
-    _paths: dict[str | None, list[str]] = {}
+    _paths: Dict[Optional[str], List[str]] = {}
     sort_paths: Property[bool] = Property.config(default=False)
     sort_groups: Property[bool] = Property.config(default=False)
 
