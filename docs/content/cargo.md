@@ -37,7 +37,7 @@ and Cloudsmith.
 
 __Build graph__
 
-![](https://i.imgur.com/E73EN9o.png)
+![](https://i.imgur.com/EMh0u9q.png)
 
 ## API Documentation
 
