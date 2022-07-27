@@ -17,14 +17,15 @@ class RenderFileTask(Task):
         self.encoding.setdefault(DEFAULT_ENCODING)
         self._content_cache: bytes | None = None
 
-    def get_file_path(self) -> Path:
-        return self.project.directory / self.file.get()
-
     def get_file_contents(self, file: Path) -> str | bytes:
         return self.content.get()
 
+    def finalize(self) -> None:
+        self.file.set(self.file.value.map(lambda p: self.project.directory / p))
+        super().finalize()
+
     def prepare(self) -> TaskStatus | None:
-        file = self.get_file_path()
+        file = self.file.get()
 
         # Materialize the file contents.
         content = self.get_file_contents(file)
@@ -41,7 +42,7 @@ class RenderFileTask(Task):
 
     def execute(self) -> TaskStatus:
         assert self._content_cache is not None
-        file = self.get_file_path()
+        file = self.file.get()
         file.parent.mkdir(exist_ok=True)
         file.write_bytes(self._content_cache)
         return TaskStatus.succeeded(f"write {len(self._content_cache)} bytes to {file}")
