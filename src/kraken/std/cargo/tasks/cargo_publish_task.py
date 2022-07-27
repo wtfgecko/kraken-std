@@ -28,7 +28,7 @@ class CargoPublishTask(Task):
             print(f'error: registry {registry.alias!r} missing a "publish_token"')
             return TaskStatus.failed()
 
-        logger.info("Publishing Crate to registry %s (%s)", registry.alias, registry.index)
+        logger.info("Publishing crate to registry '%s' (%s)", registry.alias, registry.index)
 
         command = ["cargo", "publish", "--registry", registry.alias, "--token", registry.publish_token]
         command += self.additional_args.get()
