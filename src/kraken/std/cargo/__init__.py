@@ -123,6 +123,7 @@ def cargo_fmt(*, project: Project | None = None) -> None:
 
 def cargo_build(
     mode: Literal["debug", "release"],
+    incremental: bool | None = None,
     *,
     group: str | None = "build",
     name: str | None = None,
@@ -138,8 +139,9 @@ def cargo_build(
     task = project.do(
         f"cargoBuild{mode.capitalize()}" if name is None else name,
         CargoBuildTask,
-        False,
+        default=False,
         group=group,
+        incremental=incremental,
         args=["--release"] if mode == "release" else [],
     )
     task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")

@@ -15,3 +15,9 @@ id = "d3fedd13-a647-4fcd-bac6-970b3e63e4c6"
 type = "feature"
 description = "add `CargoClippyTask` and `cargo_clippy()` function"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1fbdc4a1-999a-4a1f-bb0d-ebda0aa20d4d"
+type = "feature"
+description = "add `cargo_build(incremental)` parameter"
+author = "@NiklasRosenstein"
