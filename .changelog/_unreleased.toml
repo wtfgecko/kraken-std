@@ -1,0 +1,5 @@
+[[entries]]
+id = "53ad34d4-f56b-4740-9a9a-5c0c5e3764e7"
+type = "improvement"
+description = "no longer hide output of `proxy.py`"
+author = "@NiklasRosenstein"

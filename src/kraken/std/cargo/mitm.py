@@ -86,13 +86,8 @@ def mitm_auth_proxy(
     env = os.environ.copy()
     env["INJECT_AUTH"] = json.dumps(auth)
 
-    if os.getenv("KRAKEN_CARGO_MITM_DEBUG") in ("1", "true"):
-        stdout, stderr = None, None
-    else:
-        stdout, stderr = sp.DEVNULL, sp.DEVNULL
-
     logger.info("starting proxy server: %s", command)
-    proc = sp.Popen(command, env=env, stdout=stdout, stderr=stderr)
+    proc = sp.Popen(command, env=env)
 
     try:
         yield f"http://localhost:{port}", cert_file
