@@ -92,6 +92,7 @@ def mitm_auth_proxy(
 
     env = os.environ.copy()
     env["INJECT_AUTH"] = json.dumps(auth)
+    env["PYTHONWARNINGS"] = "ignore"
 
     logger.info("starting proxy server: %s", command)
     proc = sp.Popen(command, env=env)

@@ -54,7 +54,7 @@ class SccacheManager:
 
     def get_cache_location(self) -> str:
         stats = self.stats()
-        match = re.search(r"^Cache\s+location\s+(.*)$", stats, re.I | re.MULTILINE)
+        match = re.search(r"^Cache\s+location\s+(.*)$", stats, re.I | re.M)
         assert match is not None, f"Could not determine cache location from sccache stats output: {stats!r}"
         return match.group(1)
 
@@ -89,7 +89,7 @@ class SccacheManager:
 
         env = {"SCCACHE_NO_DAEMON": "1"}
         command = [str(self.bin) if self.bin else "sccache", "--stop-server"]
-        sp.check_call(command, env={**os.environ, **env})
+        sp.check_call(command, env={**os.environ, **env}, stdout=sp.DEVNULL)
 
         self._proc.wait(10)
         if self.is_running():
@@ -112,7 +112,7 @@ class SccacheTask(BackgroundTask):
         manager = self.manager.get()
         if not manager.is_running():
             manager.start()
-        exit_stack.callback(lambda: print(manager.stats()))
+        exit_stack.callback(lambda: print(manager.stats().strip()))
         exit_stack.callback(lambda: manager.stop())
         return TaskStatus.started(manager.get_cache_location())
 
