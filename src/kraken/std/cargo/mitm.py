@@ -60,8 +60,12 @@ class AuthInjector(HttpProxyBasePlugin):
 def mitm_auth_proxy(
     auth: dict[str, tuple[str, str]],
     port: int = 8899,
+    timeout: float | None = None,
 ) -> Iterator[tuple[str, Path]]:
     """Runs a MITM HTTPS proxy that injects credentials according to *auth* into requests."""
+
+    if timeout is None and "PROXY_PY_TIMEOUT" in os.environ:
+        timeout = float(os.environ["PROXY_PY_TIMEOUT"])
 
     certs_dir = Path(__file__).parent / "data" / "certs"
     key_file = certs_dir / "key.pem"
@@ -82,6 +86,9 @@ def mitm_auth_proxy(
         "--port",
         str(port),
     ]
+
+    if timeout is not None:
+        command += ["--timeout", str(timeout)]
 
     env = os.environ.copy()
     env["INJECT_AUTH"] = json.dumps(auth)
