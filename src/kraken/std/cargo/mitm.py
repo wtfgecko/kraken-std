@@ -65,7 +65,7 @@ def mitm_auth_proxy(
     """Runs a MITM HTTPS proxy that injects credentials according to *auth* into requests."""
 
     if timeout is None and "PROXY_PY_TIMEOUT" in os.environ:
-        timeout = float(os.environ["PROXY_PY_TIMEOUT"])
+        timeout = int(os.environ["PROXY_PY_TIMEOUT"])
 
     certs_dir = Path(__file__).parent / "data" / "certs"
     key_file = certs_dir / "key.pem"
