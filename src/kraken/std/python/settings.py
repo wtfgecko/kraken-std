@@ -18,6 +18,7 @@ class PythonIndex:
     upload_url: str | None
     credentials: tuple[str, str] | None
     is_package_source: bool
+    default: bool
 
 
 @dataclasses.dataclass
@@ -50,6 +51,9 @@ class PythonSettings:
         test_dir = self.get_tests_directory()
         return [] if test_dir is None else [str(test_dir)]
 
+    def get_default_package_index(self) -> PythonIndex | None:
+        return next((index for index in self.package_indexes.values() if index.default), None)
+
     def add_package_index(
         self,
         alias: str,
@@ -58,6 +62,7 @@ class PythonSettings:
         upload_url: str | None = None,
         credentials: tuple[str, str] | None = None,
         is_package_source: bool = True,
+        default: bool = False,
     ) -> PythonSettings:
         """Adds an index to consume Python packages from or publish packages to.
 
@@ -70,6 +75,11 @@ class PythonSettings:
         :param is_package_source: If set to `False`, the index will not be used to source packages from, but
             can be used to publish to.
         """
+
+        if default:
+            defidx = self.get_default_package_index()
+            if defidx is not None and defidx.alias != alias:
+                raise ValueError(f"cannot add another default index (got: {defidx.alias!r}, trying to add: {alias!r})")
 
         if index_url is None:
             if alias == "pypi":
@@ -88,7 +98,7 @@ class PythonSettings:
             else:
                 raise ValueError(f"cannot derive upload URL for alias {alias!r} and index URL {index_url!r}")
 
-        self.package_indexes[alias] = PythonIndex(alias, index_url, upload_url, credentials, is_package_source)
+        self.package_indexes[alias] = PythonIndex(alias, index_url, upload_url, credentials, is_package_source, default)
         return self
 
 

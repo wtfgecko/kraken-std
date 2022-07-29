@@ -1,6 +1,6 @@
 """ Implements Slap as a Python build system for kraken-std.
 
-Requires at least Slap 1.6.24. """
+Requires at least Slap 1.6.25. """
 
 from __future__ import annotations
 
@@ -92,8 +92,9 @@ class SlapManagedEnvironment(ManagedEnvironment):
                 if index.credentials:
                     spec += f",username={quote(index.credentials[0])},password={quote(index.credentials[1])}"
                 safe_spec = spec.replace(quote(index.credentials[1]), "[MASKED]") if index.credentials else spec
-                command += ["--extra-index", spec]
-                safe_command += ["--extra-index", safe_spec]
+                option = "--index" if index.default else "--extra-index"
+                command += [option, spec]
+                safe_command += [option, safe_spec]
 
         logger.info("%s", safe_command)
         sp.check_call(command, cwd=self.project_directory)
