@@ -47,3 +47,7 @@ __Build graph__
 @pydoc kraken.std.cargo.cargo_fmt
 @pydoc kraken.std.cargo.cargo_build
 @pydoc kraken.std.cargo.cargo_publish
+
+## Environment variables
+
+* `PROXY_PY_TIMEOUT`

@@ -81,3 +81,7 @@ Independent of the Python build system used, Kraken will use [Twine][] to publis
 @pydoc kraken.std.python.tasks.pytest.PytestTask
 
 @pydoc kraken.std.python.tasks.pytest.pytest
+
+__Environment variables__
+
+* `PYTEST_FLAGS`
