@@ -643,7 +643,7 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/kraken-build/kraken-std/blob/None/docs/content/docker.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/content/docker.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
@@ -681,14 +681,14 @@ time secrets under <code>/run/secrets</code> don't appear in the final image.</p
                        <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DockerBuildTask</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/5a1ade6e8e7699dddfab023e4ce78b7febab82d3/docs/../src/kraken/std/docker/__init__.py#L55">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/docker/__init__.py#L55">[view_source]</a></p>
 <p>Create a new task in the current project that builds a Docker image and eventually pushes it.</p>
 <p><a id="kraken.std.docker.DockerBuildTask"></a></p>
 <p><a id="pydoc:kraken.std.docker.DockerBuildTask"></a></p>
 <h2 id="class-dockerbuildtask">Class DockerBuildTask</h2>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">DockerBuildTask</span><span class="p">(</span><span class="n">Task</span><span class="p">)</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/5a1ade6e8e7699dddfab023e4ce78b7febab82d3/docs/../src/kraken/std/docker/__init__.py#L20">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/docker/__init__.py#L20">[view_source]</a></p>
 <p>Base class for tasks that build Docker images. Subclasses implement converting the task properties into
 the invokation for a Docker build backend.</p>
 <h3 id="native">Native</h3>
@@ -697,7 +697,7 @@ the invokation for a Docker build backend.</p>
 <h2 id="class-nativebuildtask">Class NativeBuildTask</h2>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">NativeBuildTask</span><span class="p">(</span><span class="n">DockerBuildTask</span><span class="p">)</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/5a1ade6e8e7699dddfab023e4ce78b7febab82d3/docs/../src/kraken/std/docker/native.py#L16">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/docker/native.py#L16">[view_source]</a></p>
 <p>Implements building a Docker image using the native <code>docker build</code> command.</p>
 <p><a id="kraken.std.docker.native.NativeBuildTask.native_use_buildkit"></a></p>
 <p><a id="pydoc:kraken.std.docker.native.NativeBuildTask.native_use_buildkit"></a></p>
@@ -709,7 +709,7 @@ the invokation for a Docker build backend.</p>
 <h2 id="class-buildxbuildtask">Class BuildxBuildTask</h2>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">BuildxBuildTask</span><span class="p">(</span><span class="n">DockerBuildTask</span><span class="p">)</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/5a1ade6e8e7699dddfab023e4ce78b7febab82d3/docs/../src/kraken/std/docker/buildx.py#L13">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/docker/buildx.py#L13">[view_source]</a></p>
 <p>Implements building a Docker image with Buildx.</p>
 <h3 id="kaniko">Kaniko</h3>
 <p><a id="kraken.std.docker.kaniko.KanikoBuildTask"></a></p>
@@ -717,7 +717,7 @@ the invokation for a Docker build backend.</p>
 <h2 id="class-kanikobuildtask">Class KanikoBuildTask</h2>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">KanikoBuildTask</span><span class="p">(</span><span class="n">DockerBuildTask</span><span class="p">)</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/5a1ade6e8e7699dddfab023e4ce78b7febab82d3/docs/../src/kraken/std/docker/kaniko.py#L18">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/docker/kaniko.py#L18">[view_source]</a></p>
 <p>An implementation for building Docker images with Kaniko.</p>
 <h3 id="manifest-tool">Manifest Tool</h3>
 <p><a id="kraken.std.docker.manifest_tool.ManifestToolPushTask"></a></p>
@@ -725,7 +725,7 @@ the invokation for a Docker build backend.</p>
 <h2 id="class-manifesttoolpushtask">Class ManifestToolPushTask</h2>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ManifestToolPushTask</span><span class="p">(</span><span class="n">Task</span><span class="p">)</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/5a1ade6e8e7699dddfab023e4ce78b7febab82d3/docs/../src/kraken/std/docker/manifest_tool.py#L16">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/docker/manifest_tool.py#L16">[view_source]</a></p>
 <p>A task that uses <code>manifest-tool</code> to combine multiple container images from different platforms into a single
 multi-platform manifest.</p>
 <p>For more information on <code>manifest-tool</code>, check out the GitHub repository:</p>
