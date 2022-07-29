@@ -1,0 +1,5 @@
+[[entries]]
+id = "a3e1f7c4-9f6b-4189-a2d9-985ee35f416d"
+type = "improvement"
+description = "declare compatibility with `kraken-core >=0.5.4,<0.7.0`"
+author = "@NiklasRosenstein"
