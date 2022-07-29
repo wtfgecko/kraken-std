@@ -66,7 +66,7 @@ def test__helm_push_to_oci_registry(kraken_project: Project, oci_registry: str) 
         chart_tarball=package.chart_tarball,
         registry=f"oci://{oci_registry}/example",
     )
-    kraken_project.context.execute([":helmPush"], verbose=True)
+    kraken_project.context.execute([":helmPush"])
     response = httpx.get(f"http://{oci_registry}/v2/example/example-chart/tags/list", auth=(USER_NAME, USER_PASS))
     response.raise_for_status()
     tags = response.json()

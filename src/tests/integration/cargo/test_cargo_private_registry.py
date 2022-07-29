@@ -150,7 +150,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
             cargo_auth_proxy()
             cargo_sync_config()
             cargo_publish(registry_id, additional_args=["--allow-dirty"])
-            project1.context.execute([":cargoPublish"], verbose=True)
+            project1.context.execute([":cargoPublish"])
 
         logger.info("Giving repository time to index (20s) ...")
         time.sleep(20)
@@ -171,7 +171,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
             cargo_auth_proxy()
             cargo_sync_config()
             cargo_build("debug")
-            project2.context.execute([":cargoBuildDebug"], verbose=True)
+            project2.context.execute([":cargoBuildDebug"])
 
         # Running the application should give "Hello from hello-world-lib!".
         output = sp.check_output([data_dir / "hello-world-app" / "target" / "debug" / "hello-world-app"]).decode()

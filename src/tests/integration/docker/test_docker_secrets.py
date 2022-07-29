@@ -58,7 +58,7 @@ def test__secrets_can_be_accessed_at_build_time_and_are_not_present_in_the_final
             backend=backend,
         )
 
-        kraken_project.context.execute([":buildDocker"], verbose=True)
+        kraken_project.context.execute([":buildDocker"])
 
         exit_stack.callback(lambda: sp.check_call(["docker", "rmi", image_tag]))
 
