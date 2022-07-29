@@ -32,6 +32,9 @@ class CargoProject:
     #: The registries for the Cargo project. We store the registrie's by their alias.
     registries: dict[str, CargoRegistry] = dataclasses.field(default_factory=dict)
 
+    #: Environment variables for cargo build steps.
+    build_env: dict[str, str] = dataclasses.field(default_factory=dict)
+
     def add_registry(
         self,
         alias: str,

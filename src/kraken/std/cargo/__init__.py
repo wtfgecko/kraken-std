@@ -124,6 +124,7 @@ def cargo_fmt(*, project: Project | None = None) -> None:
 def cargo_build(
     mode: Literal["debug", "release"],
     incremental: bool | None = None,
+    env: dict[str, str] | None = None,
     *,
     group: str | None = "build",
     name: str | None = None,
@@ -132,10 +133,15 @@ def cargo_build(
     """Creates a task that runs `cargo build`.
 
     :param mode: Whether to create a task that runs the debug or release build.
+    :param incremental: Whether to build incrementally or not (with the `--incremental=` option). If not
+        specified, the option is not specified and the default behaviour is used.
+    :param env: Override variables for the build environment variables. Values in this dictionary override
+        variables in :attr:`CargoProject.build_env`.
     :param name: The name of the task. If not specified, defaults to `:cargoBuild{mode.capitalied()}`."""
 
     assert mode in ("debug", "release"), repr(mode)
     project = project or Project.current()
+    cargo = CargoProject.get_or_create(project)
     task = project.do(
         f"cargoBuild{mode.capitalize()}" if name is None else name,
         CargoBuildTask,
@@ -143,6 +149,7 @@ def cargo_build(
         group=group,
         incremental=incremental,
         args=["--release"] if mode == "release" else [],
+        env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
     )
     task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")
     task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
@@ -151,6 +158,8 @@ def cargo_build(
 
 def cargo_publish(
     registry: str,
+    incremental: bool | None = None,
+    env: dict[str, str] | None = None,
     *,
     version: str | None = None,
     additional_args: Sequence[str] = (),
@@ -160,6 +169,8 @@ def cargo_publish(
     """Creates a task that publishes the create to the specified *registry*.
 
     :param registry: The alias of the registry to publish to.
+    :param incremental: Incremental builds on or off.
+    :param env: Environment variables (overrides :attr:`CargoProject.build_env`).
     :param version: The version number to publish. If specified, a cargo bump task will be added. If a version
         number to bump to is specified, the `--allow-dirty` option is automatically passed to Cargo.
     """
@@ -178,6 +189,8 @@ def cargo_publish(
         group="publish",
         registry=Supplier.of_callable(lambda: cargo.registries[registry]),
         additional_args=additional_args,
+        incremental=incremental,
+        env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
     )
     task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")
     task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
