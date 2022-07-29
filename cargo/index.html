@@ -501,7 +501,7 @@ and Cloudsmith.</p>
                    <span class="n">publish_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/bcb9760d4b6afdb9b52e3b1d36051e1735f06714/docs/../src/kraken/std/cargo/__init__.py#L41">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/1f5bc88a377dec616b539228637f98747faa1212/docs/../src/kraken/std/cargo/__init__.py#L41">[view_source]</a></p>
 <p>Adds a Cargo registry to the project. The registry must be synced to disk into the <code>.cargo/config.toml</code></p>
 <p>configuration file. You need to make sure to add a sync task using :func:<code>cargo_sync_config</code> if you manage
 your Cargo registries with this function. Can be called multiple times.</p>
@@ -522,7 +522,7 @@ is a token generated manually via the JFrog UI. It cannot be an API key.</p>
 <h4 id="cargo_auth_proxy">cargo_auth_proxy</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cargo_auth_proxy</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoAuthProxyTask</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/bcb9760d4b6afdb9b52e3b1d36051e1735f06714/docs/../src/kraken/std/cargo/__init__.py#L67">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/1f5bc88a377dec616b539228637f98747faa1212/docs/../src/kraken/std/cargo/__init__.py#L67">[view_source]</a></p>
 <p>Creates a background task that the :func:<code>cargo_build</code> and :func:<code>cargo_publish</code> tasks will depend on to
 inject the read credentials for private registries into HTTPS requests made by Cargo. This is only needed when
 private registries are used.</p>
@@ -533,7 +533,7 @@ private registries are used.</p>
                       <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoSyncConfigTask</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/bcb9760d4b6afdb9b52e3b1d36051e1735f06714/docs/../src/kraken/std/cargo/__init__.py#L84">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/1f5bc88a377dec616b539228637f98747faa1212/docs/../src/kraken/std/cargo/__init__.py#L84">[view_source]</a></p>
 <p>Creates a task that the :func:<code>cargo_build</code> and :func:<code>cargo_publish</code> tasks will depend on to synchronize
 the <code>.cargo/config.toml</code> configuration file, ensuring that the Cargo registries configured with the
 :func:<code>cargo_registry</code> function are present and up to date.</p>
@@ -543,33 +543,42 @@ the <code>.cargo/config.toml</code> configuration file, ensuring that the Cargo 
 <h4 id="cargo_build">cargo_build</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cargo_build</span><span class="p">(</span><span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="s2">&quot;release&quot;</span><span class="p">],</span>
                 <span class="n">incremental</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">env</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="o">*</span><span class="p">,</span>
                 <span class="n">group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;build&quot;</span><span class="p">,</span>
                 <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoBuildTask</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/bcb9760d4b6afdb9b52e3b1d36051e1735f06714/docs/../src/kraken/std/cargo/__init__.py#L124">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/1f5bc88a377dec616b539228637f98747faa1212/docs/../src/kraken/std/cargo/__init__.py#L124">[view_source]</a></p>
 <p>Creates a task that runs <code>cargo build</code>.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
 <li><code>mode</code>: Whether to create a task that runs the debug or release build.</li>
+<li><code>incremental</code>: Whether to build incrementally or not (with the <code>--incremental=</code> option). If not
+specified, the option is not specified and the default behaviour is used.</li>
+<li><code>env</code>: Override variables for the build environment variables. Values in this dictionary override
+variables in :attr:<code>CargoProject.build_env</code>.</li>
 <li><code>name</code>: The name of the task. If not specified, defaults to <code>:cargoBuild{mode.capitalied()}</code>.</li>
 </ul>
 <p><a id="kraken.std.cargo.cargo_publish"></a></p>
 <p><a id="pydoc:kraken.std.cargo.cargo_publish"></a></p>
 <h4 id="cargo_publish">cargo_publish</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cargo_publish</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                  <span class="n">incremental</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                  <span class="n">env</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                   <span class="o">*</span><span class="p">,</span>
                   <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                   <span class="n">additional_args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
                   <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cargoPublish&quot;</span><span class="p">,</span>
                   <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoPublishTask</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/bcb9760d4b6afdb9b52e3b1d36051e1735f06714/docs/../src/kraken/std/cargo/__init__.py#L152">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/1f5bc88a377dec616b539228637f98747faa1212/docs/../src/kraken/std/cargo/__init__.py#L159">[view_source]</a></p>
 <p>Creates a task that publishes the create to the specified <em>registry</em>.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
 <li><code>registry</code>: The alias of the registry to publish to.</li>
+<li><code>incremental</code>: Incremental builds on or off.</li>
+<li><code>env</code>: Environment variables (overrides :attr:<code>CargoProject.build_env</code>).</li>
 <li><code>version</code>: The version number to publish. If specified, a cargo bump task will be added. If a version
 number to bump to is specified, the <code>--allow-dirty</code> option is automatically passed to Cargo.</li>
 </ul>
