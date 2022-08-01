@@ -20,6 +20,9 @@ class CargoPublishTask(CargoBuildTask):
     #: The registry to publish the package to.
     registry: Property[CargoRegistry]
 
+    #: Verify (build the create).
+    verify: Property[bool] = Property.default(True)
+
     def get_cargo_command(self, env: Dict[str, str]) -> List[str]:
         super().get_cargo_command(env)
         registry = self.registry.get()
@@ -29,6 +32,7 @@ class CargoPublishTask(CargoBuildTask):
             ["cargo", "publish"]
             + self.additional_args.get()
             + ["--registry", registry.alias, "--token", registry.publish_token]
+            + ([] if self.verify.get() else ["--no-verify"])
         )
 
     def make_safe(self, args: List[str], env: Dict[str, str]) -> None:

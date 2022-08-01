@@ -116,8 +116,14 @@ class SccacheTask(BackgroundTask):
         return TaskStatus.started(manager.get_cache_location())
 
 
-def sccache(manager: SccacheManager, *, name: str = "sccache", project: Project | None = None) -> SccacheTask:
+def sccache(
+    manager: SccacheManager,
+    *,
+    name: str = "sccache",
+    group: str | None = None,
+    project: Project | None = None,
+) -> SccacheTask:
     """Creates a background task that starts the sccache server."""
 
     project = project or Project.current()
-    return project.do(name, SccacheTask, False, manager=manager)
+    return project.do(name, SccacheTask, False, group=group, manager=manager)

@@ -27,3 +27,27 @@ id = "42c428e5-3c78-4de5-a37a-505b2db79812"
 type = "fix"
 description = "fix showing sccache stats when the sccache server is stopped"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "78e3d494-b9e1-4758-a6e0-136a05ff3a93"
+type = "fix"
+description = "fix passing args to `CargoBuildTask`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "0d3dacf6-741b-489f-ba9b-7456bd462f2f"
+type = "improvement"
+description = "`cargo clippy` actually builds your project, so we make it a subclass of `CargoBuildTask` and have it depend on the auth proxy and config sync"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "211c97c4-ed30-4b5c-908b-aa91bab3be2b"
+type = "feature"
+description = "add option to disable verify for build task"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6d3153a7-7ce5-4038-8702-fa795143acb3"
+type = "improvement"
+description = "add `sccache(group)` parameter"
+author = "@NiklasRosenstein"

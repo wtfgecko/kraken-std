@@ -34,8 +34,8 @@ __all__ = [
     "CargoSyncConfigTask",
 ]
 
+CARGO_BUILD_SUPPORT_GROUP_NAME = "cargoBuildSupport"
 CARGO_SYNC_CONFIG_TASK_NAME = "cargoSyncConfig"
-CARGO_AUTH_PROXY_TASK_NAME = "cargoAuthProxy"
 
 
 def cargo_registry(
@@ -72,9 +72,10 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
     task = project.do(
-        CARGO_AUTH_PROXY_TASK_NAME,
+        "cargoAuthProxy",
         CargoAuthProxyTask,
         False,
+        group=CARGO_BUILD_SUPPORT_GROUP_NAME,
         registries=Supplier.of_callable(lambda: list(cargo.registries.values())),
     )
     task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
@@ -112,7 +113,11 @@ def cargo_clippy(
     project = project or Project.current()
     name = "cargoClippyFix" if fix else "cargoClippy"
     group = ("fmt" if fix else "lint") if group == "_auto_" else group
-    project.do(name, CargoClippyTask, not fix, group=group, fix=fix)
+    task = project.do(name, CargoClippyTask, not fix, group=group, fix=fix)
+
+    # Clippy builds your code.
+    task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
+    task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
 
 
 def cargo_fmt(*, project: Project | None = None) -> None:
@@ -148,10 +153,10 @@ def cargo_build(
         default=False,
         group=group,
         incremental=incremental,
-        args=["--release"] if mode == "release" else [],
+        additional_args=["--release"] if mode == "release" else [],
         env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
     )
-    task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")
+    task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
     task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
     return task
 
@@ -161,6 +166,7 @@ def cargo_publish(
     incremental: bool | None = None,
     env: dict[str, str] | None = None,
     *,
+    verify: bool = True,
     version: str | None = None,
     additional_args: Sequence[str] = (),
     name: str = "cargoPublish",
@@ -171,6 +177,9 @@ def cargo_publish(
     :param registry: The alias of the registry to publish to.
     :param incremental: Incremental builds on or off.
     :param env: Environment variables (overrides :attr:`CargoProject.build_env`).
+    :param verify: If this is enabled, the `cargo publish` task will build the crate after it is packaged.
+        Disabling this just packages the crate and publishes it. Only if this is enabled will the created
+        task depend on the auth proxy.
     :param version: The version number to publish. If specified, a cargo bump task will be added. If a version
         number to bump to is specified, the `--allow-dirty` option is automatically passed to Cargo.
     """
@@ -190,9 +199,12 @@ def cargo_publish(
         registry=Supplier.of_callable(lambda: cargo.registries[registry]),
         additional_args=additional_args,
         incremental=incremental,
+        verify=verify,
         env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
     )
-    task.add_relationship(f":{CARGO_AUTH_PROXY_TASK_NAME}?")
+
+    if verify:
+        task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
     task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
 
     if version is not None:

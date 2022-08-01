@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable, List
+from typing import List
 
 import tomli
 import tomli_w
-from kraken.core import Property, Task, TaskRelationship
+from kraken.core import Property
 
 from kraken.std.generic.render_file_task import RenderFileTask
 

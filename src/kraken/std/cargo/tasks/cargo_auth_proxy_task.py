@@ -4,12 +4,12 @@ import contextlib
 import logging
 import time
 from pathlib import Path
-from typing import Iterable, Iterator, List
+from typing import Iterator, List
 from urllib.parse import urlparse
 
 import tomli
 import tomli_w
-from kraken.core import BackgroundTask, Property, Task, TaskRelationship
+from kraken.core import BackgroundTask, Property
 from kraken.core.utils import atomic_file_swap, not_none
 
 from kraken.std.cargo.config import CargoRegistry
