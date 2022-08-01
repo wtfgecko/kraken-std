@@ -271,6 +271,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#unreleased" class="md-nav__link">
+    Unreleased
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#0135-2022-07-29" class="md-nav__link">
     0.1.35 (2022-07-29)
   </a>
@@ -574,6 +581,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#unreleased" class="md-nav__link">
+    Unreleased
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#0135-2022-07-29" class="md-nav__link">
     0.1.35 (2022-07-29)
   </a>
@@ -809,13 +823,44 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/content/changelog.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/kraken-build/kraken-std/blob/None/docs/content/changelog.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
 <h1 id="changelog">Changelog</h1>
+<h2 id="unreleased">Unreleased</h2>
+<table><tr><th>Type</th><th>Description</th><th>PR</th><th>Issues</th><th>Author</th></tr>
+  <tr><td>Hygiene</td><td>
+
+remove unused `CargoAuthProxyTask.for_tasks` and `CargoSyncConfigTask.for_tasks`</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Improvement</td><td>
+
+update Cargo MITM proxy to not inject credentials into CONNECT requests</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Feature</td><td>
+
+add `CargoSyncConfigTask.git_fetch_with_cli` property</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Fix</td><td>
+
+avoid revealing secret in `CargoBuildTask` and `CargoPublishTask` result status message</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Fix</td><td>
+
+fix showing sccache stats when the sccache server is stopped</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Fix</td><td>
+
+fix passing args to `CargoBuildTask`</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Improvement</td><td>
+
+`cargo clippy` actually builds your project, so we make it a subclass of `CargoBuildTask` and have it depend on the auth proxy and config sync</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Feature</td><td>
+
+add option to disable verify for build task</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Improvement</td><td>
+
+add `sccache(group)` parameter</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+</table>
+
 <h2 id="0135-2022-07-29">0.1.35 (2022-07-29)</h2>
 <table><tr><th>Type</th><th>Description</th><th>PR</th><th>Issues</th><th>Author</th></tr>
   <tr><td>Improvement</td><td>
