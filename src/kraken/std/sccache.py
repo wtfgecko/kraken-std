@@ -80,7 +80,7 @@ class SccacheManager:
         command = [str(self.bin) if self.bin else "sccache", "-s"]
         return sp.check_output(command).decode()
 
-    def stop(self) -> None:
+    def stop(self, show_stats: bool = False) -> None:
         """Stop the Sccache server."""
 
         if not self.is_running():
@@ -89,7 +89,7 @@ class SccacheManager:
 
         env = {"SCCACHE_NO_DAEMON": "1"}
         command = [str(self.bin) if self.bin else "sccache", "--stop-server"]
-        sp.check_call(command, env={**os.environ, **env}, stdout=sp.DEVNULL)
+        sp.check_call(command, env={**os.environ, **env}, stdout=None if show_stats else sp.DEVNULL)
 
         self._proc.wait(10)
         if self.is_running():
@@ -112,8 +112,7 @@ class SccacheTask(BackgroundTask):
         manager = self.manager.get()
         if not manager.is_running():
             manager.start()
-        exit_stack.callback(lambda: print(manager.stats().strip()))
-        exit_stack.callback(lambda: manager.stop())
+        exit_stack.callback(lambda: manager.stop(show_stats=True))
         return TaskStatus.started(manager.get_cache_location())
 
 

@@ -21,3 +21,9 @@ id = "c0b838ab-1f9e-4269-bcaf-fd7c8fb3297a"
 type = "fix"
 description = "avoid revealing secret in `CargoBuildTask` and `CargoPublishTask` result status message"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "42c428e5-3c78-4de5-a37a-505b2db79812"
+type = "fix"
+description = "fix showing sccache stats when the sccache server is stopped"
+author = "@NiklasRosenstein"
