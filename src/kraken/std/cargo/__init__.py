@@ -105,19 +105,22 @@ def cargo_sync_config(
 
 def cargo_clippy(
     *,
+    allow: str = "staged",
     fix: bool = False,
     name: str | None = None,
     group: str | None = "_auto_",
     project: Project | None = None,
-) -> None:
+) -> CargoClippyTask:
     project = project or Project.current()
     name = "cargoClippyFix" if fix else "cargoClippy"
     group = ("fmt" if fix else "lint") if group == "_auto_" else group
-    task = project.do(name, CargoClippyTask, not fix, group=group, fix=fix)
+    task = project.do(name, CargoClippyTask, not fix, group=group, fix=fix, allow=allow)
 
     # Clippy builds your code.
     task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
     task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
+
+    return task
 
 
 def cargo_fmt(*, project: Project | None = None) -> None:
