@@ -33,7 +33,8 @@ class GitignoreSyncTask(RenderFileTask):
         self._paths = {}
 
     def add_paths(self, header: str | None, paths: Sequence[str]) -> None:
-        self._paths.setdefault(header, []).extend(paths)
+        the_paths = self._paths.setdefault(header, [])
+        the_paths[:] = set(list(the_paths) + list(paths))
 
     # RenderFileTask
 

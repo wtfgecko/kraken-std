@@ -57,10 +57,15 @@ class GitignoreFile(NamedTuple):
         self.entries.insert(len(self.entries) if index is None else index, entry)
 
     def remove_path(self, path: str) -> None:
-        index = next((i for i, e in enumerate(self.entries) if e.is_path() and e.value == path), None)
-        if index is None:
+        removed = 0
+        while True:
+            index = next((i for i, e in enumerate(self.entries) if e.is_path() and e.value == path), None)
+            if index is None:
+                break
+            del self.entries[index]
+            removed += 1
+        if removed == 0:
             raise ValueError(f'"{path}" not in GitignoreFile')
-        del self.entries[index]
 
     def render(self) -> str:
         return "\n".join(map(str, self.entries)) + "\n"
