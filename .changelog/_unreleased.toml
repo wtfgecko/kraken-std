@@ -1,0 +1,5 @@
+[[entries]]
+id = "0f4e88cc-1671-4dab-a449-5dea3a0f8d8b"
+type = "hygiene"
+description = "remove unused `CargoAuthProxyTask.for_tasks` and `CargoSyncConfigTask.for_tasks`"
+author = "@NiklasRosenstein"

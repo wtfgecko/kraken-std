@@ -24,9 +24,6 @@ class CargoSyncConfigTask(RenderFileTask):
     #: The registries to insert into the configuration.
     registries: Property[List[CargoRegistry]] = Property.config(default_factory=list)
 
-    #: Tasks that are dependant on this task.
-    for_tasks: Property[List[Task]] = Property.default_factory(list)
-
     # RenderFileTask
 
     def get_file_contents(self, file: Path) -> str | bytes:
@@ -43,10 +40,3 @@ class CargoSyncConfigTask(RenderFileTask):
             )
         lines.append(tomli_w.dumps(content))
         return "\n".join(lines)
-
-    # Task
-
-    def get_relationships(self) -> Iterable[TaskRelationship]:
-        yield from super().get_relationships()
-        for task in self.for_tasks.get():
-            yield TaskRelationship(task, True, True)

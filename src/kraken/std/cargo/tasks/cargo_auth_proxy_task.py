@@ -38,9 +38,6 @@ class CargoAuthProxyTask(BackgroundTask):
     #: The path to the certificate file that needs to be trusted in order to talk to the proxy over HTTPS.
     proxy_cert_file: Property[Path] = Property.output()
 
-    #: Tasks that are dependant on this task.
-    for_tasks: Property[List[Task]] = Property.default_factory(list)
-
     @contextlib.contextmanager
     def _inject_config(self) -> Iterator[None]:
         """Injects the proxy URL and cert file into the Cargo and Git configuration."""
@@ -77,11 +74,6 @@ class CargoAuthProxyTask(BackgroundTask):
             yield
 
     # Task
-
-    def get_relationships(self) -> Iterable[TaskRelationship]:
-        yield from super().get_relationships()
-        for task in self.for_tasks.get():
-            yield TaskRelationship(task, True, True)
 
     def start_background_task(self, exit_stack: contextlib.ExitStack) -> None:
         from ..mitm import mitm_auth_proxy
