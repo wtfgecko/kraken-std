@@ -38,6 +38,10 @@ class AuthInjector(HttpProxyBasePlugin):
         # NOTE (@NiklasRosenstein): This method is only called for requests in an HTTPS tunnel if TLS
         #       interception is enabled, which requires a self-signed CA-certificate.
 
+        if not request.method or not request.headers:
+            return request
+
+        method = request.method.decode()
         host = not_none(request.headers)[b"host"][1].partition(b":")[0].decode()
         # path = request.path.decode() if request.path else None
 
@@ -47,7 +51,7 @@ class AuthInjector(HttpProxyBasePlugin):
         #     new_url = f'https://{host}{path}'
         #     request.set_url(new_url.encode())
 
-        if host in self.auth and not request.has_header(b"Authorization"):
+        if method != "CONNECT" and host in self.auth and not request.has_header(b"Authorization"):
             logger.info("injecting Authorization for %s request to %s", not_none(request.method).decode(), host)
             creds = self.auth[host]
             auth = base64.b64encode(f"{creds[0]}:{creds[1]}".encode())
