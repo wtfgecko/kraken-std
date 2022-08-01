@@ -9,3 +9,9 @@ id = "598f2ab5-4be0-4784-a918-5024bb1e7d58"
 type = "improvement"
 description = "update Cargo MITM proxy to not inject credentials into CONNECT requests"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1aa1e30b-4057-41f6-92b3-fb25e245a726"
+type = "feature"
+description = "add `CargoSyncConfigTask.git_fetch_with_cli` property"
+author = "@NiklasRosenstein"

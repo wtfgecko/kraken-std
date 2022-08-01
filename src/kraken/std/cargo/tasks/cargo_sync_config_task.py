@@ -24,12 +24,21 @@ class CargoSyncConfigTask(RenderFileTask):
     #: The registries to insert into the configuration.
     registries: Property[List[CargoRegistry]] = Property.config(default_factory=list)
 
+    #: Enable fetching Cargo indexes with the Git CLI.
+    git_fetch_with_cli: Property[bool]
+
     # RenderFileTask
 
     def get_file_contents(self, file: Path) -> str | bytes:
         content = tomli.loads(file.read_text()) if not self.replace.get() and file.exists() else {}
         for registry in self.registries.get():
             content.setdefault("registries", {})[registry.alias] = {"index": registry.index}
+        if self.git_fetch_with_cli.is_filled():
+            if self.git_fetch_with_cli.get():
+                content.setdefault("net", {})["git-fetch-with-cli"] = True
+            else:
+                if "net" in content:
+                    content["net"].pop("git-fetch-with-cli", None)
         lines = []
         if self.replace.get():
             lines.append("# This file is managed by Kraken. Manual edits to this file will be overwritten.")
