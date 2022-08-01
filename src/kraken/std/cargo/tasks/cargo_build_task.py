@@ -41,4 +41,4 @@ class CargoBuildTask(Task):
         self.logger.info("%s [env: %s]", safe_command, safe_env)
 
         result = sp.call(command, cwd=self.project.directory, env={**os.environ, **env})
-        return TaskStatus.from_exit_code(command, result)
+        return TaskStatus.from_exit_code(safe_command, result)

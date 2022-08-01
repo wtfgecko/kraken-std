@@ -15,3 +15,9 @@ id = "1aa1e30b-4057-41f6-92b3-fb25e245a726"
 type = "feature"
 description = "add `CargoSyncConfigTask.git_fetch_with_cli` property"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "c0b838ab-1f9e-4269-bcaf-fd7c8fb3297a"
+type = "fix"
+description = "avoid revealing secret in `CargoBuildTask` and `CargoPublishTask` result status message"
+author = "@NiklasRosenstein"
