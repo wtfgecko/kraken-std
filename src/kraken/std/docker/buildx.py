@@ -8,6 +8,7 @@ from kraken.core.task import TaskStatus
 from kraken.core.utils import flatten, not_none
 
 from . import DockerBuildTask
+from .rewrite import prepend_secret_mounts_to_file
 
 
 class BuildxBuildTask(DockerBuildTask):
@@ -57,6 +58,7 @@ class BuildxBuildTask(DockerBuildTask):
 
         # TODO (@nrosenstein): docker login for auth
 
-        self.logger.info("%s", command)
-        result = sp.call(command, env=env, cwd=self.project.directory)
-        return TaskStatus.from_exit_code(command, result)
+        with prepend_secret_mounts_to_file(self.dockerfile.get(), self.secrets.get().keys()):
+            self.logger.info("%s", command)
+            result = sp.call(command, env=env, cwd=self.project.directory)
+            return TaskStatus.from_exit_code(command, result)

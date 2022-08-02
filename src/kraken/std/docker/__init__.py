@@ -39,6 +39,7 @@ class DockerBuildTask(Task):
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
         self.build_context.set(project.directory)
+        self.dockerfile.set(Path("Dockerfile"))
         self.auth.setdefault({})
         self.build_args.setdefault({})
         self.secrets.setdefault({})

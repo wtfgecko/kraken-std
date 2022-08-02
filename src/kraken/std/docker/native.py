@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import os
 import subprocess as sp
 import tempfile
@@ -11,6 +12,7 @@ from kraken.core.task import TaskStatus
 from kraken.core.utils import flatten, not_none
 
 from . import DockerBuildTask
+from .rewrite import prepend_secret_mounts_to_file
 
 
 class NativeBuildTask(DockerBuildTask):
@@ -52,17 +54,21 @@ class NativeBuildTask(DockerBuildTask):
         if self.image_output_file.get():
             command += ["--output", f"type=tar,dest={self.image_output_file.get()}"]
 
+        command += ["--progress", "plain"]
+
         # Buildx will take the secret from the environment variasbles.
         env = os.environ.copy()
         env["DOCKER_BUILDKIT"] = "1" if self.native_use_buildkit.get() else "0"
 
         # TODO (@nrosenstein): docker login for auth
 
-        with tempfile.TemporaryDirectory() as tempdir:
+        with tempfile.TemporaryDirectory() as tempdir, contextlib.ExitStack() as exit_stack:
             for key, value in self.secrets.get().items():
                 secret_file = Path(tempdir) / key
                 secret_file.write_text(value)
                 command += ["--secret", f"id={key},src={secret_file}"]
+
+            exit_stack.enter_context(prepend_secret_mounts_to_file(self.dockerfile.get(), self.secrets.get().keys()))
 
             self.logger.info("%s", command)
             result = sp.call(command, env=env, cwd=self.project.directory)
