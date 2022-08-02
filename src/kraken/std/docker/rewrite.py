@@ -25,5 +25,4 @@ def prepend_secret_mounts_to_file(dockerfile: Path, build_secrets: Collection[st
     with atomic_file_swap(dockerfile, "w", always_revert=True) as fp:
         fp.write(prepend_secret_mounts(dockerfile_content, build_secrets))
         fp.close()
-        print(prepend_secret_mounts(dockerfile_content, build_secrets))
         yield
