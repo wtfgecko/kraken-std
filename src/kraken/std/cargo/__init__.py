@@ -15,6 +15,7 @@ from .tasks.cargo_clippy_task import CargoClippyTask
 from .tasks.cargo_fmt_task import CargoFmtTask
 from .tasks.cargo_publish_task import CargoPublishTask
 from .tasks.cargo_sync_config_task import CargoSyncConfigTask
+from .tasks.cargo_test_task import CargoTestTask
 
 __all__ = [
     "cargo_auth_proxy",
@@ -30,6 +31,7 @@ __all__ = [
     "CargoClippyTask",
     "CargoProject",
     "CargoPublishTask",
+    "CargoTestTask",
     "CargoRegistry",
     "CargoSyncConfigTask",
 ]
@@ -157,6 +159,35 @@ def cargo_build(
         group=group,
         incremental=incremental,
         additional_args=["--release"] if mode == "release" else [],
+        env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
+    )
+    task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
+    task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
+    return task
+
+
+def cargo_test(
+    incremental: bool | None = None,
+    env: dict[str, str] | None = None,
+    *,
+    group: str | None = "test",
+    project: Project | None = None,
+) -> CargoTestTask:
+    """Creates a task that runs `cargo test`.
+
+    :param incremental: Whether to build the tests incrementally or not (with the `--incremental=` option). If not
+        specified, the option is not specified and the default behaviour is used.
+    :param env: Override variables for the build environment variables. Values in this dictionary override
+        variables in :attr:`CargoProject.build_env`."""
+
+    project = project or Project.current()
+    cargo = CargoProject.get_or_create(project)
+    task = project.do(
+        "cargoTest",
+        CargoTestTask,
+        default=False,
+        group=group,
+        incremental=incremental,
         env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
     )
     task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
