@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import contextlib
+import logging
 import shutil
 import subprocess as sp
 import tempfile
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 def helm_package(
@@ -22,34 +25,32 @@ def helm_package(
     with contextlib.ExitStack() as exit_stack:
         command = ["helm", "package", str(chart_path)]
 
-        tempdir: Path | None = None
-        if output_directory is None or output_file is not None:
-            # We build into a temporary directory first.
-            tempdir = Path(exit_stack.enter_context(tempfile.TemporaryDirectory()))
-            command += ["--destination", str(tempdir)]
-        else:
-            command += ["--destination", str(output_directory)]
+        # We build into a temporary directory first.
+        tempdir = Path(exit_stack.enter_context(tempfile.TemporaryDirectory()))
+        command += ["--destination", str(tempdir)]
+
         if app_version:
             command += ["--appVersion", app_version]
         if version:
             command += ["--version", version]
 
+        logger.info("%s", command)
         result = sp.call(command)
         if result != 0:
             return result, None
 
+        built_file = list(tempdir.iterdir())
+        assert len(built_file) == 1, built_file
+
         if output_file:
-            assert tempdir is not None
             output_file.parent.mkdir(exist_ok=True, parents=True)
-            if output_file.exists():
-                output_file.unlink()
-            chart_file = next(Path(tempdir).iterdir())
-            shutil.move(str(chart_file), output_file)
+            shutil.move(str(built_file[0]), output_file)
         else:
             assert output_directory is not None
-            chart_file = next(output_directory.iterdir())
+            output_file = output_directory / built_file[0].name
+            shutil.move(str(built_file[0]), output_file)
 
-        return 0, chart_file
+        return 0, output_file
 
     assert False
 
