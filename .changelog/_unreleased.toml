@@ -1,0 +1,5 @@
+[[entries]]
+id = "69248842-86ff-404c-bc06-bedfe5c0e257"
+type = "feature"
+description = "add `GitVersion.format()`"
+author = "@NiklasRosenstein"

@@ -59,3 +59,13 @@ class GitVersion:
             distance=distance,
             dirty=match.group(6) is not None,
         )
+
+    def format(self, distance: bool = True, sha: bool = True, dirty: bool = False) -> str:
+        result = f"{self.major}.{self.minor}.{self.patch}"
+        if self.distance and distance:
+            result = f"{result}-{self.distance.value}"
+            if sha:
+                result = f"{result}-g{self.distance.sha}"
+            if self.dirty:
+                result = f"{result}-dirty"
+        return result
