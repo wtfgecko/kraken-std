@@ -42,13 +42,11 @@ def helm_package(
         built_file = list(tempdir.iterdir())
         assert len(built_file) == 1, built_file
 
-        if output_file:
-            output_file.parent.mkdir(exist_ok=True, parents=True)
-            shutil.move(str(built_file[0]), output_file)
-        else:
+        if not output_file:
             assert output_directory is not None
             output_file = output_directory / built_file[0].name
-            shutil.move(str(built_file[0]), output_file)
+        output_file.parent.mkdir(exist_ok=True, parents=True)
+        shutil.move(str(built_file[0]), output_file)
 
         return 0, output_file
 
