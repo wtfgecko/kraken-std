@@ -136,6 +136,7 @@ def cargo_build(
     incremental: bool | None = None,
     env: dict[str, str] | None = None,
     *,
+    version: str | None = None,
     group: str | None = "build",
     name: str | None = None,
     project: Project | None = None,
@@ -147,7 +148,8 @@ def cargo_build(
         specified, the option is not specified and the default behaviour is used.
     :param env: Override variables for the build environment variables. Values in this dictionary override
         variables in :attr:`CargoProject.build_env`.
-    :param name: The name of the task. If not specified, defaults to `:cargoBuild{mode.capitalied()}`."""
+    :param name: The name of the task. If not specified, defaults to `:cargoBuild{mode.capitalied()}`.
+    :param version: Bump the Cargo.toml version temporarily while building to the given version."""
 
     assert mode in ("debug", "release"), repr(mode)
     project = project or Project.current()
@@ -163,6 +165,17 @@ def cargo_build(
     )
     task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
     task.add_relationship(f":{CARGO_SYNC_CONFIG_TASK_NAME}?")
+
+    if version is not None:
+        bump_task = project.do(
+            f"{task.name}/bump",
+            CargoBumpVersionTask,
+            False,
+            version=version,
+            revert=True,
+        )
+        task.add_relationship(bump_task)
+
     return task
 
 
