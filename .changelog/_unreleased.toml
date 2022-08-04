@@ -1,0 +1,5 @@
+[[entries]]
+id = "dfc98639-5b0a-4975-8844-eca5329f577c"
+type = "improvement"
+description = "Sort Gitignore paths by default"
+author = "@NiklasRosenstein"

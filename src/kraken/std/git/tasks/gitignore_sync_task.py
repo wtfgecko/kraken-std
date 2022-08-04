@@ -23,7 +23,7 @@ class GitignoreSyncTask(RenderFileTask):
     """
 
     file: Property[Path] = Property.default(".gitignore")
-    sort_paths: Property[bool] = Property.config(default=False)
+    sort_paths: Property[bool] = Property.config(default=True)
     sort_groups: Property[bool] = Property.config(default=False)
 
     _paths: Dict[Optional[str], List[str]]
