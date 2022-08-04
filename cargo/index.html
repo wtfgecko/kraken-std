@@ -559,6 +559,7 @@ the <code>.cargo/config.toml</code> configuration file, ensuring that the Cargo 
                 <span class="n">incremental</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">env</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="o">*</span><span class="p">,</span>
+                <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;build&quot;</span><span class="p">,</span>
                 <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoBuildTask</span>
@@ -573,6 +574,7 @@ specified, the option is not specified and the default behaviour is used.</li>
 <li><code>env</code>: Override variables for the build environment variables. Values in this dictionary override
 variables in :attr:<code>CargoProject.build_env</code>.</li>
 <li><code>name</code>: The name of the task. If not specified, defaults to <code>:cargoBuild{mode.capitalied()}</code>.</li>
+<li><code>version</code>: Bump the Cargo.toml version temporarily while building to the given version.</li>
 </ul>
 <p><a id="kraken.std.cargo.cargo_publish"></a></p>
 <p><a id="pydoc:kraken.std.cargo.cargo_publish"></a></p>
@@ -587,7 +589,7 @@ variables in :attr:<code>CargoProject.build_env</code>.</li>
                   <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cargoPublish&quot;</span><span class="p">,</span>
                   <span class="n">project</span><span class="p">:</span> <span class="n">Project</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CargoPublishTask</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/cargo/__init__.py#L198">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/cargo/__init__.py#L211">[view_source]</a></p>
 <p>Creates a task that publishes the create to the specified <em>registry</em>.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
