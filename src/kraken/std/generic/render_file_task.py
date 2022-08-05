@@ -1,16 +1,24 @@
 from __future__ import annotations
 
+from multiprocessing.sharedctypes import Value
 from pathlib import Path
 
-from kraken.core import Project, Property, Task, TaskStatus
+from kraken.core import Project, Property, Supplier, Task, TaskStatus
 
 DEFAULT_ENCODING = "utf-8"
 
 
 class RenderFileTask(Task):
+    """A base class for tasks that produce a single file. You can either pass the :attr:`content` property for the
+    file contents or implement a subclass that overrides the :meth:`get_file_contents` method.
+
+    By default, the task will create a separate task on :meth:`finalize` that checks if the contents of the generated
+    file are up to date, and error if not. This task is registered to the default `"lint"` group."""
+
     file: Property[Path]
     encoding: Property[str]
     content: Property[str]
+    create_check_task: Property[bool] = Property.default(True)
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
@@ -20,22 +28,36 @@ class RenderFileTask(Task):
     def get_file_contents(self, file: Path) -> str | bytes:
         return self.content.get()
 
-    def finalize(self) -> None:
-        self.file.set(self.file.value.map(lambda p: self.project.directory / p))
-        super().finalize()
-
-    def prepare(self) -> TaskStatus | None:
+    def _get_file_contents_cached(self) -> bytes:
         file = self.file.get()
-
         # Materialize the file contents.
         content = self.get_file_contents(file)
         if isinstance(content, str):
             self._content_cache = content.encode(self.encoding.get())
         else:
             self._content_cache = content
+        return self._content_cache
+
+    def finalize(self) -> None:
+        self.file.set(self.file.value.map(lambda p: self.project.directory / p))
+        if self.create_check_task.get():
+            self.project.do(
+                self.name + "Check",
+                CheckFileContentsTask,
+                default=False,
+                group="lint",
+                # Intentionally break automatic dependency recognition, the two tasks need to be independent.
+                file=Supplier.of_callable(lambda: self.file.get()),
+                content=Supplier.of_callable(lambda: self._get_file_contents_cached()),
+                update_task=self.path,
+            )
+        super().finalize()
+
+    def prepare(self) -> TaskStatus | None:
+        file = self.file.get()
 
         # Check if we would be updating the file.
-        if file.is_file() and file.read_bytes() == self._content_cache:
+        if file.is_file() and file.read_bytes() == self._get_file_contents_cached():
             return TaskStatus.up_to_date()
 
         return TaskStatus.pending()
@@ -46,3 +68,24 @@ class RenderFileTask(Task):
         file.parent.mkdir(exist_ok=True)
         file.write_bytes(self._content_cache)
         return TaskStatus.succeeded(f"write {len(self._content_cache)} bytes to {file}")
+
+
+class CheckFileContentsTask(Task):
+    file: Property[Path]
+    content: Property[bytes]
+    update_task: Property[str]
+
+    def execute(self) -> TaskStatus | None:
+        file = self.file.get()
+        try:
+            file = file.relative_to(Path.cwd())
+        except ValueError:
+            pass
+        uptask = self.update_task.get()
+        if not file.exists():
+            return TaskStatus.failed(f'file "{file}" does not exist, run {uptask} to generate it')
+        if not file.is_file():
+            return TaskStatus.failed(f'"{file}" is not a file')
+        if file.read_bytes() != self.content.get():
+            return TaskStatus.failed(f'file "{file}" is not up to date, run {uptask} to update it')
+        return None
