@@ -145,15 +145,15 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
         with kraken_project(kraken_ctx()) as project1:
             project1.directory = data_dir / "hello-world-lib"
             cargo_registry(
-                registry_id,
+                cargo_registry_id,
                 repository.index_url,
                 read_credentials=(repository.user, repository.password),
                 publish_token=repository.password,
             )
             cargo_auth_proxy()
             cargo_sync_config()
-            cargo_publish(registry_id, additional_args=["--allow-dirty"])
-            project1.context.execute([":cargoPublish"])
+            cargo_publish(cargo_registry_id)
+            project1.context.execute(["fmt", ":cargoPublish"])
 
         logger.info("Giving repository time to index (20s) ...")
         time.sleep(20)
@@ -167,7 +167,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
         with kraken_project(kraken_ctx()) as project2:
             project2.directory = data_dir / "hello-world-app"
             cargo_registry(
-                registry_id,
+                cargo_registry_id,
                 repository.index_url,
                 read_credentials=(repository.user, repository.password),
             )
