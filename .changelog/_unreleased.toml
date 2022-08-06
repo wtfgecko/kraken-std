@@ -9,3 +9,9 @@ id = "c12eca50-f5ae-4c23-8baa-9f11171985fb"
 type = "improvement"
 description = "add `cargo_sync_config(check)` parameter, enabled by default, to create a check task"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "16a6b247-dc96-4007-b189-b7830875e8cc"
+type = "improvement"
+description = "`gitignore()` now also generates a check task"
+author = "@NiklasRosenstein"
