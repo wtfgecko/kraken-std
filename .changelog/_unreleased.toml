@@ -51,3 +51,9 @@ id = "20e43a6b-866b-4da2-8e35-63650f8e99c1"
 type = "breaking change"
 description = "Redesign Cargo build graph; no longer do `cargo_build()` and `cargo_publish()` create their separate task to bump the Cargo version but instead a `cargo_bump_version()` task was added that belongs to the build support group. `cargoAuthProxy` now depends on `cargoSyncConfig.check` to ensure that the task does not run while the proxy is active as it injects configuration values into the same file."
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "b7728061-9006-4cf5-a89b-f2f07b0c5fa0"
+type = "fix"
+description = "Fix an issue in `RenderFileTask` introduced in 0.1.46 if the target file does not exist, the internal cache was not populated when the task is executed and thus errored"
+author = "@NiklasRosenstein"

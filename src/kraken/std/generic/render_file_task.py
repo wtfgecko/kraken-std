@@ -77,11 +77,10 @@ class RenderFileTask(Task):
         return TaskStatus.pending()
 
     def execute(self) -> TaskStatus:
-        assert self._content_cache is not None
         file = self.file.get()
         file.parent.mkdir(exist_ok=True)
-        file.write_bytes(self._content_cache)
-        return TaskStatus.succeeded(f"write {len(self._content_cache)} bytes to {file}")
+        file.write_bytes(self.__get_file_contents_cached())
+        return TaskStatus.succeeded(f"write {len(self.__get_file_contents_cached())} bytes to {file}")
 
 
 class CheckFileContentsTask(Task):
