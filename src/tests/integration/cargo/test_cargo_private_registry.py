@@ -28,7 +28,6 @@ import logging
 import os
 import shutil
 import subprocess as sp
-import tempfile
 import time
 import unittest.mock
 import uuid
