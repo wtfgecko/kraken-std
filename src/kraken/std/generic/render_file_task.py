@@ -43,6 +43,8 @@ class RenderFileTask(Task):
             update_task=self.path,
         )
         task.description = description or 'Check if "%(file)s" is up to date.'
+        # Ensure that the render task comes before the check task if both were to run in the same build.
+        task.add_relationship(self, strict=False)
         return task
 
     def get_file_contents(self, file: Path) -> str | bytes:
