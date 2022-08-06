@@ -9,6 +9,7 @@ from .base_task import EnvironmentAwareDispatchTask
 
 
 class MypyTask(EnvironmentAwareDispatchTask):
+    description = "Static type checking for Python code using Mypy."
     config_file: Property[Path]
     additional_args: Property[List[str]] = Property.config(default_factory=list)
     check_tests: Property[bool] = Property.config(default=True)

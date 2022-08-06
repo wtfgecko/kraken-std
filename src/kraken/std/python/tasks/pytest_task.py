@@ -14,6 +14,7 @@ from .base_task import EnvironmentAwareDispatchTask
 
 
 class PytestTask(EnvironmentAwareDispatchTask):
+    description = "Run unit tests using Pytest."
     tests_dir: Property[Path]
     ignore_dirs: Property[List[Path]] = Property.config(default_factory=list)
     allow_no_tests: Property[bool] = Property.config(default=False)

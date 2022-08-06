@@ -18,6 +18,11 @@ class BuildTask(Task):
     as_version: Property[Optional[str]] = Property.config(default=None)
     output_files: Property[List[Path]] = Property.output()
 
+    # Task
+
+    def get_description(self) -> str | None:
+        return f"Build distributions for your Python project. [build system: {self.build_system.get().name}]"
+
     def execute(self) -> TaskStatus:
         build_system = self.build_system.get()
         if not build_system:

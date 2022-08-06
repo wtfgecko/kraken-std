@@ -13,6 +13,7 @@ from ..settings import python_settings
 class PublishTask(Task):
     """Publishes Python distributions to one or more indexes using :mod:`twine`."""
 
+    description = "Upload the distributions of your Python project. [index url: %(index_upload_url)s]"
     index_upload_url: Property[str]
     index_credentials: Property[Optional[Tuple[str, str]]] = Property.config(default=None)
     distributions: Property[List[Path]]

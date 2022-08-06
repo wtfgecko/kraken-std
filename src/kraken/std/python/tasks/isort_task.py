@@ -23,6 +23,14 @@ class IsortTask(EnvironmentAwareDispatchTask):
             command += ["--settings-file", str(self.config_file.get())]
         return command
 
+    # Task
+
+    def get_description(self) -> str | None:
+        if self.check_only.get():
+            return "Check Python source files formatting with isort."
+        else:
+            return "Format Python source files with isort."
+
 
 @dataclasses.dataclass
 class IsortTasks:

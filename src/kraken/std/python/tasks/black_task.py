@@ -18,6 +18,8 @@ class BlackTask(EnvironmentAwareDispatchTask):
     additional_args: Property[List[str]] = Property.config(default_factory=list)
     additional_files: Property[List[Path]] = Property.config(default_factory=list)
 
+    # EnvironmentAwareDispatchTask
+
     def get_execute_command(self) -> list[str]:
         command = ["black"] + list(map(str, self.source_directories.get()))
         command += self.settings.get_tests_directory_as_args()
@@ -28,6 +30,14 @@ class BlackTask(EnvironmentAwareDispatchTask):
             command += ["--config", str(self.config_file.get())]
         command += self.additional_args.get()
         return command
+
+    # Task
+
+    def get_description(self) -> str | None:
+        if self.check_only.get():
+            return "Check Python source files formatting with Black."
+        else:
+            return "Format Python source files with Black."
 
 
 @dataclasses.dataclass

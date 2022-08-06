@@ -17,6 +17,11 @@ class InstallTask(Task):
     build_system: Property[Optional[PythonBuildSystem]]
     always_use_managed_env: Property[bool]
 
+    # Task
+
+    def get_description(self) -> str | None:
+        return f"Ensure that a managed virtual environment exists. [build system: {self.build_system.get().name}]"
+
     def prepare(self) -> TaskStatus | None:
         venv = get_current_venv(os.environ)
         if not self.always_use_managed_env.get() and venv:

@@ -21,3 +21,9 @@ id = "e6f93e0a-e6c0-4704-ad57-f0eea64016d7"
 type = "improvement"
 description = "`PythonBuildSystem` now has a class-level `name` attribute"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "384bcb08-f051-4442-bac6-b2490467307d"
+type = "improvement"
+description = "add task descriptions for Python tasks"
+author = "@NiklasRosenstein"

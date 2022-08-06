@@ -9,8 +9,11 @@ from .base_task import EnvironmentAwareDispatchTask
 
 
 class Flake8Task(EnvironmentAwareDispatchTask):
+    description = "Lint Python source files with Flake8."
     config_file: Property[Path]
     additional_args: Property[List[str]] = Property.config(default_factory=list)
+
+    # EnvironmentAwareDispatchTask
 
     def get_execute_command(self) -> list[str]:
         command = ["flake8", "src/"] + self.settings.get_tests_directory_as_args()
