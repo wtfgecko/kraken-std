@@ -19,12 +19,6 @@ USER_PASS = "password-for-integration-test"
 
 
 @pytest.fixture
-def tempdir() -> Iterator[Path]:
-    with tempfile.TemporaryDirectory() as tempdir:
-        yield Path(tempdir)
-
-
-@pytest.fixture
 def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> str:
 
     # Create a htpasswd file for the registry.
