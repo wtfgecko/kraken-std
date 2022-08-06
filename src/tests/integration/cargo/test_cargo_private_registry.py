@@ -173,7 +173,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
             cargo_auth_proxy()
             cargo_sync_config()
             cargo_build("debug")
-            project2.context.execute([":cargoBuildDebug"])
+            project2.context.execute(["fmt", ":cargoBuildDebug"])
 
         # Running the application should give "Hello from hello-world-lib!".
         output = sp.check_output([data_dir / "hello-world-app" / "target" / "debug" / "hello-world-app"]).decode()
