@@ -21,7 +21,11 @@ class BuildTask(Task):
     # Task
 
     def get_description(self) -> str | None:
-        return f"Build distributions for your Python project. [build system: {self.build_system.get().name}]"
+        build_system = self.build_system.get()
+        return (
+            f"Build distributions for your Python project. [build system: "
+            f"{build_system.name if build_system else None}]"
+        )
 
     def execute(self) -> TaskStatus:
         build_system = self.build_system.get()

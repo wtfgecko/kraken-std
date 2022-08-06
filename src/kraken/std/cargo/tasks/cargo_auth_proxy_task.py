@@ -22,6 +22,8 @@ class CargoAuthProxyTask(BackgroundTask):
     """This task starts a local proxy server that injects HTTP basic authentication credentials in HTTP(S) requests
     to a Cargo repository to work around Cargo's current inability to interface with private repositories."""
 
+    description = "Creates a proxy that injects credentials to route Cargo traffic through."
+
     #: The Cargo config file to update.
     cargo_config_file: Property[Path] = Property.default(".cargo/config.toml")
 

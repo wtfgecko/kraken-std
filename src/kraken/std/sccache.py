@@ -106,6 +106,7 @@ def find_sccache() -> Path | None:
 class SccacheTask(BackgroundTask):
     """This task ensures that an Sccache server is running for all its dependant tasks."""
 
+    description = "Start sccache in the background."
     manager: Property[SccacheManager]
 
     def start_background_task(self, exit_stack: contextlib.ExitStack) -> TaskStatus:

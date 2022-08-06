@@ -20,7 +20,11 @@ class InstallTask(Task):
     # Task
 
     def get_description(self) -> str | None:
-        return f"Ensure that a managed virtual environment exists. [build system: {self.build_system.get().name}]"
+        build_system = self.build_system.get()
+        return (
+            f"Ensure that a managed virtual environment exists. [build system: "
+            f"{build_system.name if build_system else None}]"
+        )
 
     def prepare(self) -> TaskStatus | None:
         venv = get_current_venv(os.environ)

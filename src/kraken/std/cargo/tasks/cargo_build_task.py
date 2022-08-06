@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import subprocess as sp
 from typing import Dict, List, Optional
@@ -20,6 +22,11 @@ class CargoBuildTask(Task):
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
+
+    def get_description(self) -> str | None:
+        command = self.get_cargo_command({})
+        self.make_safe(command, {})
+        return f"Run `{' '.join(command)}`."
 
     def get_cargo_command(self, env: Dict[str, str]) -> List[str]:
         incremental = self.incremental.get()

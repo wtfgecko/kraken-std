@@ -13,6 +13,7 @@ class CargoBumpVersionTask(BackgroundTask):
     """This task bumps the version number in `Cargo.toml`. The change can be reverted afterwards if the
     :attr:`revert` option is enabled."""
 
+    description = 'Bump the version in "%(cargo_toml_file)s" to "%(version)s" [temporary: %(revert)s]'
     version: Property[str]
     revert: Property[bool] = Property.default(False)
     cargo_toml_file: Property[Path] = Property.default("Cargo.toml")

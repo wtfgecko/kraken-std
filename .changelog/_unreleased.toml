@@ -27,3 +27,9 @@ id = "384bcb08-f051-4442-bac6-b2490467307d"
 type = "improvement"
 description = "add task descriptions for Python tasks"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "5f868c43-c4c1-4a2e-bece-83508221fe28"
+type = "improvement"
+description = "Add descriptions to Cargo tasks and Python build/install tasks"
+author = "@NiklasRosenstein"
