@@ -39,3 +39,9 @@ id = "d1183b6e-1096-4134-b531-05d1366c633c"
 type = "improvement"
 description = "Task generates with `RenderFileTask.make_check_task()` now non-strictly depends on the render file task. This is to ensure that if both tasks are to run in the same build, the render task comes first."
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ed2d9cec-3b6f-4798-adf8-459e2482ba28"
+type = "fix"
+description = "Fix cryptic error message that can occurr when the Cargo auth proxy is killed during startup. This usually occurred if a task relying on it was not executed and the build was aborted earlier. Now we make sure that the process is alive for at least 2 seconds before it is terminated."
+author = "@NiklasRosenstein"

@@ -40,6 +40,13 @@ class CargoAuthProxyTask(BackgroundTask):
     #: The path to the certificate file that needs to be trusted in order to talk to the proxy over HTTPS.
     proxy_cert_file: Property[Path] = Property.output()
 
+    #: The number of seconds to wait after the proxy started.
+    startup_wait_time: Property[float] = Property.default(0.0)
+
+    #: The number of seconds the proxy must be alive at least before terminating it. This is to avoid cryptic error
+    #: messages if the proxy is killed during it's startup time.
+    min_lifetime: Property[float] = Property.default(2.0)
+
     @contextlib.contextmanager
     def _inject_config(self) -> Iterator[None]:
         """Injects the proxy URL and cert file into the Cargo and Git configuration."""
@@ -92,6 +99,14 @@ class CargoAuthProxyTask(BackgroundTask):
         exit_stack.callback(lambda: self.proxy_url.clear())
         self.proxy_cert_file.set(cert_file)
         exit_stack.callback(lambda: self.proxy_cert_file.clear())
-        time.sleep(1)  # Give the proxy some time to start up.
+
+        # Make sure the proxy is alive for at least a certain amount of time to avoid a cryptic error message.
+        self._start_time = time.perf_counter()
+        exit_stack.callback(
+            lambda: time.sleep(max(0, self.min_lifetime.get() - (time.perf_counter() - self._start_time)))
+        )
+
+        # Give the proxy some time to start up.
+        time.sleep(self.startup_wait_time.get())
 
         exit_stack.enter_context(self._inject_config())
