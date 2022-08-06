@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import abc
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
     from ..settings import PythonSettings
@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
 class PythonBuildSystem(abc.ABC):
     """Abstraction of a Python build system."""
+
+    name: ClassVar[str]
 
     @abc.abstractmethod
     def supports_managed_environments(self) -> bool:

@@ -23,6 +23,8 @@ logger = logging.getLogger(__name__)
 
 
 class SlapPythonBuildSystem(PythonBuildSystem):
+    name = "Slap"
+
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
 

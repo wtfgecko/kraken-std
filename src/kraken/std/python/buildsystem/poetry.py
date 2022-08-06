@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 class PoetryPythonBuildSystem(PythonBuildSystem):
+    name = "Poetry"
+
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
 
