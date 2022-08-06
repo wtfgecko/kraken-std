@@ -271,6 +271,20 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#unreleased" class="md-nav__link">
+    Unreleased
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#0146-2022-08-05" class="md-nav__link">
+    0.1.46 (2022-08-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#0145-2022-08-04" class="md-nav__link">
     0.1.45 (2022-08-04)
   </a>
@@ -644,6 +658,20 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#unreleased" class="md-nav__link">
+    Unreleased
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#0146-2022-08-05" class="md-nav__link">
+    0.1.46 (2022-08-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#0145-2022-08-04" class="md-nav__link">
     0.1.45 (2022-08-04)
   </a>
@@ -949,13 +977,54 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/kraken-build/kraken-std/blob/None/docs/content/changelog.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/content/changelog.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
 <h1 id="changelog">Changelog</h1>
+<h2 id="unreleased">Unreleased</h2>
+<table><tr><th>Type</th><th>Description</th><th>PR</th><th>Issues</th><th>Author</th></tr>
+  <tr><td>Improvement</td><td>
+
+remove `RenderFileTask.create_check_task` property in favor of a `.make_check_task()` method, colorize output of `CheckFileContentsTask`</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Improvement</td><td>
+
+add `cargo_sync_config(check)` parameter, enabled by default, to create a check task</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Improvement</td><td>
+
+`gitignore()` now also generates a check task</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Improvement</td><td>
+
+`PythonBuildSystem` now has a class-level `name` attribute</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Improvement</td><td>
+
+add task descriptions for Python tasks</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Improvement</td><td>
+
+Add descriptions to Cargo tasks and Python build/install tasks</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Improvement</td><td>
+
+Task generates with `RenderFileTask.make_check_task()` now non-strictly depends on the render file task. This is to ensure that if both tasks are to run in the same build, the render task comes first.</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Fix</td><td>
+
+Fix cryptic error message that can occurr when the Cargo auth proxy is killed during startup. This usually occurred if a task relying on it was not executed and the build was aborted earlier. Now we make sure that the process is alive for at least 2 seconds before it is terminated.</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Breaking change</td><td>
+
+Redesign Cargo build graph; no longer do `cargo_build()` and `cargo_publish()` create their separate task to bump the Cargo version but instead a `cargo_bump_version()` task was added that belongs to the build support group. `cargoAuthProxy` now depends on `cargoSyncConfig.check` to ensure that the task does not run while the proxy is active as it injects configuration values into the same file.</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+  <tr><td>Fix</td><td>
+
+Fix an issue in `RenderFileTask` introduced in 0.1.46 if the target file does not exist, the internal cache was not populated when the task is executed and thus errored</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+</table>
+
+<h2 id="0146-2022-08-05">0.1.46 (2022-08-05)</h2>
+<table><tr><th>Type</th><th>Description</th><th>PR</th><th>Issues</th><th>Author</th></tr>
+  <tr><td>Feature</td><td>
+
+`RenderFileTask` now automatically generates a corresponding check task that is added to the `lint` group</td><td></td><td></td><td>@NiklasRosenstein</td></tr>
+</table>
+
 <h2 id="0145-2022-08-04">0.1.45 (2022-08-04)</h2>
 <table><tr><th>Type</th><th>Description</th><th>PR</th><th>Issues</th><th>Author</th></tr>
   <tr><td>Improvement</td><td>
