@@ -66,6 +66,6 @@ class GitVersion:
             result = f"{result}-{self.distance.value}"
             if sha:
                 result = f"{result}-g{self.distance.sha}"
-            if self.dirty:
+            if self.dirty and dirty:
                 result = f"{result}-dirty"
         return result

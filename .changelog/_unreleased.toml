@@ -1,0 +1,5 @@
+[[entries]]
+id = "222d56a8-ae21-43af-97f7-5947640116f0"
+type = "fix"
+description = "actually take the `dirty` option into account in `GitVersion.format()`"
+author = "@NiklasRosenstein"

@@ -141,7 +141,7 @@ def cargo_fmt(*, project: Project | None = None) -> None:
 def cargo_bump_version(
     *,
     version: str,
-    revert: bool,
+    revert: bool = True,
     name: str = "cargoBumpVersion",
     group: str | None = CARGO_BUILD_SUPPORT_GROUP_NAME,
     project: Project | None = None,
