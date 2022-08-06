@@ -26,6 +26,7 @@ import dataclasses
 import json
 import logging
 import os
+import shutil
 import subprocess as sp
 import tempfile
 import time
@@ -123,15 +124,17 @@ def create_cargo_repository_in_cloudsmith(cloudsmith: dict[str, str]) -> Iterato
         repos.repos_delete(cloudsmith["owner"], identifier=repository_name)
 
 
-def publish_lib_and_build_app(repository: CargoRepositoryWithAuth) -> None:
+def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path) -> None:
 
-    data_dir = Path(__file__).parent / "data"
-    registry_id = "private-repo"
+    # Copy the Cargo project files to a temporary directory.
+    data_dir = tempdir
+    data_source_dir = Path(__file__).parent / "data"
+    for item in data_source_dir.iterdir():
+        shutil.copytree(item, data_dir / item.name)
 
-    with tempfile.TemporaryDirectory() as tempdir, unittest.mock.patch.dict(
-        os.environ,
-        {"CARGO_HOME": tempdir},
-    ):
+    cargo_registry_id = "private-repo"
+
+    with unittest.mock.patch.dict(os.environ, {"CARGO_HOME": str(tempdir)}):
 
         # Build the library and publish it to Artifactory.
         logger.info(
@@ -183,16 +186,19 @@ CLOUDSMITH_VAR = "CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS"
 
 
 @pytest.mark.skipif(ARTIFACTORY_VAR not in os.environ, reason=f"{ARTIFACTORY_VAR} is not set")
-@pytest.mark.xfail(reason="Artifactory appears to have an issue correctly initializing a Cargo repository")
-def test__artifactory_cargo_publish_and_consume() -> None:
+@pytest.mark.xfail(
+    reason="Artifactory appears to have an issue correctly initializing a Cargo repository",
+    strict=True,
+)
+def test__artifactory_cargo_publish_and_consume(tempdir: Path) -> None:
     credentials = json.loads(os.environ[ARTIFACTORY_VAR])
     with create_cargo_repository_in_artifactory(credentials) as repository:
-        publish_lib_and_build_app(repository)
+        publish_lib_and_build_app(repository, tempdir)
 
 
 @pytest.mark.skipif(CLOUDSMITH_VAR not in os.environ, reason=f"{CLOUDSMITH_VAR} is not set")
 @flaky(max_runs=3, rerun_filter=_pause_between_retries)  # type: ignore[misc]
-def test__cloudsmith_cargo_publish_and_consume() -> None:
+def test__cloudsmith_cargo_publish_and_consume(tempdir: Path) -> None:
     credentials = json.loads(os.environ[CLOUDSMITH_VAR])
     with create_cargo_repository_in_cloudsmith(credentials) as repository:
-        publish_lib_and_build_app(repository)
+        publish_lib_and_build_app(repository, tempdir)
