@@ -250,15 +250,14 @@ def cargo_publish(
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
 
-    additional_args = list(additional_args) + ["--allow-dirty"]
-
     task = project.do(
         name,
         CargoPublishTask,
         False,
         group="publish",
         registry=Supplier.of_callable(lambda: cargo.registries[registry]),
-        additional_args=additional_args,
+        additional_args=list(additional_args),
+        allow_dirty=True,
         incremental=incremental,
         verify=verify,
         env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),

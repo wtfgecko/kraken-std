@@ -41,7 +41,7 @@ class CargoAuthProxyTask(BackgroundTask):
     proxy_cert_file: Property[Path] = Property.output()
 
     #: The number of seconds to wait after the proxy started.
-    startup_wait_time: Property[float] = Property.default(0.0)
+    startup_wait_time: Property[float] = Property.default(1.0)
 
     #: The number of seconds the proxy must be alive at least before terminating it. This is to avoid cryptic error
     #: messages if the proxy is killed during it's startup time.

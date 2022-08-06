@@ -23,17 +23,23 @@ class CargoPublishTask(CargoBuildTask):
     #: Verify (build the create).
     verify: Property[bool] = Property.default(True)
 
+    #: Allow dirty worktree.
+    allow_dirty: Property[bool] = Property.default(False)
+
     def get_cargo_command(self, env: Dict[str, str]) -> List[str]:
         super().get_cargo_command(env)
         registry = self.registry.get()
         if registry.publish_token is None:
             raise ValueError(f'registry {registry.alias!r} missing a "publish_token"')
-        return (
+        command = (
             ["cargo", "publish"]
             + self.additional_args.get()
             + ["--registry", registry.alias, "--token", registry.publish_token]
             + ([] if self.verify.get() else ["--no-verify"])
         )
+        if self.allow_dirty.get() and "--allow-dirty" not in command:
+            command.append("--allow-dirty")
+        return command
 
     def make_safe(self, args: List[str], env: Dict[str, str]) -> None:
         args[args.index(not_none(self.registry.get().publish_token))] = "[MASKED]"

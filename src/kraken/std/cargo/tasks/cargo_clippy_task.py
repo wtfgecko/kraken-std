@@ -23,7 +23,7 @@ class CargoClippyTask(CargoBuildTask):
             if allow == "staged":
                 command += ["--allow-staged"]
             elif allow == "dirty":
-                command += ["--allow-dirty"]
+                command += ["--allow-dirty", "--allow-staged"]
             elif allow is not None:
                 raise ValueError(f"invalid allow: {allow!r}")
         return command
