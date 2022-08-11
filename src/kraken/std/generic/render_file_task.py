@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from kraken._vendor.termcolor import colored
 from kraken.core import Project, Property, Supplier, Task, TaskStatus
-from termcolor import colored
 
 DEFAULT_ENCODING = "utf-8"
 

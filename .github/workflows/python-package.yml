@@ -18,7 +18,7 @@ jobs:
     - uses: python-slap/slap.cli@gha/install/v1
     - uses: actions/setup-python@v2
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: pip install pipx && pipx install kraken-cli
+    - run: pip install pipx && pipx install kraken-wrapper
 
     # Need Poetry for integration tests.
     - run: pipx install poetry
@@ -45,8 +45,8 @@ jobs:
         echo "::add-mask::${{ env.ARTIFACTORY_PASSWORD }}"
         echo "::add-mask::${{ env.ARTIFACTORY_TOKEN }}"
 
-    - run: kraken run lint test -v
-    - run: kraken run integrationTest -v --resume
+    - run: krakenw run lint test -v
+    - run: krakenw run integrationTest -v --resume
 
   publish:
     runs-on: ubuntu-latest
@@ -75,14 +75,7 @@ jobs:
         echo "::add-mask::${{ env.PYPI_PASSWORD }}"
         echo "::add-mask::${{ env.TESTPYPI_PASSWORD }}"
 
-    - run: kraken run publish? -0 -v
-
-  # update-changelog:
-  #   runs-on: ubuntu-latest
-  #   if: github.event_name == 'pull_request'
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: python-slap/slap-cli@gha/changelog/update/v1
+    - run: krakenw run publish? -0 -v
 
   docs:
     runs-on: ubuntu-latest

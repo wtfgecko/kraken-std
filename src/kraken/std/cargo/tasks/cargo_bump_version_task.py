@@ -6,7 +6,7 @@ from pathlib import Path
 import tomli
 import tomli_w
 from kraken.core import BackgroundTask, Property, TaskStatus
-from kraken.core.utils import atomic_file_swap
+from kraken.util.fs import atomic_file_swap
 
 
 class CargoBumpVersionTask(BackgroundTask):

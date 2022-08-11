@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from kraken.core import Project, Property, Task
-from kraken.core.utils import import_class
+from kraken.util.importing import import_class
 
 __version__ = "0.1.0"
 __all__ = ["build", "DockerBuildTask", "manifest_tool"]

@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import os
 
-from kraken.api import project
+from foobar import baz
+from kraken.core import Project
 
 from kraken.std import python
 from kraken.std.git import git_describe
 
+project = Project.current()
 python.black(additional_files=[__file__, project.directory / "examples"])
 python.flake8()
 python.isort(additional_files=[__file__, project.directory / "examples"])

@@ -1,7 +1,9 @@
-from kraken.api import project
+from kraken.core import Project
 
 from kraken.std.docker import build_docker_image
 from kraken.std.generic.render_file import RenderFileTask
+
+project = Project.current()
 
 dockerfile = project.do(
     name="dockerfile",

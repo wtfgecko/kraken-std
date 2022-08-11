@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 from typing import Iterator, Optional
 
-from kraken.core.utils import not_none
+from kraken.util.helpers import not_none
 from proxy.http.parser import HttpParser
 from proxy.http.proxy.plugin import HttpProxyBasePlugin
 

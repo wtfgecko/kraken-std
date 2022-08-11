@@ -9,7 +9,7 @@ from pathlib import Path
 
 from kraken.core.project import Project
 from kraken.core.property import Property
-from kraken.core.utils import flatten
+from kraken.util.helpers import flatten
 
 from . import DockerBuildTask
 from .dockerapi import docker_load, docker_run

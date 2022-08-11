@@ -29,10 +29,7 @@ class HelmSettings:
 def helm_settings(project: Project | None = None) -> HelmSettings:
     """Create or get Helm settings for the project."""
 
-    if project is None:
-        from kraken.api import project as _project
-
-        project = _project
+    project = project or Project.current()
 
     settings = project.find_metadata(HelmSettings)
     if settings is None:

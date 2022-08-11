@@ -7,7 +7,7 @@ from typing import Iterator
 import httpx
 import pytest
 from kraken.core.project import Project
-from kraken.core.utils import not_none
+from kraken.util.helpers import not_none
 
 from kraken.std.helm import HelmPackageTask, HelmPushTask, helm_settings
 from tests.utils.docker import DockerServiceManager

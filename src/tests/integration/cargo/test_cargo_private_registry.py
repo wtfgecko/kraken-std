@@ -36,7 +36,7 @@ from typing import Any, Iterator
 
 import pytest
 from flaky import flaky  # type: ignore[import]
-from kraken.core.testing import kraken_ctx, kraken_project
+from kraken.test import kraken_ctx, kraken_project
 
 from kraken.std.cargo import cargo_auth_proxy, cargo_build, cargo_publish, cargo_registry, cargo_sync_config
 
@@ -141,7 +141,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
             repository.name,
             repository.index_url,
         )
-        with kraken_project(kraken_ctx()) as project1:
+        with kraken_ctx() as ctx, kraken_project(ctx) as project1:
             project1.directory = data_dir / "hello-world-lib"
             cargo_registry(
                 cargo_registry_id,
@@ -163,7 +163,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
             repository.name,
             repository.index_url,
         )
-        with kraken_project(kraken_ctx()) as project2:
+        with kraken_ctx() as ctx, kraken_project(ctx) as project2:
             project2.directory = data_dir / "hello-world-app"
             cargo_registry(
                 cargo_registry_id,

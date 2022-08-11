@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, List
 
 from kraken.core import Project, Property, TaskStatus
-from kraken.core.utils import flatten
+from kraken.util.helpers import flatten
 
 from .base_task import EnvironmentAwareDispatchTask
 

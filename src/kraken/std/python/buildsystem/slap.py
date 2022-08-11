@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from urllib.parse import quote
 
-from kraken.core.utils import NotSet
+from kraken.util.helpers import NotSet
 
 from . import ManagedEnvironment, PythonBuildSystem
 

@@ -2,7 +2,7 @@ import contextlib
 from pathlib import Path
 from typing import Collection, Iterator
 
-from kraken.core.utils import atomic_file_swap
+from kraken.util.fs import atomic_file_swap
 
 
 def prepend_secret_mounts(dockerfile_content: str, build_secrets: Collection[str]) -> str:

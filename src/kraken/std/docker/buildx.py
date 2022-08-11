@@ -5,7 +5,7 @@ import re
 import subprocess as sp
 
 from kraken.core.task import TaskStatus
-from kraken.core.utils import flatten, not_none
+from kraken.util.helpers import flatten, not_none
 
 from . import DockerBuildTask
 from .rewrite import prepend_secret_mounts_to_file

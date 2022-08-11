@@ -5,7 +5,7 @@ import os
 import subprocess as sp
 from pathlib import Path
 
-from kraken.core.utils import flatten
+from kraken.util.helpers import flatten
 
 logger = logging.getLogger(__name__)
 
