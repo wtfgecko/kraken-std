@@ -521,10 +521,12 @@
 <p>Package and publish <a href="https://helm.sh/">Helm</a> charts to OCI or HTTP(S) registries.</p>
 <p><strong>Quickstart</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># .kraken.py</span>
-<span class="kn">from</span> <span class="nn">kraken.api</span> <span class="kn">import</span> <span class="n">project</span>
+<span class="kn">from</span> <span class="nn">kraken.core</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">kraken.std.helm</span> <span class="kn">import</span> <span class="n">HelmPushTask</span><span class="p">,</span> <span class="n">HelmPackageTask</span><span class="p">,</span> <span class="n">helm_settings</span>
 
 <span class="n">helm_settings</span><span class="p">()</span><span class="o">.</span><span class="n">add_auth</span><span class="p">(</span><span class="s2">&quot;example.jfrog.io&quot;</span><span class="p">,</span> <span class="s2">&quot;me@example.org&quot;</span><span class="p">,</span> <span class="s2">&quot;api_token&quot;</span><span class="p">)</span>
+
+<span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">current</span><span class="p">()</span>
 <span class="n">package</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="s2">&quot;helmPackage&quot;</span><span class="p">,</span> <span class="n">HelmPackageTask</span><span class="p">,</span> <span class="n">chart_path</span><span class="o">=</span><span class="s2">&quot;./my-helm-chart&quot;</span><span class="p">)</span>
 <span class="n">project</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="s2">&quot;helmPush&quot;</span><span class="p">,</span> <span class="n">HelmPushTask</span><span class="p">,</span> <span class="n">chart_tarball</span><span class="o">=</span><span class="n">package</span><span class="o">.</span><span class="n">chart_tarball</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="s2">&quot;example.jfrog.io/helm-local&quot;</span><span class="p">)</span>
 </code></pre></div>
@@ -549,14 +551,14 @@
 <h2 id="class-helmpackagetask">Class HelmPackageTask</h2>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">HelmPackageTask</span><span class="p">(</span><span class="n">Task</span><span class="p">)</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/helm/__init__.py#L45">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/helm/__init__.py#L42">[view_source]</a></p>
 <p>Packages a Helm chart.</p>
 <p><a id="kraken.std.helm.HelmPushTask"></a></p>
 <p><a id="pydoc:kraken.std.helm.HelmPushTask"></a></p>
 <h2 id="class-helmpushtask">Class HelmPushTask</h2>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">HelmPushTask</span><span class="p">(</span><span class="n">Task</span><span class="p">)</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/helm/__init__.py#L71">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/helm/__init__.py#L68">[view_source]</a></p>
 <p>Pushes a Helm chart to a Helm registry. Supports OCI and HTTP(S) registries.</p>
 <p><a id="kraken.std.helm.HelmPushTask.chart_tarball"></a></p>
 <p><a id="pydoc:kraken.std.helm.HelmPushTask.chart_tarball"></a></p>
