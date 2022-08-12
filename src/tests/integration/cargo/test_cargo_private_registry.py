@@ -124,7 +124,7 @@ def create_cargo_repository_in_cloudsmith(cloudsmith: dict[str, str]) -> Iterato
         repos.repos_delete(cloudsmith["owner"], identifier=repository_name)
 
 
-def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path) -> None:
+def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdir: Path) -> None:
 
     # Copy the Cargo project files to a temporary directory.
     data_dir = tempdir
@@ -137,23 +137,34 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
     with unittest.mock.patch.dict(os.environ, {"CARGO_HOME": str(tempdir)}):
 
         # Build the library and publish it to Artifactory.
-        logger.info(
-            "Publishing data/hello-world-lib to Cargo repository %r (%r)",
-            repository.name,
-            repository.index_url,
-        )
+        if repository:
+            logger.info(
+                "Publishing data/hello-world-lib to Cargo repository %r (%r)",
+                repository.name,
+                repository.index_url,
+            )
+        else:
+            logger.info("Building data/hello-world-lib")
+
         with kraken_ctx() as ctx, kraken_project(ctx) as project1:
             project1.directory = data_dir / "hello-world-lib"
-            cargo_registry(
-                cargo_registry_id,
-                repository.index_url,
-                read_credentials=(repository.user, repository.password),
-                publish_token=repository.password,
-            )
+            if repository:
+                cargo_registry(
+                    cargo_registry_id,
+                    repository.index_url,
+                    read_credentials=(repository.user, repository.password),
+                    publish_token=repository.password,
+                )
             cargo_auth_proxy()
             cargo_sync_config()
             cargo_publish(cargo_registry_id)
-            project1.context.execute(["fmt", ":cargoPublish"])
+            if repository:
+                project1.context.execute(["fmt", "publish"])
+            else:
+                project1.context.execute(["fmt", "build"])
+
+        if not repository:
+            return
 
         num_tries = 3
         for idx in range(num_tries):
@@ -174,7 +185,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
                     cargo_auth_proxy()
                     cargo_sync_config()
                     cargo_build("debug")
-                    project2.context.execute(["fmt", ":cargoBuildDebug"])
+                    project2.context.execute(["fmt", "build"])
 
                 # Running the application should give "Hello from hello-world-lib!".
                 output = sp.check_output(
@@ -214,3 +225,7 @@ def test__cloudsmith_cargo_publish_and_consume(tempdir: Path) -> None:
     credentials = json.loads(os.environ[CLOUDSMITH_VAR])
     with create_cargo_repository_in_cloudsmith(credentials) as repository:
         publish_lib_and_build_app(repository, tempdir)
+
+
+def test_cargo_build(tempdir: Path) -> None:
+    publish_lib_and_build_app(None, tempdir)
