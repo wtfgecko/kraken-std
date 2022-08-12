@@ -4,8 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence
 
 from kraken.core import Project, Property
-
-from kraken.std.generic.render_file_task import RenderFileTask
+from kraken.lib.render_file_task import RenderFileTask
 
 from ..gitignore import GitignoreFile, parse_gitignore, sort_gitignore
 
@@ -31,12 +30,11 @@ class GitignoreSyncTask(RenderFileTask):
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
         self._paths = {}
+        self.content.setcallable(lambda: self.get_file_contents(self.file.get()))
 
     def add_paths(self, header: str | None, paths: Sequence[str]) -> None:
         the_paths = self._paths.setdefault(header, [])
         the_paths[:] = set(list(the_paths) + list(paths))
-
-    # RenderFileTask
 
     def get_file_contents(self, file: Path) -> str | bytes:
         if file.exists():

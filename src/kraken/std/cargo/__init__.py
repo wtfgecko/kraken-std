@@ -108,7 +108,7 @@ def cargo_sync_config(
         registries=Supplier.of_callable(lambda: list(cargo.registries.values())),
         replace=replace,
     )
-    check_task = task.make_check_task()
+    check_task = task.create_check()
     project.group(CARGO_BUILD_SUPPORT_GROUP_NAME).add(check_task)
     return task
 

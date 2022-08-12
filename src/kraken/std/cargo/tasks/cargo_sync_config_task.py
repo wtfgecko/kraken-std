@@ -5,9 +5,8 @@ from typing import List
 
 import tomli
 import tomli_w
-from kraken.core import Property
-
-from kraken.std.generic.render_file_task import RenderFileTask
+from kraken.core import Project, Property
+from kraken.lib.render_file_task import RenderFileTask
 
 from ..config import CargoRegistry
 
@@ -27,7 +26,9 @@ class CargoSyncConfigTask(RenderFileTask):
     #: Enable fetching Cargo indexes with the Git CLI.
     git_fetch_with_cli: Property[bool]
 
-    # RenderFileTask
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        self.content.setcallable(lambda: self.get_file_contents(self.file.get()))
 
     def get_file_contents(self, file: Path) -> str | bytes:
         content = tomli.loads(file.read_text()) if not self.replace.get() and file.exists() else {}
