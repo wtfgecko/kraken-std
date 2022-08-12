@@ -36,6 +36,7 @@ from typing import Any, Iterator
 
 import pytest
 from flaky import flaky  # type: ignore[import]
+from kraken.core import BuildError
 from kraken.test import kraken_ctx, kraken_project
 
 from kraken.std.cargo import cargo_auth_proxy, cargo_build, cargo_publish, cargo_registry, cargo_sync_config
@@ -154,30 +155,42 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
             cargo_publish(cargo_registry_id)
             project1.context.execute(["fmt", ":cargoPublish"])
 
-        logger.info("Giving repository time to index (20s) ...")
-        time.sleep(20)
+        num_tries = 3
+        for idx in range(num_tries):
+            try:
+                # Compile the application, expecting that it can consume from the freshly published library.
+                logger.info(
+                    "Building data/hello-world-app which consumes hello-world-lib from Cargo repository %r (%r)",
+                    repository.name,
+                    repository.index_url,
+                )
+                with kraken_ctx() as ctx, kraken_project(ctx) as project2:
+                    project2.directory = data_dir / "hello-world-app"
+                    cargo_registry(
+                        cargo_registry_id,
+                        repository.index_url,
+                        read_credentials=(repository.user, repository.password),
+                    )
+                    cargo_auth_proxy()
+                    cargo_sync_config()
+                    cargo_build("debug")
+                    project2.context.execute(["fmt", ":cargoBuildDebug"])
 
-        # Compile the application, expecting that it can consume from the freshly published library.
-        logger.info(
-            "Building data/hello-world-app which consumes hello-world-lib from Cargo repository %r (%r)",
-            repository.name,
-            repository.index_url,
-        )
-        with kraken_ctx() as ctx, kraken_project(ctx) as project2:
-            project2.directory = data_dir / "hello-world-app"
-            cargo_registry(
-                cargo_registry_id,
-                repository.index_url,
-                read_credentials=(repository.user, repository.password),
-            )
-            cargo_auth_proxy()
-            cargo_sync_config()
-            cargo_build("debug")
-            project2.context.execute(["fmt", ":cargoBuildDebug"])
-
-        # Running the application should give "Hello from hello-world-lib!".
-        output = sp.check_output([data_dir / "hello-world-app" / "target" / "debug" / "hello-world-app"]).decode()
-        assert output.strip() == "Hello from hello-world-lib!"
+                # Running the application should give "Hello from hello-world-lib!".
+                output = sp.check_output(
+                    [data_dir / "hello-world-app" / "target" / "debug" / "hello-world-app"]
+                ).decode()
+                assert output.strip() == "Hello from hello-world-lib!"
+            except BuildError as exc:
+                logger.error(
+                    "Encountered a build error (%s); most likely that is because the Cargo repository "
+                    "requires some time to index the package.",
+                    exc,
+                )
+                if idx == (num_tries - 1):
+                    raise
+                logger.info("Giving repository time to index (10s) ...")
+                time.sleep(10)
 
 
 ARTIFACTORY_VAR = "ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS"
