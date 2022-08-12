@@ -1,3 +1,0 @@
-
-def baz():
-    pass

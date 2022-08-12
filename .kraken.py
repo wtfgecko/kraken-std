@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 
-from foobar import baz
 from kraken.core import Project
 
 from kraken.std import python

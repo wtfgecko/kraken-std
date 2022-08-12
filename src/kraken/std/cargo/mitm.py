@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Iterator, Optional
 
 from kraken.util.helpers import not_none
+from kraken.util.krakenw import KrakenwEnv
 from proxy.http.parser import HttpParser
 from proxy.http.proxy.plugin import HttpProxyBasePlugin
 
@@ -75,10 +76,14 @@ def mitm_auth_proxy(
     key_file = certs_dir / "key.pem"
     cert_file = certs_dir / "cert.pem"
 
-    command = [
-        sys.executable,
-        "-m",
-        "proxy",
+    env = os.environ.copy()
+    kwenv = KrakenwEnv.get()
+    if kwenv and kwenv.is_pex:
+        env["PEX_SCRIPT"] = "proxy"
+        command = [str(kwenv.path)]
+    else:
+        command = [sys.executable, "-m", "proxy"]
+    command += [
         "--plugins",
         __name__ + "." + AuthInjector.__name__,
         "--ca-key-file",
@@ -94,7 +99,6 @@ def mitm_auth_proxy(
     if timeout is not None:
         command += ["--timeout", str(timeout)]
 
-    env = os.environ.copy()
     env["INJECT_AUTH"] = json.dumps(auth)
     env["PYTHONWARNINGS"] = "ignore"
 
