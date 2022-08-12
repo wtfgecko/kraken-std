@@ -28,7 +28,7 @@ def gitignore(
     project = project or Project.current()
     task = cast(Optional[GitignoreSyncTask], project.tasks().get(GITIGNORE_TASK_NAME))
     if task is None:
-        task = project.do(GITIGNORE_TASK_NAME, GitignoreSyncTask, group="fmt")
+        task = project.do(GITIGNORE_TASK_NAME, GitignoreSyncTask, group="apply")
         task.create_check()
     task.add_paths(header, [paths] if isinstance(paths, str) else paths)
     return task

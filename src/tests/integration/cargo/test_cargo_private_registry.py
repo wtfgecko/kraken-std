@@ -159,9 +159,9 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
             cargo_sync_config()
             cargo_publish(cargo_registry_id)
             if repository:
-                project1.context.execute(["fmt", "publish"])
+                project1.context.execute(["fmt", "lint", "publish"])
             else:
-                project1.context.execute(["fmt", "build"])
+                project1.context.execute(["fmt", "lint", "build"])
 
         if not repository:
             return

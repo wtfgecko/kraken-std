@@ -104,7 +104,7 @@ def cargo_sync_config(
     task = project.do(
         "cargoSyncConfig",
         CargoSyncConfigTask,
-        group="fmt",
+        group="apply",
         registries=Supplier.of_callable(lambda: list(cargo.registries.values())),
         replace=replace,
     )
