@@ -38,6 +38,7 @@ class BuildxBuildTask(DockerBuildTask):
         if self.cache_repo.get():
             # NOTE (@NiklasRosenstein): Buildx does not allow leading underscores, while Kaniko and Artifactory do.
             command += ["--cache-to", f"type=registry,ref={not_none(self.cache_repo.get())}"]
+            command += ["--cache-from", f"type=registry,ref={not_none(self.cache_repo.get())}"]
         if not self.cache.get():
             command += ["--no-cache"]
         command += flatten(["--tag", t] for t in self.tags.get())
