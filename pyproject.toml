@@ -58,7 +58,7 @@ flake8 = "flake8 src/"
 
 [tool.slap.run]
 fmt = "black src/ && isort src/"
-"docs:build" = "cd docs && novella --base-url kraken-cli/"
+"docs:build" = "cd docs && novella --base-url kraken-std/"
 "docs:dev" = "cd docs && novella --serve"
 
 [tool.mypy]
