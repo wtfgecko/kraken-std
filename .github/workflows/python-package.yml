@@ -38,7 +38,7 @@ jobs:
     #     echo "::add-mask::${{ env.ARTIFACTORY_PASSWORD }}"
     #     echo "::add-mask::${{ env.ARTIFACTORY_TOKEN }}"
 
-    - run: git rev-parse --show-toplevel
+    - run: git config --global --add safe.directory /__w/kraken-std/kraken-std && git rev-parse --show-toplevel
 
     - run: krakenw run ${{ matrix.test-type }} -v
 
