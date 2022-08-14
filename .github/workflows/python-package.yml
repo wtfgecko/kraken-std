@@ -8,23 +8,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/kraken-build/kraken-base-image:develop
     strategy:
       fail-fast: false
       matrix:
         python-version: [ "3.7", "3.8", "3.9", "3.10", "3.x" ]
+        test-type: [ "lint test", "integrationTest" ]
     steps:
     - uses: actions/checkout@v2
       with: { fetch-depth: 0 }
-    - uses: python-slap/slap.cli@gha/install/v1
-    - uses: actions/setup-python@v2
-      with: { python-version: "${{ matrix.python-version }}" }
-    - run: pip install pipx && pipx install kraken-wrapper
-
-    # Need Poetry for integration tests.
-    - run: pipx install poetry
-
-    # Make sure we have Docker available for the ete-tests.
-    - uses: docker/setup-buildx-action@v2
 
     # Import credentials for integration tests.
     - name: Import Secrets
@@ -45,8 +38,7 @@ jobs:
         echo "::add-mask::${{ env.ARTIFACTORY_PASSWORD }}"
         echo "::add-mask::${{ env.ARTIFACTORY_TOKEN }}"
 
-    - run: krakenw run lint test -v
-    - run: krakenw run integrationTest -v --resume
+    - run: krakenw run ${{ matrix.test-type }} -v
 
   publish:
     runs-on: ubuntu-latest
