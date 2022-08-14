@@ -1,4 +1,4 @@
-name: Python application
+oname: Python application
 
 on:
   push: { branches: [ develop ], tags: [ "*" ] }
@@ -13,30 +13,32 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.x" ]
+        python-version: [ "3.7" ] #, "3.8", "3.9", "3.10", "3.x" ]
         test-type: [ "lint test", "integrationTest" ]
     steps:
     - uses: actions/checkout@v2
       with: { fetch-depth: 0 }
 
-    # Import credentials for integration tests.
-    - name: Import Secrets
-      uses: hashicorp/vault-action@v2.4.0
-      with:
-        url: ${{ secrets.VAULT_ADDR }}
-        token: ${{ secrets.VAULT_TOKEN }}
-        secrets: |
-          kv/data/projects/github.com/kraken-build/kraken-std cloudsmith_io | CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS ;
-          kv/data/projects/github.com/kraken-build/kraken-std cloudsmith_io.api_key | CLOUDSMITH_API_KEY ;
-          kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io | ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS ;
-          kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io.password | ARTIFACTORY_PASSWORD ;
-          kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io.token | ARTIFACTORY_TOKEN ;
+    # # Import credentials for integration tests.
+    # - name: Import Secrets
+    #   uses: hashicorp/vault-action@v2.4.0
+    #   with:
+    #     url: ${{ secrets.VAULT_ADDR }}
+    #     token: ${{ secrets.VAULT_TOKEN }}
+    #     secrets: |
+    #       kv/data/projects/github.com/kraken-build/kraken-std cloudsmith_io | CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS ;
+    #       kv/data/projects/github.com/kraken-build/kraken-std cloudsmith_io.api_key | CLOUDSMITH_API_KEY ;
+    #       kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io | ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS ;
+    #       kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io.password | ARTIFACTORY_PASSWORD ;
+    #       kv/data/projects/github.com/kraken-build/kraken-std niklasrosenstein_jfrog_io.token | ARTIFACTORY_TOKEN ;
 
-    - name: Mask secrets
-      run: |
-        echo "::add-mask::${{ env.CLOUDSMITH_API_KEY }}"
-        echo "::add-mask::${{ env.ARTIFACTORY_PASSWORD }}"
-        echo "::add-mask::${{ env.ARTIFACTORY_TOKEN }}"
+    # - name: Mask secrets
+    #   run: |
+    #     echo "::add-mask::${{ env.CLOUDSMITH_API_KEY }}"
+    #     echo "::add-mask::${{ env.ARTIFACTORY_PASSWORD }}"
+    #     echo "::add-mask::${{ env.ARTIFACTORY_TOKEN }}"
+
+    - run: git rev-parse --show-toplevel
 
     - run: krakenw run ${{ matrix.test-type }} -v
 
