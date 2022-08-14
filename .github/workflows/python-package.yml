@@ -40,7 +40,7 @@ jobs:
 
     # This is needed when running on Github actions in a container apparently. ¯\_(ツ)_/¯
     - run: git config --global --add safe.directory /__w/kraken-std/kraken-std
-    - run: pyenv global
+    - run: pyenv global ${{ matrix.python-version }}
 
     - run: krakenw run ${{ matrix.test-type }} -v
       env:
