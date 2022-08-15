@@ -21,18 +21,16 @@ def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> s
 
     # Create a htpasswd file for the registry.
     logger.info("Generating htpasswd for Pypiserver")
-    htpasswd_content = not_none(
-        docker_service_manager.run(
-            "httpd:2",
-            entrypoint="htpasswd",
-            args=["-Bbn", USER_NAME, USER_PASS],
-            capture_output=True,
-        )
+    htpasswd_content = docker_service_manager.run(
+        "httpd:2",
+        entrypoint="htpasswd",
+        args=["-Bbn", USER_NAME, USER_PASS],
+        capture_output=True,
     )
     htpasswd = tempdir / "htpasswd"
-    htpasswd.write_bytes(htpasswd_content)
+    htpasswd.write_bytes(not_none(htpasswd_content))
 
-    index_url = f"http://localhost:{PYPISERVER_PORT}/simple"
+    index_url = f"http://{docker_service_manager.docker_host}:{PYPISERVER_PORT}/simple"
     docker_service_manager.run(
         "pypiserver/pypiserver:latest",
         ["--passwords", "/.htpasswd", "-a", "update"],
@@ -41,6 +39,7 @@ def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> s
         detach=True,
         probe=("GET", index_url),
     )
+
     logger.info("Started local Pypiserver at %s", index_url)
     return index_url
 

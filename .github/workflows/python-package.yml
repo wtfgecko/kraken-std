@@ -15,6 +15,8 @@ jobs:
       matrix:
         python-version: [ "3.7" ] #, "3.8", "3.9", "3.10", "3.x" ]
         test-type: [ "lint test", "integrationTest" ]
+    env:
+      KRAKEN_STD_TEST_DOCKER_HOST: docker.host.internal
     steps:
     - uses: actions/checkout@v2
       with: { fetch-depth: 0 }

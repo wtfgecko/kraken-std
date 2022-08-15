@@ -25,19 +25,18 @@ def oci_registry(docker_service_manager: DockerServiceManager) -> Iterator[str]:
 
         # Create a htpasswd file for the registry.
         logger.info("Generating htpasswd for OCI registry")
-        htpasswd_content = not_none(
-            docker_service_manager.run(
-                "httpd:2",
-                entrypoint="htpasswd",
-                args=["-Bbn", USER_NAME, USER_PASS],
-                capture_output=True,
-            )
+        htpasswd_content = docker_service_manager.run(
+            "httpd:2",
+            entrypoint="htpasswd",
+            args=["-Bbn", USER_NAME, USER_PASS],
+            capture_output=True,
         )
         htpasswd = Path(tempdir) / "htpasswd"
-        htpasswd.write_bytes(htpasswd_content)
+        htpasswd.write_bytes(not_none(htpasswd_content))
 
         # Start the registry.
         logger.info("Starting OCI registry")
+        index_url = f"{docker_service_manager.docker_host}:{REGISTRY_PORT}"
         docker_service_manager.run(
             "registry",
             detach=True,
@@ -48,10 +47,10 @@ def oci_registry(docker_service_manager: DockerServiceManager) -> Iterator[str]:
                 "REGISTRY_AUTH_HTPASSWD_REALM": "Registry Realm",
                 "REGISTRY_AUTH_HTPASSWD_PATH": "/auth/htpasswd",
             },
+            probe=("GET", f"http://{index_url}/v2/"),
         )
 
-        time.sleep(0.5)
-        yield f"localhost:{REGISTRY_PORT}"
+        yield index_url
 
 
 def test__helm_push_to_oci_registry(kraken_project: Project, oci_registry: str) -> None:

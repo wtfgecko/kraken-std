@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import contextlib
 import logging
+import os
 import subprocess as sp
 import time
+from urllib.parse import urlparse, urlunparse
 
 import httpx
 from kraken.util.helpers import flatten
@@ -12,10 +14,19 @@ logger = logging.getLogger(__name__)
 
 
 class DockerServiceManager:
-    """Helper for integration tests to start Docker services."""
+    """Helper for integration tests to start Docker services.
+
+    Environment variables:
+
+        KRAKEN_STD_TEST_DOCKER_HOST (default: localhost) """
 
     def __init__(self, exit_stack: contextlib.ExitStack) -> None:
         self._exit_stack = exit_stack
+        self._docker_host = os.getenv("KRAKEN_STD_TEST_DOCKER_HOST", "localhost")
+
+    @property
+    def docker_host(self) -> str:
+        return self._docker_host
 
     def _stop_container(self, container_id: str) -> None:
         sp.call(["docker", "stop", container_id])
@@ -29,7 +40,7 @@ class DockerServiceManager:
             except httpx.RequestError as exc:
                 logger.debug("Ignoring error while probing (%s)", exc)
             else:
-                if request.status_code // 100 in (2, 3):
+                if request.status_code // 100 in (2, 3, 4):
                     logger.info("Probe returned status code %d", request.status_code)
                     return
                 logger.debug("Probe returned status code %d (continue probing)", request.status_code)
@@ -46,6 +57,7 @@ class DockerServiceManager:
         platform: str | None = None,
         env: dict[str, str] | None = None,
         entrypoint: str | None = None,
+        name: str | None = None,
         capture_output: bool = False,
         probe: tuple[str, str] | None = None,
         probe_timeout: int = 60,
@@ -60,8 +72,11 @@ class DockerServiceManager:
         command += flatten(["--env", f"{k}={v}"] for k, v in (env or {}).items())
         if platform:
             command += ["--platform", platform]
+        if name:
+            command += ["--name", name]
         command += [image]
         command += args or []
+
         if detach:
             container_id = sp.check_output(command).decode().strip()
             logger.info('started detached container with id "%s" from command %s', container_id, command)
@@ -75,11 +90,15 @@ class DockerServiceManager:
             self._exit_stack.callback(_stop_logs_proc)
 
             if probe:
-                self._run_probe(probe[0], probe[1], probe_timeout)
+                probe_method, probe_url = probe
+                probe_url = probe_url % {'host': self._docker_host}
+                self._run_probe(probe_method, probe_url, probe_timeout)
+
+            return None
 
         elif capture_output:
             return sp.check_output(command)
+
         else:
             sp.check_call(command)
-
-        return None
+            return None
