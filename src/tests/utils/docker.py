@@ -5,7 +5,6 @@ import logging
 import os
 import subprocess as sp
 import time
-from urllib.parse import urlparse, urlunparse
 
 import httpx
 from kraken.util.helpers import flatten
@@ -18,7 +17,7 @@ class DockerServiceManager:
 
     Environment variables:
 
-        KRAKEN_STD_TEST_DOCKER_HOST (default: localhost) """
+        KRAKEN_STD_TEST_DOCKER_HOST (default: localhost)"""
 
     def __init__(self, exit_stack: contextlib.ExitStack) -> None:
         self._exit_stack = exit_stack
@@ -91,7 +90,7 @@ class DockerServiceManager:
 
             if probe:
                 probe_method, probe_url = probe
-                probe_url = probe_url % {'host': self._docker_host}
+                probe_url = probe_url % {"host": self._docker_host}
                 self._run_probe(probe_method, probe_url, probe_timeout)
 
             return None
