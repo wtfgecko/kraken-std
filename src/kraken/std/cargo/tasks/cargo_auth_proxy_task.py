@@ -10,8 +10,8 @@ from urllib.parse import urlparse
 import tomli
 import tomli_w
 from kraken.core import BackgroundTask, Property
-from kraken.util.fs import atomic_file_swap
-from kraken.util.helpers import not_none
+from kraken.core.util.fs import atomic_file_swap
+from kraken.core.util.helpers import not_none
 
 from kraken.std.cargo.config import CargoRegistry
 from kraken.std.git.config import dump_gitconfig, load_gitconfig

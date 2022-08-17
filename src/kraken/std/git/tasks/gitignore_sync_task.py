@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence
 
 from kraken.core import Project, Property
-from kraken.lib.render_file_task import RenderFileTask
+from kraken.core.lib.render_file_task import RenderFileTask
 
 from ..gitignore import GitignoreFile, parse_gitignore, sort_gitignore
 

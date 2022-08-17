@@ -9,7 +9,7 @@ from pathlib import Path
 from kraken.core.project import Project
 from kraken.core.property import Property
 from kraken.core.task import TaskStatus
-from kraken.util.helpers import flatten, not_none
+from kraken.core.util.helpers import flatten, not_none
 
 from . import DockerBuildTask
 from .rewrite import prepend_secret_mounts_to_file

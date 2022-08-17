@@ -11,9 +11,9 @@ from pathlib import Path
 
 import tomli
 import tomli_w
-from kraken.util.fs import atomic_file_swap
-from kraken.util.helpers import NotSet
-from kraken.util.path import is_relative_to
+from kraken.core.util.fs import atomic_file_swap
+from kraken.core.util.helpers import NotSet
+from kraken.core.util.path import is_relative_to
 from nr.python.environment.virtualenv import get_current_venv
 
 from kraken.std.python.settings import PythonSettings

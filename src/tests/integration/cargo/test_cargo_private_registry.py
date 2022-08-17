@@ -36,7 +36,7 @@ from typing import Any, Iterator
 
 import pytest
 from kraken.core import BuildError
-from kraken.test import kraken_ctx, kraken_project
+from kraken.core.test import kraken_ctx, kraken_project
 
 from kraken.std.cargo import cargo_auth_proxy, cargo_build, cargo_publish, cargo_registry, cargo_sync_config
 

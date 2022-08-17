@@ -6,7 +6,7 @@ import subprocess as sp
 import time
 
 import httpx
-from kraken.util.helpers import flatten
+from kraken.core.util.helpers import flatten
 
 logger = logging.getLogger(__name__)
 
