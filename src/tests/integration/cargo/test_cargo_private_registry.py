@@ -21,7 +21,6 @@ Artifactory/Cloudsmith repository Git index every time.
 
 from __future__ import annotations
 
-import contextlib
 import dataclasses
 import json
 import logging
@@ -31,9 +30,7 @@ import shutil
 import subprocess as sp
 import time
 import unittest.mock
-import uuid
 from pathlib import Path
-from typing import Any, Iterator
 
 import pytest
 from kraken.core import BuildError

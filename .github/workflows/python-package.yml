@@ -13,15 +13,15 @@ jobs:
       matrix:
         include:
           - python-version: "3.7"
-            test-type: test
+            test-type: lint test
           - python-version: "3.8"
-            test-type: test
+            test-type: lint test
           - python-version: "3.9"
-            test-type: test
+            test-type: lint test
           - python-version: "3.10"
-            test-type: test
+            test-type: lint test
           - python-version: "3.x"
-            test-type: test
+            test-type: lint test
           - python-version: "3.7"
             test-type: integrationTest
     steps:
@@ -57,7 +57,7 @@ jobs:
         echo "::add-mask::${{ env.ARTIFACTORY_PASSWORD }}"
         echo "::add-mask::${{ env.ARTIFACTORY_TOKEN }}"
 
-    - run: krakenw run lint ${{ matrix.test-type }} -v
+    - run: krakenw run ${{ matrix.test-type }} -v
 
   publish:
     runs-on: ubuntu-latest
