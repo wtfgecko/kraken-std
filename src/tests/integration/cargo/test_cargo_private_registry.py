@@ -26,6 +26,7 @@ import dataclasses
 import json
 import logging
 import os
+import random
 import shutil
 import subprocess as sp
 import time
@@ -38,15 +39,16 @@ import pytest
 from kraken.core import BuildError
 from kraken.core.test import kraken_ctx, kraken_project
 
-from kraken.std.cargo import cargo_auth_proxy, cargo_build, cargo_publish, cargo_registry, cargo_sync_config
+from kraken.std.cargo import (
+    cargo_auth_proxy,
+    cargo_build,
+    cargo_bump_version,
+    cargo_publish,
+    cargo_registry,
+    cargo_sync_config,
+)
 
 logger = logging.getLogger(__name__)
-
-
-def _pause_between_retries(*args: Any) -> bool:
-    """Used as a rerun filter for :func:`flaky`."""
-    time.sleep(20)
-    return True
 
 
 @dataclasses.dataclass
@@ -55,79 +57,7 @@ class CargoRepositoryWithAuth:
     index_url: str
     user: str
     password: str
-
-
-@contextlib.contextmanager
-def create_cargo_repository_in_artifactory(artifactory: dict[str, str]) -> Iterator[CargoRepositoryWithAuth]:
-    """Sets up a Cargo repository in Artifactory."""
-
-    import requests
-    from pyartifactory.models.repository import LocalRepository, PackageTypeEnum
-    from pyartifactory.objects import Artifactory
-
-    client = Artifactory(artifactory["url"], (artifactory["user"], artifactory["password"]))
-    repository_name = f"kraken-integration-test-cargo-{str(uuid.uuid4())[:7]}"
-
-    # Create a new Artifactory Cargo repository.
-    logger.info("Creating Cargo repository %r in Artifactory %r", repository_name, artifactory["url"])
-    local_repo = LocalRepository(
-        key=repository_name,
-        packageType=PackageTypeEnum.cargo,
-        propertySets=["artifactory"],
-        repoLayoutRef="cargo-default",
-    )
-    try:
-        client.repositories.create_repo(local_repo)
-    except requests.exceptions.HTTPError as exc:
-        logger.error("Encountered an HTTPError while creating repository. body=%s", exc.response.text)
-        raise
-    logger.info("Cargo repository %r created", repository_name)
-
-    try:
-        index_url = f"{artifactory['url']}/git/{repository_name}.git"
-        logger.info("Expected Cargo index URL is %r", index_url)
-        logger.info("Sleeping for 30s to give Artifactory time for the repository creation.")
-        time.sleep(30)
-        yield CargoRepositoryWithAuth(
-            repository_name,
-            index_url,
-            artifactory["user"],
-            "Bearer " + artifactory["password"],
-        )
-    finally:
-        assert artifactory is not None
-        logger.info("Deleting Cargo repository %r from Artifactory %r", repository_name, artifactory["url"])
-        client.repositories.delete(repository_name)
-
-
-@contextlib.contextmanager
-def create_cargo_repository_in_cloudsmith(cloudsmith: dict[str, str]) -> Iterator[CargoRepositoryWithAuth]:
-    """Sets up a Cargo repository in Cloudsmith."""
-
-    from cloudsmith_api import ApiClient, Configuration, ReposApi, ReposCreate  # type: ignore[import]
-
-    config = Configuration()
-    config.api_key["X-Api-Key"] = cloudsmith["api_key"]
-    client = ApiClient(config)
-    repos = ReposApi(client)
-
-    repository_name = f"kraken-integration-test-cargo-{str(uuid.uuid4())[:7]}"
-
-    logger.info("Creating Cloudsmith repository %r", repository_name)
-    data = ReposCreate(
-        description="temporary integration test repository",
-        name=repository_name,
-        repository_type_str="private",
-    )
-    response = repos.repos_create(cloudsmith["owner"], data=data)
-    logger.info("Cloudsmith repository %r created.", repository_name)
-
-    index_url = f"{response.cdn_url}/cargo/index.git"
-    try:
-        yield CargoRepositoryWithAuth(repository_name, index_url, cloudsmith["user"], cloudsmith["api_key"])
-    finally:
-        logger.info("Deleting Cloudsmith repository %r", repository_name)
-        repos.repos_delete(cloudsmith["owner"], identifier=repository_name)
+    token: str
 
 
 def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdir: Path) -> None:
@@ -139,6 +69,8 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
         shutil.copytree(item, data_dir / item.name)
 
     cargo_registry_id = "private-repo"
+    publish_version = ".".join(str(random.randint(0, 999)) for _ in range(3))
+    logger.info("==== Publish version is %s", publish_version)
 
     with unittest.mock.patch.dict(os.environ, {"CARGO_HOME": str(tempdir)}):
 
@@ -159,10 +91,12 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
                     cargo_registry_id,
                     repository.index_url,
                     read_credentials=(repository.user, repository.password),
-                    publish_token=repository.password,
+                    publish_token=repository.token,
                 )
             cargo_auth_proxy()
-            cargo_sync_config()
+            task = cargo_sync_config()
+            task.git_fetch_with_cli.set(True)
+            cargo_bump_version(version=publish_version)
             cargo_publish(cargo_registry_id)
             if repository:
                 project1.context.execute(["fmt", "lint", "publish"])
@@ -183,6 +117,8 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
                 )
                 with kraken_ctx() as ctx, kraken_project(ctx) as project2:
                     project2.directory = data_dir / "hello-world-app"
+                    cargo_toml = project2.directory / "Cargo.toml"
+                    cargo_toml.write_text(cargo_toml.read_text().replace("$VERSION", publish_version))
                     cargo_registry(
                         cargo_registry_id,
                         repository.index_url,
@@ -217,15 +153,27 @@ CLOUDSMITH_VAR = "CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS"
 @pytest.mark.skipif(ARTIFACTORY_VAR not in os.environ, reason=f"{ARTIFACTORY_VAR} is not set")
 def test__artifactory_cargo_publish_and_consume(tempdir: Path) -> None:
     credentials = json.loads(os.environ[ARTIFACTORY_VAR])
-    with create_cargo_repository_in_artifactory(credentials) as repository:
-        publish_lib_and_build_app(repository, tempdir)
+    repository = CargoRepositoryWithAuth(
+        "kraken-std-cargo-integration-test",
+        credentials["url"] + "/git/kraken-std-cargo-integration-test.git",
+        credentials["user"],
+        credentials["password"],
+        "Bearer " + credentials["token"],
+    )
+    publish_lib_and_build_app(repository, tempdir)
 
 
 @pytest.mark.skipif(CLOUDSMITH_VAR not in os.environ, reason=f"{CLOUDSMITH_VAR} is not set")
 def test__cloudsmith_cargo_publish_and_consume(tempdir: Path) -> None:
     credentials = json.loads(os.environ[CLOUDSMITH_VAR])
-    with create_cargo_repository_in_cloudsmith(credentials) as repository:
-        publish_lib_and_build_app(repository, tempdir)
+    repository = CargoRepositoryWithAuth(
+        "kraken-std-cargo-integration-test",
+        "https://dl.cloudsmith.io/basic/niklas-rosenstein-OJj/kraken-std-cargo-integration-test/cargo/index.git",
+        credentials["user"],
+        credentials["api_key"],
+        credentials["api_key"],
+    )
+    publish_lib_and_build_app(repository, tempdir)
 
 
 def test_cargo_build(tempdir: Path) -> None:
