@@ -86,7 +86,14 @@ def create_cargo_repository_in_artifactory(artifactory: dict[str, str]) -> Itera
     try:
         index_url = f"{artifactory['url']}/git/{repository_name}.git"
         logger.info("Expected Cargo index URL is %r", index_url)
-        yield CargoRepositoryWithAuth(repository_name, index_url, artifactory["user"], artifactory["password"])
+        logger.info("Sleeping for 30s to give Artifactory time for the repository creation.")
+        time.sleep(30)
+        yield CargoRepositoryWithAuth(
+            repository_name,
+            index_url,
+            artifactory["user"],
+            "Bearer " + artifactory["password"],
+        )
     finally:
         assert artifactory is not None
         logger.info("Deleting Cargo repository %r from Artifactory %r", repository_name, artifactory["url"])
@@ -208,10 +215,6 @@ CLOUDSMITH_VAR = "CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS"
 
 
 @pytest.mark.skipif(ARTIFACTORY_VAR not in os.environ, reason=f"{ARTIFACTORY_VAR} is not set")
-@pytest.mark.xfail(
-    reason="Artifactory appears to have an issue correctly initializing a Cargo repository",
-    strict=True,
-)
 def test__artifactory_cargo_publish_and_consume(tempdir: Path) -> None:
     credentials = json.loads(os.environ[ARTIFACTORY_VAR])
     with create_cargo_repository_in_artifactory(credentials) as repository:
