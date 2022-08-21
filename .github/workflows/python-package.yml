@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        includes:
+        include:
           - python-version: "3.7"
             test-type: test
           - python-version: "3.8"
