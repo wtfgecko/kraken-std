@@ -46,7 +46,10 @@ jobs:
         echo "::add-mask::${{ env.ARTIFACTORY_TOKEN }}"
 
     - run: krakenw run lint test -v
+
+    # We don't want to hammer Artifactory/Cloudsmith with integration tests, so we only do it once per CI.
     - run: krakenw run integrationTest -v --resume
+      if: ${{ matrix.python-version == "3.7" }}
 
   publish:
     runs-on: ubuntu-latest
