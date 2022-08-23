@@ -15,7 +15,7 @@ class IsortTask(EnvironmentAwareDispatchTask):
     additional_files: Property[List[Path]] = Property.config(default_factory=list)
 
     def get_execute_command(self) -> list[str]:
-        command = ["isort", "src/"] + self.settings.get_tests_directory_as_args()
+        command = ["isort", str(self.settings.source_directory)] + self.settings.get_tests_directory_as_args()
         command += [str(p) for p in self.additional_files.get()]
         if self.check_only.get():
             command += ["--check-only"]

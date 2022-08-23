@@ -16,7 +16,7 @@ class Flake8Task(EnvironmentAwareDispatchTask):
     # EnvironmentAwareDispatchTask
 
     def get_execute_command(self) -> list[str]:
-        command = ["flake8", "src/"] + self.settings.get_tests_directory_as_args()
+        command = ["flake8", str(self.settings.source_directory)] + self.settings.get_tests_directory_as_args()
         if self.config_file.is_filled():
             command += ["--config", str(self.config_file.get())]
         command += self.additional_args.get()

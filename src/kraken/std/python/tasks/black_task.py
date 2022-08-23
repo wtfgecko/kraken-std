@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import Any, List, Union
+from typing import Any, List
 
 from kraken.core import Project, Property
 
@@ -14,14 +14,13 @@ class BlackTask(EnvironmentAwareDispatchTask):
 
     check_only: Property[bool] = Property.config(default=False)
     config_file: Property[Path]
-    source_directories: Property[List[Union[str, Path]]] = Property.config(default_factory=lambda: ["src"])
     additional_args: Property[List[str]] = Property.config(default_factory=list)
     additional_files: Property[List[Path]] = Property.config(default_factory=list)
 
     # EnvironmentAwareDispatchTask
 
     def get_execute_command(self) -> list[str]:
-        command = ["black"] + list(map(str, self.source_directories.get()))
+        command = ["black", str(self.settings.source_directory)]
         command += self.settings.get_tests_directory_as_args()
         command += [str(p) for p in self.additional_files.get()]
         if self.check_only.get():
@@ -46,7 +45,10 @@ class BlackTasks:
     format: BlackTask
 
 
-def black(project: Project | None = None, **kwargs: Any) -> BlackTasks:
+def black(
+    project: Project | None = None,
+    **kwargs: Any,
+) -> BlackTasks:
     """Creates two black tasks, one to check and another to format. The check task will be grouped under `"lint"`
     whereas the format task will be grouped under `"fmt"`."""
 
