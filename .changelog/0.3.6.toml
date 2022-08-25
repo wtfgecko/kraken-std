@@ -1,3 +1,5 @@
+release-date = "2022-08-25"
+
 [[entries]]
 id = "ed26008d-db87-44b8-aaa1-d1f4dddd5f5a"
 type = "improvement"
@@ -10,5 +12,5 @@ type = "fix"
 description = "Fix #10 - Kaniko now writes secrets to /kaniko/secrets where they will be kept persistent through multiple stages of the Dockerfile and linked to /run/secrets on every `RUN` command using a preprocessed Dockerfile"
 author = "@NiklasRosenstein"
 issues = [
-    "https://github.com/kraken-build/kraken-std/issues/10"
+    "https://github.com/kraken-build/kraken-std/issues/10",
 ]
