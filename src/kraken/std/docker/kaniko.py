@@ -1,65 +1,37 @@
 from __future__ import annotations
 
-import base64
 import contextlib
-import json
 import shlex
 import tempfile
 from pathlib import Path
 
+import deprecated
 from kraken.core.project import Project
 from kraken.core.property import Property
 from kraken.core.util.helpers import flatten
 
 from . import DockerBuildTask
 from .dockerapi import docker_load, docker_run
+from .util import render_docker_auth, update_run_commands
 
 
 class KanikoBuildTask(DockerBuildTask):
     """An implementation for building Docker images with Kaniko."""
 
-    kaniko_image: Property[str]
-    kaniko_context: Property[str]
-    kaniko_cache_copy_layers: Property[bool]
-    kaniko_snapshot_mode: Property[str]
-    kaniko_secrets_mount_dir: Property[str]
+    kaniko_image: Property[str] = Property.default("gcr.io/kaniko-project/executor:v1.7.0-debug")
+    kaniko_context: Property[str] = Property.default("/workspace")
+    kaniko_cache_copy_layers: Property[bool] = Property.default(True)
+    kaniko_snapshot_mode: Property[str] = Property.default("redo")
+    kaniko_secrets_mount_dir: Property[str] = Property.default("/kaniko/secrets")
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
-        self.kaniko_image.set("gcr.io/kaniko-project/executor:debug")
-        self.kaniko_context.set("/workspace")
-        self.kaniko_cache_copy_layers.set(True)
-        self.kaniko_snapshot_mode.set("redo")
-        self.kaniko_secrets_mount_dir.set("/run/secrets")
+        self.preprocess_dockerfile.set(True)
 
-    def finalize(self) -> None:
-        if self.cache.get() and not self.push.get() and not self.cache_repo.get():
-            self.logger.warning(
-                "Disabling cache in Kaniko build %s because it must be combined with push or cache_repo",
-                self,
-            )
-            self.cache.set(False)
-        cache_repo = self.cache_repo.get_or(None)
-        if cache_repo and ":" in cache_repo:
-            raise ValueError(f"Kaniko --cache-repo argument cannot contain `:` (got: {cache_repo!r})")
-        return super().finalize()
-
-    def _render_auth_file(self) -> str:
-        """Renders the JSON configuration that will be written to `/kaniko/.docker/config.json`."""
-        return json.dumps(
-            {
-                "auths": {
-                    index: {"auth": base64.b64encode(f"{username}:{password}".encode("ascii")).decode("ascii")}
-                    for index, (username, password) in self.auth.get().items()
-                }
-            },
-            indent=2,
-        )
-
-    def _render_main_script(self, executor_command: list[str]) -> str:
+    def render_main_script(self, executor_command: list[str]) -> str:
         """Renders the shell script that will be executed in the Kaniko container."""
 
-        docker_config = self._render_auth_file()
+        docker_config = render_docker_auth(self.auth.get())
 
         script = []
         script += [
@@ -79,7 +51,7 @@ class KanikoBuildTask(DockerBuildTask):
         script += [" ".join(map(shlex.quote, executor_command))]
         return "\n".join(script)
 
-    def _get_kaniko_executor_command(self, dockerfile: str | None, tar_path: str | None) -> list[str]:
+    def get_kaniko_executor_command(self, dockerfile: str | None, tar_path: str | None) -> list[str]:
         if tar_path and not self.tags:
             raise ValueError("Need at least one destination (tag) when exporting to an image tarball")
         executor_command = ["/kaniko/executor"]
@@ -107,6 +79,14 @@ class KanikoBuildTask(DockerBuildTask):
         executor_command += ["--context", self.kaniko_context.get()]
         return executor_command
 
+    @deprecated.deprecated("use KanikoBuildTask.render_main_script() instead", version="0.3.6")
+    def _render_main_script(self, executor_command: list[str]) -> str:
+        return self.render_main_script(executor_command)
+
+    @deprecated.deprecated("use KanikoBuildTask.get_kaniko_executor_command() instead", version="0.3.6")
+    def _get_kaniko_executor_command(self, dockerfile: str | None, tar_path: str | None) -> list[str]:
+        return self.get_kaniko_executor_command(dockerfile, tar_path)
+
     def _build(
         self,
         exit_stack: contextlib.ExitStack,
@@ -114,15 +94,13 @@ class KanikoBuildTask(DockerBuildTask):
         volumes = [f"{self.build_context.get().absolute()}:{self.kaniko_context.get()}"]
 
         # If the Dockerfile is not relative to the build context, we need to mount it explicitly.
+        dockerfile = self.dockerfile.get()
         in_container_dockerfile: str | None = None
-        if self.dockerfile.is_filled():
-            try:
-                in_container_dockerfile = str(
-                    self.dockerfile.get().absolute().relative_to(self.build_context.get().absolute())
-                )
-            except ValueError:
-                in_container_dockerfile = "/kaniko/Dockerfile"
-                volumes += [f"{self.dockerfile.get().absolute()}:{in_container_dockerfile}"]
+        try:
+            in_container_dockerfile = str(dockerfile.absolute().relative_to(self.build_context.get().absolute()))
+        except ValueError:
+            in_container_dockerfile = "/kaniko/Dockerfile"
+            volumes += [f"{dockerfile.absolute()}:{in_container_dockerfile}"]
 
         # If the image needs to be loaded into the Docker daemon after building, we need to always
         # export it to a file.
@@ -159,6 +137,29 @@ class KanikoBuildTask(DockerBuildTask):
             result = docker_load(image_output_file)
             if result != 0:
                 raise Exception(f"Docker load failed with exit code {result}")
+
+    # DockerBuildTask
+
+    def _preprocess_dockerfile(self, dockerfile: Path) -> str:
+        return update_run_commands(
+            dockerfile.read_text(),
+            prefix="ln -sf /kaniko/secrets /run/secrets && ( ",
+            suffix=" ); __ret=$?; unlink /run/secrets; exit $__ret",
+        )
+
+    # Task
+
+    def finalize(self) -> None:
+        if self.cache.get() and not self.push.get() and not self.cache_repo.get():
+            self.logger.warning(
+                "Disabling cache in Kaniko build %s because it must be combined with push or cache_repo",
+                self,
+            )
+            self.cache.set(False)
+        cache_repo = self.cache_repo.get_or(None)
+        if cache_repo and ":" in cache_repo:
+            raise ValueError(f"Kaniko --cache-repo argument cannot contain `:` (got: {cache_repo!r})")
+        return super().finalize()
 
     def execute(self) -> None:
         with contextlib.ExitStack() as exit_stack:

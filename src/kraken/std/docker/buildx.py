@@ -3,16 +3,30 @@ from __future__ import annotations
 import os
 import re
 import subprocess as sp
+from pathlib import Path
 
-from kraken.core.task import TaskStatus
+from kraken.core import Project, TaskStatus
 from kraken.core.util.helpers import flatten, not_none
 
+from kraken.std.docker.util import update_run_commands
+
 from . import DockerBuildTask
-from .rewrite import prepend_secret_mounts_to_file
 
 
 class BuildxBuildTask(DockerBuildTask):
     """Implements building a Docker image with Buildx."""
+
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        self.preprocess_dockerfile.set(True)
+
+    # DockerBuildTask
+
+    def _preprocess_dockerfile(self, dockerfile: Path) -> str:
+        mount_string = " ".join(f"--mount=type=secret,id={sec}" for sec in self.secrets.get().keys()) + " "
+        return update_run_commands(dockerfile.read_text(), prefix=mount_string)
+
+    # Task
 
     def finalize(self) -> None:
         if not self.load.get() and not self.push.get():
@@ -59,7 +73,6 @@ class BuildxBuildTask(DockerBuildTask):
 
         # TODO (@nrosenstein): docker login for auth
 
-        with prepend_secret_mounts_to_file(self.dockerfile.get(), self.secrets.get().keys()):
-            self.logger.info("%s", command)
-            result = sp.call(command, env=env, cwd=self.project.directory)
-            return TaskStatus.from_exit_code(command, result)
+        self.logger.info("%s", command)
+        result = sp.call(command, env=env, cwd=self.project.directory)
+        return TaskStatus.from_exit_code(command, result)

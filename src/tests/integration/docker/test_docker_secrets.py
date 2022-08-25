@@ -26,10 +26,18 @@ def test__secrets_can_be_accessed_at_build_time_and_are_not_present_in_the_final
 
     dockerfile_content = textwrap.dedent(
         f"""
-        FROM alpine:latest
+        FROM alpine:latest as base
+        RUN cat {secret_path}
+
+        # Need to test that the secret is still available in the second build stage because of
+        #    https://github.com/kraken-build/kraken-std/issues/10
+        FROM base
         RUN cat {secret_path}
         """
     )
+
+    if backend == "kaniko":
+        dockerfile_content += "\nRUN ls /kaniko/secrets\nRUN ls /run/secrets"
 
     image_tag = "kraken-integration-tests/test-secrets:latest"
 
@@ -57,6 +65,19 @@ def test__secrets_can_be_accessed_at_build_time_and_are_not_present_in_the_final
 
         exit_stack.callback(lambda: sp.check_call(["docker", "rmi", image_tag]))
 
+        # Check that the secret files does not exist.
         command = ["sh", "-c", f"find {secret_path} 2>/dev/null || true"]
         output = sp.check_output(["docker", "run", "--rm", image_tag] + command).decode().strip()
         assert output == ""
+
+        if backend == "kaniko":
+            # Check that the secrets folder does not exist.
+            # NOTE (@niklas.rosenstein): Buildx leaves the /run/secrets folder dangling
+            command = ["sh", "-c", "find /run/secrets 2>/dev/null || true"]
+            output = sp.check_output(["docker", "run", "--rm", image_tag] + command).decode().strip()
+            assert output == ""
+
+            # Check that the kaniko secrets dir does not exist.
+            command = ["sh", "-c", "find /kaniko/secrets 2>/dev/null || true"]
+            output = sp.check_output(["docker", "run", "--rm", image_tag] + command).decode().strip()
+            assert output == ""

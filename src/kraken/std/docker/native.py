@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 import os
 import subprocess as sp
 import tempfile
@@ -11,19 +10,28 @@ from kraken.core.property import Property
 from kraken.core.task import TaskStatus
 from kraken.core.util.helpers import flatten, not_none
 
+from kraken.std.docker.util import update_run_commands
+
 from . import DockerBuildTask
-from .rewrite import prepend_secret_mounts_to_file
 
 
 class NativeBuildTask(DockerBuildTask):
     """Implements building a Docker image using the native `docker build` command."""
 
     #: Whether to use Docker Buildkit. Enabled by default.
-    native_use_buildkit: Property[bool]
+    native_use_buildkit: Property[bool] = Property.default(True)
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
-        self.native_use_buildkit.set(True)
+        self.preprocess_dockerfile.set(True)
+
+    # DockerBuildTask
+
+    def _preprocess_dockerfile(self, dockerfile: Path) -> str:
+        mount_string = " ".join(f"--mount=type=secret,id={sec}" for sec in self.secrets.get().keys()) + " "
+        return update_run_commands(dockerfile.read_text(), prefix=mount_string)
+
+    # Task
 
     def finalize(self) -> None:
         if self.cache_repo.get() is not None:
@@ -62,13 +70,11 @@ class NativeBuildTask(DockerBuildTask):
 
         # TODO (@nrosenstein): docker login for auth
 
-        with tempfile.TemporaryDirectory() as tempdir, contextlib.ExitStack() as exit_stack:
+        with tempfile.TemporaryDirectory() as tempdir:
             for key, value in self.secrets.get().items():
                 secret_file = Path(tempdir) / key
                 secret_file.write_text(value)
                 command += ["--secret", f"id={key},src={secret_file}"]
-
-            exit_stack.enter_context(prepend_secret_mounts_to_file(self.dockerfile.get(), self.secrets.get().keys()))
 
             self.logger.info("%s", command)
             result = sp.call(command, env=env, cwd=self.project.directory)
