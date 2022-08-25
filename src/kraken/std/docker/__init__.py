@@ -68,7 +68,7 @@ class DockerBuildTask(Task):
 
     def finalize(self) -> None:
         if self.preprocess_dockerfile.get():
-            tempfile = self.project.directory / self.name / "Dockerfile"
+            tempfile = self.project.build_directory / self.name / "Dockerfile"
             dockerfile = self.dockerfile.value
             task = render_file(
                 name=self.name + ".preprocess",
