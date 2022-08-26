@@ -10,10 +10,10 @@ import pytest
 from kraken.core.lib.render_file_task import RenderFileTask
 from kraken.core.project import Project
 
-from kraken.std.docker import build_docker_image
+from kraken.std.docker import BUILD_BACKENDS, build_docker_image
 
 
-@pytest.mark.parametrize("backend", ["buildx", "kaniko", "native"])
+@pytest.mark.parametrize("backend", BUILD_BACKENDS.keys())
 def test__secrets_can_be_accessed_at_build_time_and_are_not_present_in_the_final_image(
     kraken_project: Project,
     backend: str,

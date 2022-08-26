@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+from sre_constants import IN_UNI_IGNORE
 from typing import Mapping
 
 
@@ -23,8 +24,15 @@ def update_run_commands(dockerfile_content: str, prefix: str, suffix: str = "") 
     """Prepends a prefix string to all `RUN` commands in a Dockerfile."""
 
     lines = dockerfile_content.splitlines()
+    in_run_command = False
     for idx, line in enumerate(lines):
-        if line.startswith("RUN "):
-            line = "RUN " + prefix + line[4:] + suffix
+        if line.startswith("RUN ") or in_run_command:
+            if not in_run_command:
+                line = "RUN " + prefix + line[4:]
+            if line.endswith("\\"):
+                in_run_command = True
+            elif not line.lstrip().startswith("#"):
+                line = line + suffix
+                in_run_command = False
             lines[idx] = line
     return "\n".join(lines)
