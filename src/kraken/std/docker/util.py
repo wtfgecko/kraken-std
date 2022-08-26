@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import base64
 import json
-from sre_constants import IN_UNI_IGNORE
 from typing import Mapping
 
 
