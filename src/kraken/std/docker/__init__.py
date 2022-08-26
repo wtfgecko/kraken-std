@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from kraken.core import Project, Property, Supplier, Task
-from kraken.core.lib.render_file_task import render_file
+from kraken.core.lib.render_file_task import RenderFileTask, render_file
 from kraken.core.util.importing import import_class
 
 from .util import render_docker_auth
@@ -46,39 +46,35 @@ class DockerBuildTask(Task):
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
         self.build_context.set(project.directory)
-        self.dockerfile.set(Path("Dockerfile"))
-        self.auth.setdefault({})
-        self.build_args.setdefault({})
-        self.secrets.setdefault({})
-        self.cache_repo.setdefault(None)
-        self.cache.set(True)
-        self.tags.setdefault([])
-        self.push.set(False)
-        self.squash.set(False)
-        self.target.setdefault(None)
-        self.image_output_file.setdefault(None)
-        self.load.setdefault(False)
+        self.preprocessor_task: RenderFileTask | None = None
 
     def _preprocess_dockerfile(self, dockerfile: Path) -> str:
         """Internal. Can be implemented by subclasses. Preprocess the Dockerfile."""
 
         return dockerfile.read_text()
 
+    def create_preprocessor_task(self) -> RenderFileTask:
+        assert self.preprocess_dockerfile.get(), f"no preprocessing requested: {self}"
+        assert not self.preprocessor_task, f"preprocessor task already exists: {self.preprocessor_task}"
+        tempfile = self.project.build_directory / self.name / "Dockerfile"
+        dockerfile = self.dockerfile.value
+        task = render_file(
+            name=self.name + ".preprocess",
+            description="Preprocess the Dockerfile.",
+            create_check=False,
+            file=tempfile,
+            content=Supplier.of_callable(lambda: self._preprocess_dockerfile(dockerfile.get()), [dockerfile]),
+            project=self.project,
+        )[0]
+        self.dockerfile.set(task.file)
+        self.preprocessor_task = task
+        return task
+
     # Task
 
     def finalize(self) -> None:
-        if self.preprocess_dockerfile.get():
-            tempfile = self.project.build_directory / self.name / "Dockerfile"
-            dockerfile = self.dockerfile.value
-            task = render_file(
-                name=self.name + ".preprocess",
-                description="Preprocess the Dockerfile.",
-                create_check=False,
-                file=tempfile,
-                content=Supplier.of_callable(lambda: self._preprocess_dockerfile(dockerfile.get()), [dockerfile]),
-                project=self.project,
-            )[0]
-            self.dockerfile.set(task.file)
+        if not self.preprocessor_task and self.preprocess_dockerfile.get():
+            self.create_preprocessor_task()
         return super().finalize()
 
 
