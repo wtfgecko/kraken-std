@@ -20,7 +20,7 @@ def render_docker_auth(auth: Mapping[str, tuple[str, str]], indent: int | None =
 
 
 def update_run_commands(dockerfile_content: str, prefix: str, suffix: str = "") -> str:
-    """Prepends a prefix string to all `RUN` commands in a Dockerfile."""
+    """Prepends a prefix and appends a suffix string to all `RUN` commands in a Dockerfile."""
 
     lines = dockerfile_content.splitlines()
     in_run_command = False
