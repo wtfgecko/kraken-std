@@ -53,7 +53,7 @@ class DockerBuildTask(Task):
 
         return dockerfile.read_text()
 
-    def create_preprocessor_task(self) -> RenderFileTask:
+    def create_preprocessor_task(self, group: str | None = None) -> RenderFileTask:
         assert self.preprocess_dockerfile.get(), f"no preprocessing requested: {self}"
         assert not self.preprocessor_task, f"preprocessor task already exists: {self.preprocessor_task}"
         tempfile = self.project.build_directory / self.name / "Dockerfile"
@@ -62,6 +62,7 @@ class DockerBuildTask(Task):
             name=self.name + ".preprocess",
             description="Preprocess the Dockerfile.",
             create_check=False,
+            group=group,
             file=tempfile,
             content=Supplier.of_callable(lambda: self._preprocess_dockerfile(dockerfile.get()), [dockerfile]),
             project=self.project,
