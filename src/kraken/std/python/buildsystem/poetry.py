@@ -7,6 +7,7 @@ import logging
 import os
 import shutil
 import subprocess as sp
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import tomli
@@ -69,6 +70,60 @@ class PoetryManagedEnvironment(ManagedEnvironment):
         self.project_directory = project_directory
         self._env_path: Path | None | NotSet = NotSet.Value
 
+    def _get_current_poetry_environment_path(self) -> Path | None:
+        """Uses `poetry env info -p`. This will not work if Poetry has to fall back to a compatible Python
+        version if the version that Poetry is installed into is not compatible."""
+
+        # Ensure we de-activate any environment that might be active when Kraken is invoked. Otherwise,
+        # Poetry would fall back to that environment.
+        environ = os.environ.copy()
+        venv = get_current_venv(environ)
+        if venv:
+            venv.deactivate(environ)
+
+        command = ["poetry", "env", "info", "-p"]
+        try:
+            response = sp.check_output(command, cwd=self.project_directory, env=environ).decode().strip()
+        except sp.CalledProcessError as exc:
+            if exc.returncode != 1:
+                raise
+            return None
+        else:
+            return Path(response)
+
+    def _get_all_poetry_known_environment_paths(self) -> list[Path]:
+        """Uses `poetry env list --full-path` to get the path to all relevant virtual environments that are known
+        to Poetry for the project. We fall back to this method if `poetry env info -p` fails us."""
+
+        command = ["poetry", "env", "list", "--full-path"]
+        try:
+            response = sp.check_output(command, cwd=self.project_directory).decode().strip().splitlines()
+        except sp.CalledProcessError as exc:
+            if exc.returncode != 1:
+                raise
+            return []
+        else:
+            return [Path(line) for line in response if line]
+
+    def _get_poetry_environment_path(self) -> Path | None:
+        # Run the two Poetry commands we need to run in parallel to improve load times.
+        with ThreadPoolExecutor() as executor:
+            venv_path_future = executor.submit(self._get_current_poetry_environment_path)
+            known_venvs_future = executor.submit(self._get_all_poetry_known_environment_paths)
+            venv_path = venv_path_future.result()
+            if venv_path is not None:
+                return venv_path
+            known_venvs = known_venvs_future.result()
+            if known_venvs:
+                if len(known_venvs) > 1:
+                    logger.warning(
+                        "This project has multiple Poetry environments. Picking the first one (%s)", known_venvs[0]
+                    )
+                return known_venvs[0]
+            return None
+
+    # ManagedEnvironment
+
     def exists(self) -> bool:
         try:
             self.get_path()
@@ -78,26 +133,7 @@ class PoetryManagedEnvironment(ManagedEnvironment):
 
     def get_path(self) -> Path:
         if self._env_path is NotSet.Value:
-            command = ["poetry", "env", "info", "-p"]
-            environ = os.environ.copy()
-            # Poetry would otherwise assume the active virtual env.
-            venv = get_current_venv(environ)
-            if venv:
-                venv.deactivate(environ)
-            try:
-                self._env_path = Path(
-                    sp.check_output(
-                        command,
-                        cwd=self.project_directory,
-                        env=environ,
-                    )
-                    .decode()
-                    .strip()
-                )
-            except sp.CalledProcessError as exc:
-                if exc.returncode != 1:
-                    raise
-                self._env_path = None
+            self._env_path = self._get_poetry_environment_path()
         if self._env_path is None:
             raise RuntimeError("managed environment does not exist")
         return self._env_path
@@ -113,6 +149,7 @@ class PoetryManagedEnvironment(ManagedEnvironment):
         #       pyproject.toml instead of just temporarily?
         pyproject_toml = self.project_directory / "pyproject.toml"
         pyproject_conf = tomli.loads(pyproject_toml.read_text())
+        sources_conf = pyproject_conf.setdefault("tool", {}).setdefault("poetry", {}).setdefault("source", [])
 
         for index in settings.package_indexes.values():
             if index.is_package_source and index.credentials:
@@ -120,13 +157,19 @@ class PoetryManagedEnvironment(ManagedEnvironment):
                     "username": index.credentials[0],
                     "password": index.credentials[1],
                 }
-                pyproject_conf.setdefault("tool", {}).setdefault("poetry", {}).setdefault("source", []).append(
-                    {
-                        "name": index.alias,
-                        "url": index.index_url,
-                        "secondary": True,
-                    }
-                )
+
+                source_config = {
+                    "name": index.alias,
+                    "url": index.index_url,
+                    "secondary": True,
+                }
+
+                # Find the source with the same name and update it, or create a new one.
+                source = next((x for x in sources_conf if x["name"] == index.alias), None)
+                if source is None:
+                    sources_conf.append(source_config)
+                else:
+                    source.update(source_config)
 
         with contextlib.ExitStack() as exit_stack:
             fp = exit_stack.enter_context(atomic_file_swap(poetry_toml, "wb", always_revert=True))
