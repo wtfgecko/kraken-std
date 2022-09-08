@@ -4,6 +4,7 @@ import contextlib
 import shlex
 import tempfile
 from pathlib import Path
+from typing import Sequence
 
 import deprecated
 from kraken.core.project import Project
@@ -23,6 +24,7 @@ class KanikoBuildTask(DockerBuildTask):
     kaniko_cache_copy_layers: Property[bool] = Property.default(True)
     kaniko_snapshot_mode: Property[str] = Property.default("redo")
     kaniko_secrets_mount_dir: Property[str] = Property.default("/kaniko/secrets")
+    kaniko_secrets_from_env: Property[Sequence[str]] = Property.default(())
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
@@ -41,12 +43,14 @@ class KanikoBuildTask(DockerBuildTask):
             "EOF",
         ]
 
-        if self.secrets:
-            script += [f"mkdir -p {shlex.quote(self.kaniko_secrets_mount_dir.get())}"]
+        secrets_mount_dir = self.kaniko_secrets_mount_dir.get()
+        if self.secrets.get():
+            script += [f"mkdir -p {shlex.quote(secrets_mount_dir)}"]
             for secret, value in self.secrets.get().items():
-                script += [
-                    f"echo {shlex.quote(value)} > {shlex.quote(self.kaniko_secrets_mount_dir.get() + '/' + secret)}"
-                ]
+                script += [f"echo {shlex.quote(value)} > {shlex.quote(secrets_mount_dir + '/' + secret)}"]
+        if self.kaniko_secrets_from_env.get():
+            for env in self.kaniko_secrets_from_env.get():
+                script += [f"echo ${env} > {shlex.quote(secrets_mount_dir + '/' + env)}"]
 
         script += [" ".join(map(shlex.quote, executor_command))]
         return "\n".join(script)
