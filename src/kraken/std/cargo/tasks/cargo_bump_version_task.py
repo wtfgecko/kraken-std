@@ -3,10 +3,10 @@ from __future__ import annotations
 import contextlib
 from pathlib import Path
 
-import tomli
-import tomli_w
 from kraken.core import BackgroundTask, Property, TaskStatus
 from kraken.core.util.fs import atomic_file_swap
+
+from kraken.std.cargo.manifest import CargoManifest
 
 
 class CargoBumpVersionTask(BackgroundTask):
@@ -19,9 +19,9 @@ class CargoBumpVersionTask(BackgroundTask):
     cargo_toml_file: Property[Path] = Property.default("Cargo.toml")
 
     def _get_updated_cargo_toml(self) -> str:
-        content = tomli.loads(self.cargo_toml_file.get().read_text())
-        content["package"]["version"] = self.version.get()
-        return tomli_w.dumps(content)
+        manifest = CargoManifest.read(self.cargo_toml_file.get())
+        manifest.package.version = self.version.get()
+        return manifest.to_toml_string()
 
     # BackgroundTask
 
