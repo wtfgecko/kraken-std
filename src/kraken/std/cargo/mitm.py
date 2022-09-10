@@ -30,10 +30,11 @@ def mitm_auth_proxy(
     cert_file = certs_dir / "cert.pem"
 
     env = os.environ.copy()
+    env["PYTHONPATH"] = str(Path(__file__).parent) + os.pathsep + env.get("PYTHONPATH", "")
     command = [
         "proxy",
         "--plugins",
-        __name__.rpartition(".")[0] + ".mitm_impl.AuthInjector",
+        "mitm_impl.AuthInjector",
         "--ca-key-file",
         str(key_file),
         "--ca-cert-file",
