@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 import tomli
 import tomli_w
-from kraken.core import BackgroundTask, Property
+from kraken.core import BackgroundTask, Property, TaskStatus
 from kraken.core.util.fs import atomic_file_swap
 from kraken.core.util.helpers import not_none
 
@@ -85,7 +85,7 @@ class CargoAuthProxyTask(BackgroundTask):
 
     # Task
 
-    def start_background_task(self, exit_stack: contextlib.ExitStack) -> None:
+    def start_background_task(self, exit_stack: contextlib.ExitStack) -> TaskStatus:
         from ..mitm import mitm_auth_proxy
 
         auth: dict[str, tuple[str, str]] = {}
@@ -95,7 +95,14 @@ class CargoAuthProxyTask(BackgroundTask):
             host = not_none(urlparse(registry.index).hostname)
             auth[host] = registry.read_credentials
 
-        proxy_url, cert_file = exit_stack.enter_context(mitm_auth_proxy(auth=auth, port=self.proxy_port.get()))
+        try:
+            proxy_url, cert_file = exit_stack.enter_context(mitm_auth_proxy(auth=auth, port=self.proxy_port.get()))
+        except FileNotFoundError as exc:
+            return TaskStatus.skipped(
+                f"Could not start proxy ({exc}). This may cause errors when Cargo tries to fetch dependencies. "
+                "Consider running `pipx install proxy.py`."
+            )
+
         self.proxy_url.set(proxy_url)
         exit_stack.callback(lambda: self.proxy_url.clear())
         self.proxy_cert_file.set(cert_file)
@@ -111,3 +118,4 @@ class CargoAuthProxyTask(BackgroundTask):
         time.sleep(self.startup_wait_time.get())
 
         exit_stack.enter_context(self._inject_config())
+        return TaskStatus.succeeded()
