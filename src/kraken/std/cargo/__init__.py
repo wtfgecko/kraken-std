@@ -192,6 +192,7 @@ def cargo_build(
         default=False,
         group=group,
         incremental=incremental,
+        target=mode,
         additional_args=["--release"] if mode == "release" else [],
         env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
     )

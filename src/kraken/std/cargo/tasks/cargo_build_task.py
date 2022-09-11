@@ -2,14 +2,27 @@ from __future__ import annotations
 
 import os
 import subprocess as sp
+from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 from kraken.core import Project, Property, Task, TaskStatus
+
+from kraken.std.descriptors.resource import BinaryArtifact
+
+from ..manifest import CargoManifest
+
+
+@dataclass
+class CargoBinaryArtifact(BinaryArtifact):
+    pass
 
 
 class CargoBuildTask(Task):
     """This task runs `cargo build` using the specified parameters. It will respect the authentication
     credentials configured in :attr:`CargoProjectSettings.auth`."""
+
+    #: The build target (debug or release).
+    target: Property[str]
 
     #: Additional arguments to pass to the Cargo command-line.
     additional_args: Property[List[str]] = Property.default_factory(list)
@@ -19,6 +32,9 @@ class CargoBuildTask(Task):
 
     #: Environment variables for the Cargo command.
     env: Property[Dict[str, str]] = Property.default_factory(dict)
+
+    #: An output property for the Cargo binaries that are being produced by this build.
+    out_binaries: Property[List[CargoBinaryArtifact]] = Property.output()
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
@@ -47,5 +63,18 @@ class CargoBuildTask(Task):
         self.make_safe(safe_command, safe_env)
         self.logger.info("%s [env: %s]", safe_command, safe_env)
 
+        # Expose the output binaries that are produced by this task.
+        manifest = CargoManifest.read(self.project.directory / "Cargo.toml")
+        out_binaries = []
+        for bin in manifest.bin:
+            out_binaries.append(
+                CargoBinaryArtifact(bin.name, self.project.directory / "target" / self.target.get() / bin.name)
+            )
+        self.out_binaries.set(out_binaries)
+
         result = sp.call(command, cwd=self.project.directory, env={**os.environ, **env})
+
+        for out_bin in out_binaries:
+            assert out_bin.path.is_file(), out_bin
+
         return TaskStatus.from_exit_code(safe_command, result)

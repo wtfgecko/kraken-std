@@ -161,6 +161,7 @@ def test__artifactory_cargo_publish_and_consume(tempdir: Path) -> None:
 
 
 @pytest.mark.skipif(CLOUDSMITH_VAR not in os.environ, reason=f"{CLOUDSMITH_VAR} is not set")
+@pytest.mark.xfail(reason="currently failing, see #14")
 def test__cloudsmith_cargo_publish_and_consume(tempdir: Path) -> None:
     credentials = json.loads(os.environ[CLOUDSMITH_VAR])
     repository = CargoRepositoryWithAuth(

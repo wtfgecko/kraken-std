@@ -23,7 +23,7 @@ keywords = []
 python = "^3.7"
 "nr.python.environment" = "^0.1.4"
 httpx = "^0.23.0"
-kraken-core = "^0.9.1"
+kraken-core = "^0.10.2"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 twine = "^4.0.1"
@@ -49,17 +49,7 @@ docs = ["mkdocs", "mkdocs-material", "novella==0.2.3", "pydoc-markdown==4.6.0"]
 [tool.slap]
 typed = true
 
-[tool.slap.test]
-check = "slap check"
-mypy = "dmypy run src/"
-pytest = "PYTHONPATH=src pytest src/tests/ --ignore src/tests/integration --log-cli-level INFO -vv $PYTEST_FLAGS"
-pytest-ete = "PYTHONPATH=src pytest src/tests/integration --log-cli-level INFO -vv $PYTEST_FLAGS"
-black = "black --check src/"
-isort = "isort --check-only src/"
-flake8 = "flake8 src/"
-
 [tool.slap.run]
-fmt = "black src/ && isort src/"
 "docs:build" = "cd docs && novella --base-url kraken-std/"
 "docs:dev" = "cd docs && novella --serve"
 

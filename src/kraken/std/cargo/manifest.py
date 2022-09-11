@@ -45,7 +45,6 @@ class CargoManifest:
 
     @classmethod
     def of(cls, path: Path, data: dict[str, Any]) -> CargoManifest:
-        print(data.get("bin", []))
         return cls(
             path,
             data,
