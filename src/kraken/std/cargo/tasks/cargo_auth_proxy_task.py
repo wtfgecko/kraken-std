@@ -118,4 +118,4 @@ class CargoAuthProxyTask(BackgroundTask):
         time.sleep(self.startup_wait_time.get())
 
         exit_stack.enter_context(self._inject_config())
-        return TaskStatus.succeeded()
+        return TaskStatus.started()
