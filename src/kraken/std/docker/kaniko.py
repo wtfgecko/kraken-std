@@ -19,7 +19,7 @@ from .util import render_docker_auth, update_run_commands
 class KanikoBuildTask(DockerBuildTask):
     """An implementation for building Docker images with Kaniko."""
 
-    kaniko_image: Property[str] = Property.default("gcr.io/kaniko-project/executor:v1.7.0-debug")
+    kaniko_image: Property[str] = Property.default("gcr.io/kaniko-project/executor:v1.9.0-debug")
     kaniko_context: Property[str] = Property.default("/workspace")
     kaniko_cache_copy_layers: Property[bool] = Property.default(True)
     kaniko_snapshot_mode: Property[str] = Property.default("redo")

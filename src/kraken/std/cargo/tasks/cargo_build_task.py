@@ -69,10 +69,9 @@ class CargoBuildTask(Task):
             # Expose the output binaries that are produced by this task.
             # We only expect a binary to be built if the target is debug or release.
             manifest = CargoManifest.read(self.project.directory / "Cargo.toml")
+            target_dir = self.project.directory / os.getenv("CARGO_TARGET_DIR", "target")
             for bin in manifest.bin:
-                out_binaries.append(
-                    CargoBinaryArtifact(bin.name, self.project.directory / "target" / self.target.get() / bin.name)
-                )
+                out_binaries.append(CargoBinaryArtifact(bin.name, target_dir / self.target.get() / bin.name))
         self.out_binaries.set(out_binaries)
 
         result = sp.call(command, cwd=self.project.directory, env={**os.environ, **env})
