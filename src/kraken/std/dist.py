@@ -6,16 +6,29 @@ import abc
 import logging
 import tarfile
 import zipfile
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence, Union, cast
+from typing import Any, Mapping, Sequence, Union, cast
 
+import databind.json
 from kraken.core import Project, Property, Task
+from kraken.core.util.helpers import flatten
 from termcolor import colored
 from typing_extensions import Literal
 
 from .descriptors.resource import BinaryArtifact, Resource
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class IndividualDistOptions:
+    arcname: str | None = None
+
+
+@dataclass
+class ConfiguredResource(Resource):
+    options: IndividualDistOptions
 
 
 class DistributionTask(Task):
@@ -25,7 +38,7 @@ class DistributionTask(Task):
     #: to the project output directory. A Path object is treated relative to the project
     #: directory. Unless the :attr:`archive_type` property is set, the suffix will determine
     #: the type of archive that is created.
-    output_file: Property[Union[str, Path]]
+    output_file: Property[Path]
 
     #: The type of archive that will be created. Can be zip, tgz and tar.
     archive_type: Property[str]
@@ -34,17 +47,19 @@ class DistributionTask(Task):
     prefix: Property[str]
 
     #: A list of resources to include.
-    resources: Property[list[Resource]] = Property.default_factory(list)
+    resources: Property[list[ConfiguredResource]] = Property.default_factory(list)
+
+    #: A resource that describes the output file.
+    _output_file_resource: Property[Resource] = Property.output()
+
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        self._output_file_resource.set(self.output_file.map(lambda p: Resource("dist", p)))
 
     # Task
 
     def execute(self) -> None:
         output_file = self.output_file.get()
-        if isinstance(output_file, str):
-            output_file = self.project.build_directory / output_file
-        else:
-            output_file = self.project.directory / output_file
-
         archive_type = self.archive_type.get_or(None)
         if archive_type is None:
             archive_type = output_file.suffix.lstrip(".")
@@ -54,7 +69,9 @@ class DistributionTask(Task):
         print("Writing archive", colored(str(output_file), "yellow"))
         with wopen_archive(output_file, archive_type) as archive:
             for resource in self.resources.get():
-                if isinstance(resource, BinaryArtifact):
+                if resource.options.arcname:
+                    arcname = resource.options.arcname
+                elif isinstance(resource, BinaryArtifact):
                     arcname = resource.path.name
                 else:
                     arcname = str(resource.path)
@@ -128,7 +145,7 @@ class ZipArchiveWriter(ArchiveWriter):
 def dist(
     *,
     name: str,
-    dependencies: Sequence[str | Task],
+    dependencies: Sequence[str | Task] | Mapping[str, Mapping[str, Any] | IndividualDistOptions],
     output_file: str | Path,
     archive_type: str | None = None,
     prefix: str | None = None,
@@ -138,7 +155,8 @@ def dist(
 
     :param name: The name of the task.
     :param dependencies: A list of tasks or task selectors (resolved relative to the *project*) that provide the
-        resources that should be included in the generated archive.
+        resources that should be included in the generated archive. If a dictionary is specified, instead, it must
+        map each dependency to a dictionary of settings that can be deserialized into :class:`IndividualDistOptions`.
     :param output_file: The output filename to write to. If a string is specified, it will be treated relative to the
         project build directory. If a path object is specified, it will be treated relative to the project directory.
     :param archive_type: The type of archive to create (e.g. `zip`, `tar`, `tar.gz`, `tar.bz2` or `tar.xz`). If left
@@ -147,10 +165,44 @@ def dist(
     """
 
     project = project or Project.current()
+
+    if isinstance(output_file, str):
+        output_file = project.build_directory / output_file
+    else:
+        output_file = project.directory / output_file
+
+    if isinstance(dependencies, Sequence):
+        dependencies = cast(Mapping[str, Union[Mapping[str, Any], IndividualDistOptions]], {d: {} for d in dependencies})
+    dependencies_map = {
+        k: databind.json.load(v, IndividualDistOptions) if not isinstance(v, IndividualDistOptions) else v
+        for k, v in dependencies.items()
+    }
+    dependencies_set = project.resolve_tasks(dependencies_map)
+
+    resources = (
+        dependencies_set.select(Resource).dict_supplier()
+        # This monster is used to re-assoicated the IndividualDistOptions specified in *dependencies* back to
+        # with the Resource (s)provided by the task(s) that match the selector.
+        .map(
+            lambda resources: list(
+                flatten(
+                    [
+                        ConfiguredResource(
+                            **vars(single_resource),
+                            options=dependencies_map[next(iter(dependencies_set.partitions()[task]))],
+                        )
+                        for single_resource in task_resources
+                    ]
+                    for task, task_resources in resources.items()
+                )
+            )
+        )
+    )
+
     return project.do(
         name,
         DistributionTask,
-        resources=project.resolve_tasks(dependencies).select(Resource).supplier(),
+        resources=resources,
         output_file=output_file,
         archive_type=archive_type,
         prefix=prefix,

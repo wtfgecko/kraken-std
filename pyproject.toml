@@ -23,12 +23,13 @@ keywords = []
 python = "^3.7"
 "nr.python.environment" = "^0.1.4"
 httpx = "^0.23.0"
-kraken-core = "^0.10.2"
+kraken-core = "^0.10.3"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 twine = "^4.0.1"
 termcolor = "^1.1.0"
 deprecated = "^1.2.13"
+"databind.json" = "^2.0.7"
 
 [tool.poetry.dev-dependencies]
 black = "*"
