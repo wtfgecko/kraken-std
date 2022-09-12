@@ -21,7 +21,8 @@ class CargoBuildTask(Task):
     """This task runs `cargo build` using the specified parameters. It will respect the authentication
     credentials configured in :attr:`CargoProjectSettings.auth`."""
 
-    #: The build target (debug or release).
+    #: The build target (debug or release). If this is anything else, the :attr:`out_binaries` will be set
+    #: to an empty list instead of parsed from the Cargo manifest.
     target: Property[str]
 
     #: Additional arguments to pass to the Cargo command-line.
@@ -63,13 +64,15 @@ class CargoBuildTask(Task):
         self.make_safe(safe_command, safe_env)
         self.logger.info("%s [env: %s]", safe_command, safe_env)
 
-        # Expose the output binaries that are produced by this task.
-        manifest = CargoManifest.read(self.project.directory / "Cargo.toml")
         out_binaries = []
-        for bin in manifest.bin:
-            out_binaries.append(
-                CargoBinaryArtifact(bin.name, self.project.directory / "target" / self.target.get() / bin.name)
-            )
+        if self.target.get_or(None) in ("debug", "release"):
+            # Expose the output binaries that are produced by this task.
+            # We only expect a binary to be built if the target is debug or release.
+            manifest = CargoManifest.read(self.project.directory / "Cargo.toml")
+            for bin in manifest.bin:
+                out_binaries.append(
+                    CargoBinaryArtifact(bin.name, self.project.directory / "target" / self.target.get() / bin.name)
+                )
         self.out_binaries.set(out_binaries)
 
         result = sp.call(command, cwd=self.project.directory, env={**os.environ, **env})

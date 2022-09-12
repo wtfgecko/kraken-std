@@ -172,7 +172,9 @@ def dist(
         output_file = project.directory / output_file
 
     if isinstance(dependencies, Sequence):
-        dependencies = cast(Mapping[str, Union[Mapping[str, Any], IndividualDistOptions]], {d: {} for d in dependencies})
+        dependencies = cast(
+            Mapping[str, Union[Mapping[str, Any], IndividualDistOptions]], {d: {} for d in dependencies}
+        )
     dependencies_map = {
         k: databind.json.load(v, IndividualDistOptions) if not isinstance(v, IndividualDistOptions) else v
         for k, v in dependencies.items()
