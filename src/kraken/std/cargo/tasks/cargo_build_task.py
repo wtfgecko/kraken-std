@@ -74,7 +74,8 @@ class CargoBuildTask(Task):
 
         result = sp.call(command, cwd=self.project.directory, env={**os.environ, **env})
 
-        for out_bin in out_binaries:
-            assert out_bin.path.is_file(), out_bin
+        if result == 0:
+            for out_bin in out_binaries:
+                assert out_bin.path.is_file(), out_bin
 
         return TaskStatus.from_exit_code(safe_command, result)
