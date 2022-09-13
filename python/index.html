@@ -611,7 +611,7 @@
                 
                   
 
-  <a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/content/python.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/kraken-build/kraken-std/blob/None/docs/content/python.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
@@ -664,7 +664,7 @@ registered in the build script are made available to the installation process.</
         <span class="n">tests_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">always_use_managed_env</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PythonSettings</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L105">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/71a933038c7f52be89e1e203e6e5f6395c866622/docs/../src/kraken/std/python/settings.py#L105">[view_source]</a></p>
 <p>Read the Python settings for the given or current project and optionally update attributes.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
@@ -678,14 +678,14 @@ registered in the build script are made available to the installation process.</
 <div class="highlight"><pre><span></span><code><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span> <span class="nc">PythonSettings</span><span class="p">()</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L25">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/71a933038c7f52be89e1e203e6e5f6395c866622/docs/../src/kraken/std/python/settings.py#L25">[view_source]</a></p>
 <p>Project-global settings for Python tasks.</p>
 <p><a id="kraken.std.python.settings.PythonSettings.get_tests_directory"></a></p>
 <p><a id="pydoc:kraken.std.python.settings.PythonSettings.get_tests_directory"></a></p>
 <h4 id="get_tests_directory">get_tests_directory</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_tests_directory</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L35">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/71a933038c7f52be89e1e203e6e5f6395c866622/docs/../src/kraken/std/python/settings.py#L35">[view_source]</a></p>
 <p>Returns :attr:<code>tests_directory</code> if it is set. If not, it will look for the following directories and
 return the first that exists: <code>test/</code>, <code>tests/</code>, <code>src/test/</code>, <code>src/tests/</code>. The determined path will be
 relative to the project directory.</p>
@@ -694,7 +694,7 @@ relative to the project directory.</p>
 <h4 id="get_tests_directory_as_args">get_tests_directory_as_args</h4>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_tests_directory_as_args</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L47">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/71a933038c7f52be89e1e203e6e5f6395c866622/docs/../src/kraken/std/python/settings.py#L47">[view_source]</a></p>
 <p>Returns a list with a single item that is the test directory, or an empty list. This is convenient
 when constructing command-line arguments where you want to pass the test directory if it exists.</p>
 <p><a id="kraken.std.python.settings.PythonSettings.add_package_index"></a></p>
@@ -708,7 +708,7 @@ when constructing command-line arguments where you want to pass the test directo
                       <span class="n">is_package_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                       <span class="n">default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PythonSettings</span>
 </code></pre></div>
-<p><a href="https://github.com/kraken-build/kraken-std/blob/develop/docs/../src/kraken/std/python/settings.py#L57">[view_source]</a></p>
+<p><a href="https://github.com/kraken-build/kraken-std/blob/71a933038c7f52be89e1e203e6e5f6395c866622/docs/../src/kraken/std/python/settings.py#L57">[view_source]</a></p>
 <p>Adds an index to consume Python packages from or publish packages to.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
