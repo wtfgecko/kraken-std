@@ -34,6 +34,16 @@ class PythonBuildSystem(abc.ABC):
         """A chance to permanently update the Pyproject configuration."""
 
     @abc.abstractmethod
+    def requires_login(self) -> bool:
+        """Return True if this build system requires a separate login step (i.e. if the credentials cannot be
+        passed at install time to the command-line)."""
+
+    def login(self, settings: PythonSettings) -> None:
+        """Log into the Python package indices."""
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         """Build one or more distributions of the project managed by this build system.
 

@@ -1,0 +1,5 @@
+[[entries]]
+id = "deff70ac-ff1d-4943-95cd-fcbe90267ff0"
+type = "feature"
+description = "add `login()` task for python"
+author = "@NiklasRosenstein"

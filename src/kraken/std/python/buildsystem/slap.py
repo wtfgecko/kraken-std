@@ -41,6 +41,9 @@ class SlapPythonBuildSystem(PythonBuildSystem):
         if "poetry" in pyproject.get("tool", {}):
             PoetryPythonBuildSystem(self.project_directory).update_pyproject(settings, pyproject)
 
+    def requires_login(self) -> bool:
+        return False
+
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         if as_version is not None:
             # TODO (@NiklasRosenstein): We should find a way to revert the changes to the worktree

@@ -44,6 +44,19 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
             if index.is_package_source:
                 pyproject.upsert_poetry_source(index.alias, index.index_url, index.default, not index.default)
 
+    def requires_login(self) -> bool:
+        return True
+
+    def login(self, settings: PythonSettings) -> None:
+        for index in settings.package_indexes.values():
+            if index.is_package_source and index.credentials:
+                command = ["poetry", "config", "http-basic." + index.alias, index.credentials[0], index.credentials[1]]
+                safe_command = ["poetry", "config", "http-basic." + index.alias, index.credentials[0], "MASKED"]
+                logger.info("$ %s", safe_command)
+                code = sp.call(command)
+                if code != 0:
+                    raise RuntimeError(f"command {safe_command!r} failed with exit code {code}")
+
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         if as_version is not None:
             # TODO (@NiklasRosenstein): We should find a way to revert the changes to the worktree
