@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import os
+import shlex
 import subprocess as sp
 from dataclasses import dataclass
-from shlex import shlex
 from typing import Dict, List, Optional
 
 from kraken.core import Project, Property, Task, TaskStatus
