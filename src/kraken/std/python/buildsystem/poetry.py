@@ -160,23 +160,6 @@ class PoetryManagedEnvironment(ManagedEnvironment):
         return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
-
-        # Ensure that `poetry.toml` is up to date with the credentials.
-        poetry_toml = self.project_directory / "poetry.toml"
-        poetry_conf = tomli.loads(poetry_toml.read_text()) if poetry_toml.exists() else {}
-
-        for index in settings.package_indexes.values():
-            if index.is_package_source and index.credentials:
-                poetry_conf.setdefault("http-basic", {})[index.alias] = {
-                    "username": index.credentials[0],
-                    "password": index.credentials[1],
-                }
-
-        with contextlib.ExitStack() as exit_stack:
-            fp = exit_stack.enter_context(atomic_file_swap(poetry_toml, "wb", always_revert=True))
-            tomli_w.dump(poetry_conf, fp)
-            fp.close()
-
-            command = ["poetry", "install", "--no-interaction"]
-            logger.info("%s", command)
-            sp.check_call(command, cwd=self.project_directory)
+        command = ["poetry", "install", "--no-interaction"]
+        logger.info("%s", command)
+        sp.check_call(command, cwd=self.project_directory)
