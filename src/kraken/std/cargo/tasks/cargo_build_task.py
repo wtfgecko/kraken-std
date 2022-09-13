@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import subprocess as sp
 from dataclasses import dataclass
+from shlex import shlex
 from typing import Dict, List, Optional
 
 from kraken.core import Project, Property, Task, TaskStatus
@@ -50,7 +51,8 @@ class CargoBuildTask(Task):
         if incremental is not None:
             env["CARGO_INCREMENTAL"] = "1" if incremental else "0"
 
-        return ["cargo", "build"] + self.additional_args.get()
+        additional_args = shlex.split(os.environ.get("KRAKEN_CARGO_BUILD_FLAGS", ""))
+        return ["cargo", "build"] + self.additional_args.get() + additional_args
 
     def make_safe(self, args: List[str], env: Dict[str, str]) -> None:
         pass
