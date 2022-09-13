@@ -39,7 +39,7 @@ class BuildTask(Task):
 
 def build(
     *,
-    name: str = "pythonBuild",
+    name: str = "python.build",
     group: str | None = "build",
     as_version: str | None = None,
     project: Project | None = None,

@@ -38,10 +38,10 @@ class IsortTasks:
     format: IsortTask
 
 
-def isort(project: Project | None = None, **kwargs: Any) -> IsortTasks:
+def isort(*, name: str = "python.isort", project: Project | None = None, **kwargs: Any) -> IsortTasks:
     # TODO (@NiklasRosenstein): We may need to ensure an order to isort and block somehow, sometimes they yield
     #       slightly different results based on the order they run.
     project = project or Project.current()
-    check_task = project.do("isortCheck", IsortTask, group="lint", **kwargs, check_only=True)
-    format_task = project.do("isortFormat", IsortTask, group="fmt", default=False, **kwargs)
+    check_task = project.do(f"{name}.check", IsortTask, group="lint", **kwargs, check_only=True)
+    format_task = project.do(name, IsortTask, group="fmt", default=False, **kwargs)
     return IsortTasks(check_task, format_task)

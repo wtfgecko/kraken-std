@@ -55,12 +55,10 @@ class InstallTask(Task):
         return TaskStatus.succeeded()
 
 
-def install(project: Project | None = None) -> InstallTask:
-    """Get or create the `pythonInstall` task for the given project.
+def install(*, name: str = "python.install", project: Project | None = None) -> InstallTask:
+    """Get or create the `python.install` task for the given project.
 
     The install task relies on the build system configured in the Python project settings."""
-
-    name = "pythonInstall"
 
     project = project or Project.current()
     task = cast(Union[InstallTask, None], project.tasks().get(name))

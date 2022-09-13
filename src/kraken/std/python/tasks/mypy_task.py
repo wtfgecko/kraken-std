@@ -43,6 +43,6 @@ class MypyTask(EnvironmentAwareDispatchTask):
         return command
 
 
-def mypy(project: Project | None = None, **kwargs: Any) -> MypyTask:
+def mypy(*, name: str = "python.mypy", project: Project | None = None, **kwargs: Any) -> MypyTask:
     project = project or Project.current()
-    return project.do("mypy", MypyTask, group="lint", **kwargs)
+    return project.do(name, MypyTask, group="lint", **kwargs)

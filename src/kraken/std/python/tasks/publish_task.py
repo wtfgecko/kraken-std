@@ -45,7 +45,7 @@ def publish(
     package_index: str,
     distributions: list[Path] | Property[List[Path]],
     skip_existing: bool = False,
-    name: str = "publishPython",
+    name: str = "python.publish",
     group: str | None = "publish",
     default: bool = False,
     project: Project | None = None,

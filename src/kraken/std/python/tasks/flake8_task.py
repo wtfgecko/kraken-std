@@ -23,6 +23,6 @@ class Flake8Task(EnvironmentAwareDispatchTask):
         return command
 
 
-def flake8(project: Project | None = None, **kwargs: Any) -> Flake8Task:
+def flake8(*, name: str = "python.flake8", project: Project | None = None, **kwargs: Any) -> Flake8Task:
     project = project or Project.current()
-    return project.do("flake8", Flake8Task, group="lint", **kwargs)
+    return project.do(name, Flake8Task, group="lint", **kwargs)

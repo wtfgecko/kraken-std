@@ -25,10 +25,12 @@ class EnvironmentAwareDispatchTask(Task):
         self.settings = python_settings(project)
 
     def get_relationships(self) -> Iterable[TaskRelationship]:
-        # If a pythonInstall task exists, we may need it.
-        install_task = self.project.tasks().get("pythonInstall")
-        if install_task:
-            yield TaskRelationship(install_task, True, False)
+        from .install_task import InstallTask
+
+        # If a python.install task exists, we may need it.
+        for task in (t for t in self.project.tasks().values() if isinstance(t, InstallTask)):
+            yield TaskRelationship(task, True, False)
+
         yield from super().get_relationships()
 
     @abc.abstractmethod
