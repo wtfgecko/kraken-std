@@ -39,7 +39,10 @@ class InstallTask(Task):
             )
         managed_environment = build_system.get_managed_environment()
         if managed_environment.exists():
+            if self.selected:
+                return TaskStatus.pending("explicitly selected to run")
             return TaskStatus.skipped("managed environment exists (%s)" % managed_environment.get_path())
+
         return TaskStatus.pending()
 
     def execute(self) -> TaskStatus:
