@@ -1,0 +1,5 @@
+[[entries]]
+id = "24a70355-1370-43da-9b11-b3b03576e103"
+type = "feature"
+description = "add `update_pyproject_task()` and `PythonBuildSystem.update_pyproject()`; for Poetry this will update/replace the Python package indices defined in the build script into the Pyproject (note: currently discards comments in the config)"
+author = "@NiklasRosenstein"

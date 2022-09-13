@@ -14,6 +14,9 @@ from urllib.parse import quote
 
 from kraken.core.util.helpers import NotSet
 
+from kraken.std.python.buildsystem.poetry import PoetryPythonBuildSystem
+from kraken.std.python.pyproject import Pyproject
+
 from . import ManagedEnvironment, PythonBuildSystem
 
 if TYPE_CHECKING:
@@ -33,6 +36,10 @@ class SlapPythonBuildSystem(PythonBuildSystem):
 
     def get_managed_environment(self) -> ManagedEnvironment:
         return SlapManagedEnvironment(self.project_directory)
+
+    def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
+        if "poetry" in pyproject.get("tool", {}):
+            PoetryPythonBuildSystem(self.project_directory).update_pyproject(settings, pyproject)
 
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         if as_version is not None:

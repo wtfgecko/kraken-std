@@ -17,6 +17,7 @@ from kraken.core.util.helpers import NotSet
 from kraken.core.util.path import is_relative_to
 from nr.python.environment.virtualenv import get_current_venv
 
+from kraken.std.python.pyproject import Pyproject
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
@@ -35,6 +36,13 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
 
     def get_managed_environment(self) -> ManagedEnvironment:
         return PoetryManagedEnvironment(self.project_directory)
+
+    def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
+        for source in pyproject.get_poetry_sources():
+            pyproject.delete_poetry_source(source["name"])
+        for index in settings.package_indexes.values():
+            if index.is_package_source:
+                pyproject.upsert_poetry_source(index.alias, index.index_url, index.default, not index.default)
 
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         if as_version is not None:
@@ -144,13 +152,6 @@ class PoetryManagedEnvironment(ManagedEnvironment):
         poetry_toml = self.project_directory / "poetry.toml"
         poetry_conf = tomli.loads(poetry_toml.read_text()) if poetry_toml.exists() else {}
 
-        # Ensure that the source is configured in `pyproject.toml`.
-        # TODO (@NiklasRosenstein): Maybe we should permanently sync the source configuration into the
-        #       pyproject.toml instead of just temporarily?
-        pyproject_toml = self.project_directory / "pyproject.toml"
-        pyproject_conf = tomli.loads(pyproject_toml.read_text())
-        sources_conf = pyproject_conf.setdefault("tool", {}).setdefault("poetry", {}).setdefault("source", [])
-
         for index in settings.package_indexes.values():
             if index.is_package_source and index.credentials:
                 poetry_conf.setdefault("http-basic", {})[index.alias] = {
@@ -158,26 +159,9 @@ class PoetryManagedEnvironment(ManagedEnvironment):
                     "password": index.credentials[1],
                 }
 
-                source_config = {
-                    "name": index.alias,
-                    "url": index.index_url,
-                    "secondary": True,
-                }
-
-                # Find the source with the same name and update it, or create a new one.
-                source = next((x for x in sources_conf if x["name"] == index.alias), None)
-                if source is None:
-                    sources_conf.append(source_config)
-                else:
-                    source.update(source_config)
-
         with contextlib.ExitStack() as exit_stack:
             fp = exit_stack.enter_context(atomic_file_swap(poetry_toml, "wb", always_revert=True))
             tomli_w.dump(poetry_conf, fp)
-            fp.close()
-
-            fp = exit_stack.enter_context(atomic_file_swap(pyproject_toml, "wb", always_revert=True))
-            tomli_w.dump(pyproject_conf, fp)
             fp.close()
 
             command = ["poetry", "install", "--no-interaction"]

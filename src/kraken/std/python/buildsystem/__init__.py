@@ -7,6 +7,8 @@ import abc
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
+from kraken.std.python.pyproject import Pyproject
+
 if TYPE_CHECKING:
     from ..settings import PythonSettings
 
@@ -26,6 +28,10 @@ class PythonBuildSystem(abc.ABC):
 
         :raise NotImplementedError: If :meth:`supports_managed_environment` returns `False`.
         """
+
+    @abc.abstractmethod
+    def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
+        """A chance to permanently update the Pyproject configuration."""
 
     @abc.abstractmethod
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
