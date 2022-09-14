@@ -76,7 +76,7 @@ class KanikoBuildTask(DockerBuildTask):
             executor_command += ["--single-snapshot"]
         if self.kaniko_cache_copy_layers.get():
             executor_command += ["--cache-copy-layers"]
-        if self.kaniko_use_compressed_caching.get():
+        if not self.kaniko_use_compressed_caching.get():
             executor_command += ["--compressed-caching=false"]
         target = self.target.get()
         if target:
